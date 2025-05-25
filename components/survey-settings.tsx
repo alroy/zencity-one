@@ -9,9 +9,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Wrench } from "lucide-react"
+import { Plus, Wrench, Calendar } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 interface SurveySettingsProps {
   onBack: () => void
@@ -27,6 +31,9 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
   const [httpHeaders, setHttpHeaders] = useState([{ name: "", value: "" }])
   const [httpMethod, setHttpMethod] = useState("POST")
   const [webhookUrl, setWebhookUrl] = useState("")
+  const [selectedCadence, setSelectedCadence] = useState("select")
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date(2025, 2, 1)) // March 1, 2025
+  const [endDate, setEndDate] = useState<Date | undefined>()
 
   // Add state for editable fields
   const [surveyTitle, setSurveyTitle] = useState(initialTitle || "Adams County, Community Survey")
@@ -55,6 +62,19 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
     { label: "Survey Builder", path: "survey-builder", isClickable: true },
     { label: "New Survey", isCurrent: true },
   ]
+
+  const getDistributionDuration = (cadence: string): string => {
+    const durations: { [key: string]: string } = {
+      "one-time": "1 month",
+      monthly: "1 month",
+      "bi-monthly": "2 months",
+      quarterly: "3 months",
+      "semi-annual": "3 months",
+      "very-small-semi-annual": "5 months",
+      annual: "3 months",
+    }
+    return durations[cadence] || ""
+  }
 
   const addCustomParameter = () => {
     setCustomParameters([...customParameters, { key: "", value: "" }])
@@ -188,38 +208,82 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Label htmlFor="cadence">Cadence</Label>
-                      </div>
-                      <Select defaultValue="select">
+                      <Label htmlFor="cadence">Cadence</Label>
+                      <Select value={selectedCadence} onValueChange={setSelectedCadence}>
                         <SelectTrigger id="cadence" className="mt-1">
                           <SelectValue placeholder="Select cadence" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="select">Select cadence</SelectItem>
                           <SelectItem value="one-time">One-time</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="bi-monthly">Bi-monthly</SelectItem>
                           <SelectItem value="quarterly">Quarterly</SelectItem>
-                          <SelectItem value="semi-annually">Semi-annually</SelectItem>
-                          <SelectItem value="annually">Annually</SelectItem>
+                          <SelectItem value="semi-annual">Semi-annual</SelectItem>
+                          <SelectItem value="very-small-semi-annual">Very small Semi-annual</SelectItem>
+                          <SelectItem value="annual">Annual</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="flex items-end space-x-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Label htmlFor="start-date">Start date</Label>
+                    <div>
+                      <Label htmlFor="start-date">Start date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-between text-left font-normal mt-1",
+                              distributionMethod === "third-party" && "opacity-50 cursor-not-allowed",
+                            )}
+                            id="start-date"
+                            disabled={distributionMethod === "third-party"}
+                          >
+                            <span>{startDate ? format(startDate, "MMMM d, yyyy") : "Select date"}</span>
+                            <Calendar className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Show distribution duration only for Representative method */}
+                      {distributionMethod === "representative" &&
+                        selectedCadence !== "select" &&
+                        getDistributionDuration(selectedCadence) && (
+                          <p className="text-sm text-gray-600 mt-2">
+                            Distribution duration: {getDistributionDuration(selectedCadence)}
+                          </p>
+                        )}
+
+                      {/* Show end date picker only for Fast and Self-distributed methods */}
+                      {(distributionMethod === "fast" || distributionMethod === "self-distributed") && (
+                        <div className="mt-4">
+                          <Label htmlFor="end-date">Distribution end date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full justify-between text-left font-normal mt-1"
+                                id="end-date"
+                              >
+                                <span>{endDate ? format(endDate, "MMMM d, yyyy") : "Select date"}</span>
+                                <Calendar className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <CalendarComponent
+                                mode="single"
+                                selected={endDate}
+                                onSelect={setEndDate}
+                                initialFocus
+                                disabled={(date) => (startDate ? date < startDate : false)}
+                              />
+                            </PopoverContent>
+                          </Popover>
                         </div>
-                        <Input id="start-date" defaultValue="Distribution: 3 months" readOnly className="mt-1" />
-                      </div>
-                      <Select defaultValue="march">
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="march">March 1, 2025</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      )}
                     </div>
                   </div>
 
