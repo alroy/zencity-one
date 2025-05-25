@@ -10,6 +10,7 @@ interface SurveyBuilderProps {
   initialOptions?: {
     showTemplateModal?: boolean
     templateFilter?: string[]
+    templateNames?: Record<string, string>
     surveyTitle?: string
   }
 }
@@ -18,6 +19,7 @@ export function SurveyBuilder({ initialOptions }: SurveyBuilderProps) {
   const [view, setView] = useState<"list" | "template" | "settings">("list")
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [templateFilter, setTemplateFilter] = useState<string[] | undefined>(undefined)
+  const [templateNames, setTemplateNames] = useState<Record<string, string> | undefined>(undefined)
   const [surveyTitle, setSurveyTitle] = useState<string | undefined>(undefined)
   const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>(undefined)
 
@@ -30,6 +32,9 @@ export function SurveyBuilder({ initialOptions }: SurveyBuilderProps) {
       if (initialOptions.templateFilter) {
         setTemplateFilter(initialOptions.templateFilter)
       }
+      if (initialOptions.templateNames) {
+        setTemplateNames(initialOptions.templateNames)
+      }
       if (initialOptions.surveyTitle) {
         setSurveyTitle(initialOptions.surveyTitle)
       }
@@ -38,6 +43,7 @@ export function SurveyBuilder({ initialOptions }: SurveyBuilderProps) {
 
   const handleCreateNew = () => {
     setTemplateFilter(undefined) // Reset filter for normal creation
+    setTemplateNames(undefined) // Reset custom names
     setShowTemplateModal(true)
   }
 
@@ -64,6 +70,12 @@ export function SurveyBuilder({ initialOptions }: SurveyBuilderProps) {
 
   // Helper function to get template name by ID
   const getTemplateNameById = (templateId: string): string => {
+    // First check if we have a custom name for this template
+    if (templateNames && templateNames[templateId]) {
+      return templateNames[templateId]
+    }
+
+    // Otherwise use the default mapping
     const templates = [
       { id: "community-survey", name: "Community Survey" },
       { id: "blockwise", name: "Blockwise" },
@@ -77,6 +89,8 @@ export function SurveyBuilder({ initialOptions }: SurveyBuilderProps) {
       { id: "parks-survey", name: "City Parks Survey" },
       { id: "whats-your-view", name: "What's Your View On..." },
       { id: "custom-survey", name: "Custom Survey" },
+      { id: "quick-pulse", name: "Quick Pulse" },
+      { id: "mini-survey", name: "Mini Survey" },
     ]
 
     const template = templates.find((t) => t.id === templateId)
@@ -117,6 +131,7 @@ export function SurveyBuilder({ initialOptions }: SurveyBuilderProps) {
           onClose={() => setShowTemplateModal(false)}
           onSelectTemplate={handleSelectTemplate}
           templateFilter={templateFilter}
+          templateNames={templateNames}
         />
       </div>
     </div>

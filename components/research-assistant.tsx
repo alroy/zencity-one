@@ -171,24 +171,38 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
 
   const handleCreateQuickSurvey = () => {
     if (onSectionChange) {
-      // Determine which templates to show based on the current query
-      let templateFilter: string[] = ["custom-survey"] // Always include custom survey
+      // Extract the main topic from the query
+      let topic = "General"
 
       if (query.includes("transportation") || query.includes("transit")) {
-        templateFilter = ["transportation", "pulse", "whats-your-view", "custom-survey"]
+        topic = "Transportation"
       } else if (query.includes("bike")) {
-        templateFilter = ["transportation", "blockwise", "whats-your-view", "custom-survey"]
+        topic = "Bike Lanes"
       } else if (query.includes("engagement") || query.includes("campaign")) {
-        templateFilter = ["engagement", "community-survey", "pulse", "whats-your-view", "custom-survey"]
-      } else {
-        templateFilter = ["community-survey", "pulse", "whats-your-view", "custom-survey"]
+        topic = "Community Engagement"
+      } else if (query.includes("park")) {
+        topic = "Parks"
+      } else if (query.includes("safety") || query.includes("police")) {
+        topic = "Public Safety"
+      } else if (query.includes("housing")) {
+        topic = "Housing"
+      } else if (query.includes("health")) {
+        topic = "Health"
+      }
+
+      // Create contextual template names
+      const templateNames = {
+        "quick-pulse": `Quick Pulse on ${topic}`,
+        "mini-survey": `Mini Survey: ${topic}`,
+        "custom-survey": "Custom Survey",
       }
 
       // Navigate to survey builder with template modal open and filtered
       onSectionChange("survey-builder", {
         showTemplateModal: true,
-        templateFilter: templateFilter,
-        surveyTitle: query || "Quick Survey",
+        templateFilter: ["quick-pulse", "mini-survey", "custom-survey"],
+        templateNames: templateNames,
+        surveyTitle: query || `${topic} Survey`,
       })
     }
   }

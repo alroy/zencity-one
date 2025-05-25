@@ -10,9 +10,16 @@ interface SurveyTemplateModalProps {
   onClose: () => void
   onSelectTemplate: (template: string) => void
   templateFilter?: string[]
+  templateNames?: Record<string, string>
 }
 
-export function SurveyTemplateModal({ open, onClose, onSelectTemplate, templateFilter }: SurveyTemplateModalProps) {
+export function SurveyTemplateModal({
+  open,
+  onClose,
+  onSelectTemplate,
+  templateFilter,
+  templateNames,
+}: SurveyTemplateModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [filteredTemplates, setFilteredTemplates] = useState<typeof allTemplates>([])
 
@@ -77,16 +84,37 @@ export function SurveyTemplateModal({ open, onClose, onSelectTemplate, templateF
       name: "Custom Survey",
       icon: "/custom-form-illustration.png",
     },
+    {
+      id: "quick-pulse",
+      name: "Quick Pulse",
+      icon: "/pulse-survey-illustration.png",
+    },
+    {
+      id: "mini-survey",
+      name: "Mini Survey",
+      icon: "/opinion-poll-illustration.png",
+    },
   ]
 
   // Filter templates when templateFilter changes or modal opens
   useEffect(() => {
     if (templateFilter && templateFilter.length > 0) {
-      setFilteredTemplates(allTemplates.filter((template) => templateFilter.includes(template.id)))
+      const filtered = allTemplates.filter((template) => templateFilter.includes(template.id))
+
+      // Apply custom template names if provided
+      if (templateNames) {
+        filtered.forEach((template) => {
+          if (templateNames[template.id]) {
+            template.name = templateNames[template.id]
+          }
+        })
+      }
+
+      setFilteredTemplates(filtered)
     } else {
       setFilteredTemplates(allTemplates)
     }
-  }, [templateFilter, open])
+  }, [templateFilter, templateNames, open])
 
   const handleTemplateClick = (templateId: string) => {
     setSelectedTemplate(templateId)
