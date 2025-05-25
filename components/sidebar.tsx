@@ -16,6 +16,8 @@ import {
   ChevronRight,
   FileBarChart,
   Users,
+  LinkIcon,
+  CheckCircle,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
@@ -35,6 +37,12 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       setExpandedSections((prev) => (prev.includes("city-explorer") ? prev : [...prev, "city-explorer"]))
     } else if (activeSection === "survey-builder") {
       setExpandedSections((prev) => (prev.includes("engagement-manager") ? prev : [...prev, "engagement-manager"]))
+    } else if (
+      activeSection === "internal-platforms" ||
+      activeSection === "resident-feedback" ||
+      activeSection === "integration-health"
+    ) {
+      setExpandedSections((prev) => (prev.includes("integrations") ? prev : [...prev, "integrations"]))
     }
   }, [activeSection])
 
@@ -43,7 +51,14 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   }
 
   const handleSectionClick = (sectionId: string) => {
-    const functionalSections = ["monitor", "research-assistant", "survey-builder"]
+    const functionalSections = [
+      "monitor",
+      "research-assistant",
+      "survey-builder",
+      "internal-platforms",
+      "resident-feedback",
+      "integration-health",
+    ]
 
     if (functionalSections.includes(sectionId)) {
       console.log(`Navigating to section: ${sectionId}`)
@@ -86,6 +101,16 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         { id: "overview", title: "Overview", icon: BarChart3 },
         { id: "report-generator", title: "Report Generator", icon: FileBarChart },
         { id: "archive", title: "Archive", icon: Archive },
+      ],
+    },
+    {
+      id: "integrations",
+      title: "Integrations",
+      icon: LinkIcon,
+      children: [
+        { id: "internal-platforms", title: "Internal Platforms", icon: LinkIcon },
+        { id: "resident-feedback", title: "Resident Feedback", icon: Users },
+        { id: "integration-health", title: "Integration Health", icon: CheckCircle },
       ],
     },
   ]

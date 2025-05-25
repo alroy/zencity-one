@@ -10,6 +10,9 @@ import { Monitor } from "@/components/monitor"
 import { ResearchAssistant } from "@/components/research-assistant"
 import { SurveyBuilder } from "@/components/survey-builder"
 import { ComingSoon } from "@/components/coming-soon"
+import { InternalPlatforms } from "@/components/integrations/internal-platforms"
+import { ResidentFeedbackPlatforms } from "@/components/integrations/resident-feedback"
+import { IntegrationHealth } from "@/components/integrations/integration-health"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState("monitor")
@@ -31,6 +34,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         return <ResearchAssistant onSectionChange={handleSectionChange} />
       case "survey-builder":
         return <SurveyBuilder initialOptions={sectionOptions} />
+      case "internal-platforms":
+        return <InternalPlatforms />
+      case "resident-feedback":
+        return <ResidentFeedbackPlatforms />
+      case "integration-health":
+        return <IntegrationHealth />
       default:
         // For any other section, show the coming soon component
         return <ComingSoon section={activeSection} />
