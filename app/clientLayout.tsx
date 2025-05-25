@@ -57,7 +57,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <div className="flex-1 flex justify-center overflow-hidden">
               <main className="w-[80%] overflow-y-auto">{renderContent()}</main>
             </div>
-            <FloatingToolkit />
+            <FloatingToolkit onSectionChange={handleSectionChange} />
           </div>
           <Toaster />
         </div>

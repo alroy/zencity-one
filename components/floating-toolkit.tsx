@@ -15,7 +15,11 @@ import {
 import { BarChart3, FileText, FileEdit, Send, Users, Globe } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-export function FloatingToolkit() {
+interface FloatingToolkitProps {
+  onSectionChange?: (section: string, options?: any) => void
+}
+
+export function FloatingToolkit({ onSectionChange }: FloatingToolkitProps) {
   const [showAnimation, setShowAnimation] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const { toast } = useToast()
@@ -23,11 +27,21 @@ export function FloatingToolkit() {
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   const handleAction = (action: string) => {
-    toast({
-      title: "Action Selected",
-      description: `You selected: ${action}`,
-      duration: 3000,
-    })
+    // Handle the "Conduct a survey" action specifically
+    if (action === "Conduct a survey" && onSectionChange) {
+      // Navigate to survey manager with template modal open
+      onSectionChange("survey-builder", {
+        showTemplateModal: true,
+      })
+    } else {
+      // For other actions, just show a toast notification
+      toast({
+        title: "Action Selected",
+        description: `You selected: ${action}`,
+        duration: 3000,
+      })
+    }
+
     setDropdownOpen(false)
   }
 
