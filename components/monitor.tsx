@@ -21,6 +21,7 @@ export function Monitor() {
       responses: 847,
       target: 1200,
       avgRating: 4.2,
+      estimatedDaysToTarget: 6,
       sentiment: {
         positive: 0.65,
         negative: 0.15,
@@ -31,6 +32,8 @@ export function Monitor() {
         { name: "Business Support", count: 132 },
         { name: "Public Spaces", count: 98 },
         { name: "Parking", count: 87 },
+        { name: "Lighting", count: 76 },
+        { name: "Accessibility", count: 65 },
       ],
       demographics: {
         age: [
@@ -82,6 +85,7 @@ export function Monitor() {
       responses: 623,
       target: 800,
       avgRating: 3.8,
+      estimatedDaysToTarget: 9,
       sentiment: {
         positive: 0.58,
         negative: 0.22,
@@ -92,6 +96,8 @@ export function Monitor() {
         { name: "Trail Maintenance", count: 127 },
         { name: "Sports Facilities", count: 112 },
         { name: "Park Safety", count: 98 },
+        { name: "Accessibility", count: 87 },
+        { name: "Community Events", count: 76 },
       ],
       demographics: {
         age: [
@@ -237,7 +243,7 @@ export function Monitor() {
         </Card>
       </div>
 
-      {/* Running Surveys - Renamed from "Current Running Surveys" */}
+      {/* Running Surveys */}
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Running Surveys</CardTitle>

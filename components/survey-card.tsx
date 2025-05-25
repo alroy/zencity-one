@@ -147,18 +147,18 @@ export function SurveyCard({
             </div>
           </div>
 
-          {/* Top Themes Section - Now with View All Results CTA */}
+          {/* Top Themes Section - Now a dedicated section with more prominence */}
           <div className="p-4 border-b">
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-medium text-gray-700">Top Themes</div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 text-xs">
-                    <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                  <Button variant="outline" size="sm" className="h-8 px-3">
                     View All Results
+                    <ExternalLink className="ml-1 h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
+                <TooltipContent className="max-w-xs">
                   <p>
                     These are preliminary results based on in-progress data and may change as more responses are
                     collected.
@@ -166,7 +166,6 @@ export function SurveyCard({
                 </TooltipContent>
               </Tooltip>
             </div>
-
             <div className="flex flex-wrap gap-2">
               {topThemes.slice(0, showAllThemes ? topThemes.length : 5).map((theme, i) => (
                 <Badge
@@ -340,6 +339,37 @@ export function SurveyCard({
               </Button>
             </div>
           </div>
+
+          {/* Theme Panel (conditionally rendered) */}
+          {activeTheme && (
+            <div className="p-4 bg-gray-50 border-t">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium">Theme: {activeTheme}</h4>
+                <Button variant="ghost" size="sm" className="h-8 p-0" onClick={() => setActiveTheme(null)}>
+                  Close
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <div className="bg-white p-3 rounded border">
+                  <p className="text-sm italic">
+                    "The new bike lanes have made my commute so much safer. I appreciate the city's investment in
+                    cycling infrastructure."
+                  </p>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <p className="text-sm italic">
+                    "I've noticed more people cycling since the bike lanes were installed. It's great to see the
+                    community embracing this change."
+                  </p>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <p className="text-sm italic">
+                    "The protected bike lanes make me feel much more comfortable riding with my children."
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </TooltipProvider>
