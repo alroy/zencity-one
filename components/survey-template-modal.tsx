@@ -1,0 +1,152 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+
+interface SurveyTemplateModalProps {
+  open: boolean
+  onClose: () => void
+  onSelectTemplate: (template: string) => void
+  templateFilter?: string[]
+}
+
+export function SurveyTemplateModal({ open, onClose, onSelectTemplate, templateFilter }: SurveyTemplateModalProps) {
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
+  const [filteredTemplates, setFilteredTemplates] = useState<typeof allTemplates>([])
+
+  const allTemplates = [
+    {
+      id: "community-survey",
+      name: "Community Survey",
+      icon: "/community-survey.png",
+    },
+    {
+      id: "blockwise",
+      name: "Blockwise",
+      icon: "/city-blocks-map-illustration.png",
+    },
+    {
+      id: "experience-survey",
+      name: "Experience Survey",
+      icon: "/people-conversation-illustration.png",
+    },
+    {
+      id: "pulse",
+      name: "Pulse",
+      icon: "/pulse-survey-illustration.png",
+    },
+    {
+      id: "engagement",
+      name: "Engagement",
+      icon: "/community-engagement.png",
+    },
+    {
+      id: "transportation",
+      name: "Transportation City Meter",
+      icon: "/city-blocks-map-illustration.png", // Reusing city blocks image
+    },
+    {
+      id: "health-wellbeing",
+      name: "Health and Wellbeing",
+      icon: "/people-conversation-illustration.png", // Reusing people conversation image
+    },
+    {
+      id: "city-pulse",
+      name: "City Pulse",
+      icon: "/pulse-survey-illustration.png", // Reusing pulse survey image
+    },
+    {
+      id: "police-engagement",
+      name: "Police Engagement",
+      icon: "/police-community-illustration.png",
+    },
+    {
+      id: "parks-survey",
+      name: "City Parks Survey",
+      icon: "/community-survey.png", // Reusing community survey image
+    },
+    {
+      id: "whats-your-view",
+      name: "What's Your View On...",
+      icon: "/opinion-poll-illustration.png",
+    },
+    {
+      id: "custom-survey",
+      name: "Custom Survey",
+      icon: "/custom-form-illustration.png",
+    },
+  ]
+
+  // Filter templates when templateFilter changes or modal opens
+  useEffect(() => {
+    if (templateFilter && templateFilter.length > 0) {
+      setFilteredTemplates(allTemplates.filter((template) => templateFilter.includes(template.id)))
+    } else {
+      setFilteredTemplates(allTemplates)
+    }
+  }, [templateFilter, open])
+
+  const handleTemplateClick = (templateId: string) => {
+    setSelectedTemplate(templateId)
+  }
+
+  const handleNext = () => {
+    if (selectedTemplate) {
+      onSelectTemplate(selectedTemplate)
+    }
+  }
+
+  const handleClose = () => {
+    setSelectedTemplate(null)
+    onClose()
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Create a new survey: Choose a template</DialogTitle>
+        </DialogHeader>
+
+        <div className="grid grid-cols-3 gap-4 py-6 overflow-y-auto max-h-[60vh] pr-2">
+          {filteredTemplates.map((template) => (
+            <Card
+              key={template.id}
+              className={`cursor-pointer hover:shadow-lg transition-shadow p-4 
+                ${
+                  selectedTemplate === template.id
+                    ? "border-[#3BD1BB] ring-2 ring-[#3BD1BB]/50"
+                    : "border-[#3BD1BB]/20 hover:border-[#3BD1BB]/50"
+                }`}
+              onClick={() => handleTemplateClick(template.id)}
+            >
+              <div className="aspect-video mb-3 bg-gray-50 rounded-lg overflow-hidden">
+                <img
+                  src={template.icon || "/placeholder.svg"}
+                  alt={template.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-center font-medium">{template.name}</h3>
+            </Card>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleNext}
+            className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
+            disabled={!selectedTemplate}
+          >
+            Next
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
