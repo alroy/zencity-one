@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { ChevronLeft } from "lucide-react"
 
 interface SurveyTemplateModalProps {
   open: boolean
@@ -22,6 +23,8 @@ export function SurveyTemplateModal({
 }: SurveyTemplateModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [filteredTemplates, setFilteredTemplates] = useState<typeof allTemplates>([])
+  const [showingAllTemplates, setShowingAllTemplates] = useState(false)
+  const [originalFilteredTemplates, setOriginalFilteredTemplates] = useState<typeof allTemplates>([])
 
   const allTemplates = [
     {
@@ -98,6 +101,8 @@ export function SurveyTemplateModal({
 
   // Filter templates when templateFilter changes or modal opens
   useEffect(() => {
+    setShowingAllTemplates(false)
+
     if (templateFilter && templateFilter.length > 0) {
       const filtered = allTemplates.filter((template) => templateFilter.includes(template.id))
 
@@ -111,8 +116,10 @@ export function SurveyTemplateModal({
       }
 
       setFilteredTemplates(filtered)
+      setOriginalFilteredTemplates([...filtered]) // Store original filtered templates
     } else {
       setFilteredTemplates(allTemplates)
+      setOriginalFilteredTemplates([...allTemplates])
     }
   }, [templateFilter, templateNames, open])
 
@@ -128,14 +135,46 @@ export function SurveyTemplateModal({
 
   const handleClose = () => {
     setSelectedTemplate(null)
+    setShowingAllTemplates(false)
     onClose()
   }
+
+  const handleViewAllTemplates = () => {
+    setShowingAllTemplates(true)
+    setFilteredTemplates(allTemplates)
+  }
+
+  const handleBackToFiltered = () => {
+    setShowingAllTemplates(false)
+    setFilteredTemplates(originalFilteredTemplates)
+  }
+
+  const isFiltered = templateFilter && templateFilter.length > 0 && templateFilter.length < allTemplates.length
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Create a new survey: Choose a template</DialogTitle>
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center">
+            {showingAllTemplates && (
+              <Button variant="ghost" size="sm" className="mr-2 p-0 h-8 w-8" onClick={handleBackToFiltered}>
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Back to recommended templates</span>
+              </Button>
+            )}
+            <DialogTitle>
+              {showingAllTemplates ? "All Templates" : "Create a new survey: Choose a template"}
+            </DialogTitle>
+          </div>
+          {isFiltered && !showingAllTemplates && (
+            <Button
+              variant="link"
+              className="text-[#3BD1BB] hover:text-[#2ab19e] p-0 h-auto"
+              onClick={handleViewAllTemplates}
+            >
+              View all templates
+            </Button>
+          )}
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-4 py-6 overflow-y-auto max-h-[60vh] pr-2">
