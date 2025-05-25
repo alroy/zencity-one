@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Toaster } from "@/components/ui/toaster"
-import { MoreActionsMenu } from "@/components/more-actions-menu"
+import { TopBar } from "@/components/top-bar"
 import { Monitor } from "@/components/monitor"
 import { ResearchAssistant } from "@/components/research-assistant"
 import { SurveyBuilder } from "@/components/survey-builder"
@@ -14,6 +14,7 @@ import { ComingSoon } from "@/components/coming-soon"
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState("monitor")
   const [sectionOptions, setSectionOptions] = useState<any>(null)
+  const customerName = "Adams County" // This would typically come from a context or API
 
   const handleSectionChange = (section: string, options?: any) => {
     console.log(`Setting active section to: ${section}`, options)
@@ -42,9 +43,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <div className="flex h-screen bg-gray-50">
           <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
           <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex justify-end p-4 border-b border-gray-200 bg-white">
-              <MoreActionsMenu />
-            </div>
+            <TopBar customerName={customerName} />
             <main className="flex-1 overflow-auto">{renderContent()}</main>
           </div>
           <Toaster />
