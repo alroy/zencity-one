@@ -3,7 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown, Users, MessageCircle, ExternalLink, Eye, BarChart3 } from "lucide-react"
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  MessageCircle,
+  ExternalLink,
+  Eye,
+  BarChart3,
+  ChevronRight,
+} from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { SurveyCard } from "@/components/survey-card"
 
@@ -245,6 +254,34 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Community Engagement Summary Bar */}
+      <div className="mt-8 mb-6 bg-gray-50 border rounded-lg p-6">
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900">Community Engagement at a Glance</h2>
+
+          <p className="text-sm text-gray-600 italic">
+            Synthesized from resident feedback submitted via the engagement minisite over the past month.
+          </p>
+
+          <p className="text-gray-700 leading-relaxed">
+            Residents praise Adams County's small-town charm within a metro area, strong civic engagement, and easy
+            highway access. They celebrate our cultural diversity, French heritage, clean image, and community events
+            like Adams Days. One voice noted a fading uniqueness, but overall sentiment remains strongly positive.
+          </p>
+
+          <div>
+            <Button
+              variant="outline"
+              className="mt-2 border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10"
+              onClick={() => onSectionChange && onSectionChange("citizen-participation")}
+            >
+              View full participation stats
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Running Surveys */}
