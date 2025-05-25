@@ -53,7 +53,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
           <div className="flex-1 flex flex-col overflow-hidden">
             <TopBar customerName={customerName} />
-            <main className="flex-1 overflow-auto">{renderContent()}</main>
+            <div className="flex-1 flex justify-center overflow-hidden">
+              <main className="w-[80%] overflow-y-auto">{renderContent()}</main>
+            </div>
           </div>
           <Toaster />
         </div>
