@@ -197,7 +197,7 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
         "custom-survey": "Custom Survey",
       }
 
-      // Navigate to survey builder with template modal open and filtered
+      // Navigate to survey manager with template modal open and filtered
       onSectionChange("survey-builder", {
         showTemplateModal: true,
         templateFilter: ["quick-pulse", "mini-survey", "custom-survey"],

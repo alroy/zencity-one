@@ -89,7 +89,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       title: "Engagement Manager",
       icon: Users,
       children: [
-        { id: "survey-builder", title: "Survey Builder", icon: FileText, badge: "2" },
+        { id: "survey-builder", title: "Survey Manager", icon: FileText, badge: "2" },
         { id: "citizen-participation", title: "Residents Participation", icon: Users },
       ],
     },

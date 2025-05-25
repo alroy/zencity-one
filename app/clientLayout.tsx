@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { TopBar } from "@/components/top-bar"
 import { Monitor } from "@/components/monitor"
 import { ResearchAssistant } from "@/components/research-assistant"
-import { SurveyBuilder } from "@/components/survey-builder"
+import { SurveyManager } from "@/components/survey-manager"
 import { ComingSoon } from "@/components/coming-soon"
 import { InternalPlatforms } from "@/components/integrations/internal-platforms"
 import { ResidentFeedbackPlatforms } from "@/components/integrations/resident-feedback"
@@ -29,11 +29,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     console.log(`Rendering content for section: ${activeSection}`)
     switch (activeSection) {
       case "monitor":
-        return <Monitor />
+        return <Monitor onSectionChange={handleSectionChange} />
       case "research-assistant":
         return <ResearchAssistant onSectionChange={handleSectionChange} />
       case "survey-builder":
-        return <SurveyBuilder initialOptions={sectionOptions} />
+        return <SurveyManager initialOptions={sectionOptions} />
       case "internal-platforms":
         return <InternalPlatforms />
       case "resident-feedback":

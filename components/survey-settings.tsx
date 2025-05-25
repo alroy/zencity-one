@@ -58,7 +58,7 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
 
   const breadcrumbItems = [
     { label: "Engagement Manager", path: "engagement-manager", isClickable: false },
-    { label: "Survey Builder", path: "survey-builder", isClickable: true },
+    { label: "Survey Manager", path: "survey-builder", isClickable: true },
     { label: "New Survey", isCurrent: true },
   ]
 

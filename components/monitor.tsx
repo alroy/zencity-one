@@ -7,7 +7,11 @@ import { TrendingUp, TrendingDown, Users, MessageCircle, ExternalLink, Eye, BarC
 import { PageHeader } from "@/components/page-header"
 import { SurveyCard } from "@/components/survey-card"
 
-export function Monitor() {
+interface MonitorProps {
+  onSectionChange?: (section: string) => void
+}
+
+export function Monitor({ onSectionChange }: MonitorProps) {
   const breadcrumbItems = [
     { label: "City Explorer", path: "city-explorer", isClickable: false },
     { label: "Monitor", isCurrent: true },
@@ -247,7 +251,7 @@ export function Monitor() {
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Running Surveys</CardTitle>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => onSectionChange && onSectionChange("survey-builder")}>
             <Eye className="w-4 h-4 mr-2" />
             Show All Surveys
           </Button>
