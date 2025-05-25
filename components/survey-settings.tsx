@@ -9,9 +9,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Wrench, Calendar } from "lucide-react"
+import { Plus, Calendar } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format } from "date-fns"
@@ -118,22 +117,6 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
 
             <div className="flex items-center space-x-2">
               <Button variant="outline">Save</Button>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 border-gray-200"
-                    >
-                      <Wrench className="w-4 h-4" />
-                      <span>Toolkit</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Access additional survey tools and quick actions</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
               <Button onClick={onSave} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
                 Publish
               </Button>
@@ -209,8 +192,18 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="cadence">Cadence</Label>
-                      <Select value={selectedCadence} onValueChange={setSelectedCadence}>
-                        <SelectTrigger id="cadence" className="mt-1">
+                      <Select
+                        value={selectedCadence}
+                        onValueChange={setSelectedCadence}
+                        disabled={distributionMethod !== "representative"}
+                      >
+                        <SelectTrigger
+                          id="cadence"
+                          className={cn(
+                            "mt-1",
+                            distributionMethod !== "representative" && "opacity-50 cursor-not-allowed",
+                          )}
+                        >
                           <SelectValue placeholder="Select cadence" />
                         </SelectTrigger>
                         <SelectContent>
