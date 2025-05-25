@@ -13,6 +13,7 @@ import { ComingSoon } from "@/components/coming-soon"
 import { InternalPlatforms } from "@/components/integrations/internal-platforms"
 import { ResidentFeedbackPlatforms } from "@/components/integrations/resident-feedback"
 import { IntegrationHealth } from "@/components/integrations/integration-health"
+import { FloatingToolkit } from "@/components/floating-toolkit"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState("monitor")
@@ -56,6 +57,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <div className="flex-1 flex justify-center overflow-hidden">
               <main className="w-[80%] overflow-y-auto">{renderContent()}</main>
             </div>
+            <FloatingToolkit />
           </div>
           <Toaster />
         </div>
