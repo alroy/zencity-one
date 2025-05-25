@@ -83,11 +83,6 @@ export function SurveyTemplateModal({
       icon: "/opinion-poll-illustration.png",
     },
     {
-      id: "custom-survey",
-      name: "Custom Survey",
-      icon: "/custom-form-illustration.png",
-    },
-    {
       id: "quick-pulse",
       name: "Quick Pulse",
       icon: "/pulse-survey-illustration.png",
@@ -97,6 +92,11 @@ export function SurveyTemplateModal({
       name: "Mini Survey",
       icon: "/opinion-poll-illustration.png",
     },
+    {
+      id: "custom-survey",
+      name: "Custom Survey",
+      icon: "/custom-form-illustration.png",
+    },
   ]
 
   // Filter templates when templateFilter changes or modal opens
@@ -104,7 +104,7 @@ export function SurveyTemplateModal({
     setShowingAllTemplates(false)
 
     if (templateFilter && templateFilter.length > 0) {
-      const filtered = allTemplates.filter((template) => templateFilter.includes(template.id))
+      let filtered = allTemplates.filter((template) => templateFilter.includes(template.id))
 
       // Apply custom template names if provided
       if (templateNames) {
@@ -115,13 +115,27 @@ export function SurveyTemplateModal({
         })
       }
 
+      // Ensure Custom Survey is always last
+      filtered = sortTemplatesWithCustomLast(filtered)
+
       setFilteredTemplates(filtered)
       setOriginalFilteredTemplates([...filtered]) // Store original filtered templates
     } else {
-      setFilteredTemplates(allTemplates)
-      setOriginalFilteredTemplates([...allTemplates])
+      const sorted = sortTemplatesWithCustomLast([...allTemplates])
+      setFilteredTemplates(sorted)
+      setOriginalFilteredTemplates([...sorted])
     }
   }, [templateFilter, templateNames, open])
+
+  // Helper function to ensure Custom Survey is always last
+  const sortTemplatesWithCustomLast = (templates: typeof allTemplates) => {
+    const customSurveyIndex = templates.findIndex((t) => t.id === "custom-survey")
+    if (customSurveyIndex !== -1) {
+      const customSurvey = templates.splice(customSurveyIndex, 1)[0]
+      templates.push(customSurvey)
+    }
+    return templates
+  }
 
   const handleTemplateClick = (templateId: string) => {
     setSelectedTemplate(templateId)
@@ -141,7 +155,7 @@ export function SurveyTemplateModal({
 
   const handleViewAllTemplates = () => {
     setShowingAllTemplates(true)
-    setFilteredTemplates(allTemplates)
+    setFilteredTemplates(sortTemplatesWithCustomLast([...allTemplates]))
   }
 
   const handleBackToFiltered = () => {
@@ -154,7 +168,7 @@ export function SurveyTemplateModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader className="flex flex-row items-center justify-between">
+        <DialogHeader>
           <div className="flex items-center">
             {showingAllTemplates && (
               <Button variant="ghost" size="sm" className="mr-2 p-0 h-8 w-8" onClick={handleBackToFiltered}>
@@ -166,42 +180,47 @@ export function SurveyTemplateModal({
               {showingAllTemplates ? "All Templates" : "Create a new survey: Choose a template"}
             </DialogTitle>
           </div>
-          {isFiltered && !showingAllTemplates && (
-            <Button
-              variant="link"
-              className="text-[#3BD1BB] hover:text-[#2ab19e] p-0 h-auto"
-              onClick={handleViewAllTemplates}
-            >
-              View all templates
-            </Button>
-          )}
         </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-4 py-6 overflow-y-auto max-h-[60vh] pr-2">
-          {filteredTemplates.map((template) => (
-            <Card
-              key={template.id}
-              className={`cursor-pointer hover:shadow-lg transition-shadow p-4 
-                ${
-                  selectedTemplate === template.id
-                    ? "border-[#3BD1BB] ring-2 ring-[#3BD1BB]/50"
-                    : "border-[#3BD1BB]/20 hover:border-[#3BD1BB]/50"
-                }`}
-              onClick={() => handleTemplateClick(template.id)}
-            >
-              <div className="aspect-video mb-3 bg-gray-50 rounded-lg overflow-hidden">
-                <img
-                  src={template.icon || "/placeholder.svg"}
-                  alt={template.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <h3 className="text-center font-medium">{template.name}</h3>
-            </Card>
-          ))}
+        <div className="py-6 overflow-y-auto max-h-[60vh] pr-2">
+          <div className="grid grid-cols-3 gap-6">
+            {filteredTemplates.map((template) => (
+              <Card
+                key={template.id}
+                className={`cursor-pointer hover:shadow-lg transition-shadow p-4 
+                  ${
+                    selectedTemplate === template.id
+                      ? "border-[#3BD1BB] ring-2 ring-[#3BD1BB]/50"
+                      : "border-[#3BD1BB]/20 hover:border-[#3BD1BB]/50"
+                  }`}
+                onClick={() => handleTemplateClick(template.id)}
+              >
+                <div className="aspect-video mb-3 bg-gray-50 rounded-lg overflow-hidden">
+                  <img
+                    src={template.icon || "/placeholder.svg"}
+                    alt={template.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="text-center font-medium">{template.name}</h3>
+              </Card>
+            ))}
+          </div>
+
+          {isFiltered && !showingAllTemplates && (
+            <div className="mt-6 ml-1">
+              <Button
+                variant="link"
+                className="text-[#3BD1BB] hover:text-[#2ab19e] p-0 h-auto font-medium"
+                onClick={handleViewAllTemplates}
+              >
+                View all templates
+              </Button>
+            </div>
+          )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-2">
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>

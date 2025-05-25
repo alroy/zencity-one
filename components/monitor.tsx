@@ -3,9 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { TrendingUp, TrendingDown, Users, MessageCircle, ExternalLink, Eye, BarChart3 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { SurveyCard } from "@/components/survey-card"
 
 export function Monitor() {
   const breadcrumbItems = [
@@ -13,28 +13,129 @@ export function Monitor() {
     { label: "Monitor", isCurrent: true },
   ]
 
+  // Enhanced survey data with additional metrics
   const activeSurveys = [
     {
       id: 1,
       name: "Downtown Revitalization Survey",
       responses: 847,
       target: 1200,
-      demographics: {
-        age: { "18-34": 32, "35-54": 45, "55+": 23 },
-        ethnicity: { White: 58, Hispanic: 25, Black: 12, Other: 5 },
-        gender: { Female: 54, Male: 43, Other: 3 },
+      avgRating: 4.2,
+      sentiment: {
+        positive: 0.65,
+        negative: 0.15,
+        neutral: 0.2,
       },
+      topThemes: [
+        { name: "Pedestrian Safety", count: 156 },
+        { name: "Business Support", count: 132 },
+        { name: "Public Spaces", count: 98 },
+        { name: "Parking", count: 87 },
+      ],
+      demographics: {
+        age: [
+          { name: "18-34", current: 271, target: 400, percentage: 68 },
+          { name: "35-54", current: 381, target: 400, percentage: 95 },
+          { name: "55+", current: 195, target: 400, percentage: 49 },
+        ],
+        gender: [
+          { name: "Female", current: 457, target: 600, percentage: 76 },
+          { name: "Male", current: 364, target: 600, percentage: 61 },
+          { name: "Other", current: 26, target: 0, percentage: 100 },
+        ],
+        ethnicity: [
+          { name: "White", current: 491, target: 600, percentage: 82 },
+          { name: "Hispanic", current: 212, target: 300, percentage: 71 },
+          { name: "Black", current: 102, target: 180, percentage: 57 },
+          { name: "Asian", current: 42, target: 120, percentage: 35 },
+        ],
+        other: [
+          { name: "Homeowner", current: 423, target: 500, percentage: 85 },
+          { name: "Renter", current: 424, target: 700, percentage: 61 },
+        ],
+      },
+      trends: {
+        responseRate: [
+          { date: "May 19", value: 42 },
+          { date: "May 20", value: 38 },
+          { date: "May 21", value: 56 },
+          { date: "May 22", value: 61 },
+          { date: "May 23", value: 47 },
+          { date: "May 24", value: 52 },
+          { date: "May 25", value: 59 },
+        ],
+        completionTime: [
+          { date: "May 19", value: 8.2 },
+          { date: "May 20", value: 7.9 },
+          { date: "May 21", value: 8.1 },
+          { date: "May 22", value: 7.6 },
+          { date: "May 23", value: 7.8 },
+          { date: "May 24", value: 7.5 },
+          { date: "May 25", value: 7.3 },
+        ],
+      },
+      quotasBelowTarget: 2,
     },
     {
       id: 2,
       name: "Parks & Recreation Needs Assessment",
       responses: 623,
       target: 800,
-      demographics: {
-        age: { "18-34": 28, "35-54": 52, "55+": 20 },
-        ethnicity: { White: 62, Hispanic: 22, Black: 10, Other: 6 },
-        gender: { Female: 58, Male: 39, Other: 3 },
+      avgRating: 3.8,
+      sentiment: {
+        positive: 0.58,
+        negative: 0.22,
+        neutral: 0.2,
       },
+      topThemes: [
+        { name: "Playground Equipment", count: 143 },
+        { name: "Trail Maintenance", count: 127 },
+        { name: "Sports Facilities", count: 112 },
+        { name: "Park Safety", count: 98 },
+      ],
+      demographics: {
+        age: [
+          { name: "18-34", current: 174, target: 250, percentage: 70 },
+          { name: "35-54", current: 324, target: 350, percentage: 93 },
+          { name: "55+", current: 125, target: 200, percentage: 63 },
+        ],
+        gender: [
+          { name: "Female", current: 361, target: 400, percentage: 90 },
+          { name: "Male", current: 243, target: 400, percentage: 61 },
+          { name: "Other", current: 19, target: 0, percentage: 100 },
+        ],
+        ethnicity: [
+          { name: "White", current: 386, target: 400, percentage: 97 },
+          { name: "Hispanic", current: 137, target: 200, percentage: 69 },
+          { name: "Black", current: 62, target: 120, percentage: 52 },
+          { name: "Asian", current: 38, target: 80, percentage: 48 },
+        ],
+        other: [
+          { name: "Parents", current: 312, target: 400, percentage: 78 },
+          { name: "Non-Parents", current: 311, target: 400, percentage: 78 },
+        ],
+      },
+      trends: {
+        responseRate: [
+          { date: "May 19", value: 32 },
+          { date: "May 20", value: 28 },
+          { date: "May 21", value: 35 },
+          { date: "May 22", value: 42 },
+          { date: "May 23", value: 38 },
+          { date: "May 24", value: 41 },
+          { date: "May 25", value: 45 },
+        ],
+        completionTime: [
+          { date: "May 19", value: 9.1 },
+          { date: "May 20", value: 8.7 },
+          { date: "May 21", value: 8.9 },
+          { date: "May 22", value: 8.5 },
+          { date: "May 23", value: 8.3 },
+          { date: "May 24", value: 8.2 },
+          { date: "May 25", value: 8.0 },
+        ],
+      },
+      quotasBelowTarget: 3,
     },
   ]
 
@@ -136,67 +237,19 @@ export function Monitor() {
         </Card>
       </div>
 
-      {/* Active Surveys - Now displayed side by side */}
+      {/* Running Surveys - Renamed from "Current Running Surveys" */}
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Current Running Surveys</CardTitle>
+          <CardTitle>Running Surveys</CardTitle>
           <Button variant="outline" size="sm">
             <Eye className="w-4 h-4 mr-2" />
-            Show Details
+            Show All Surveys
           </Button>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {activeSurveys.map((survey) => (
-              <div key={survey.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">{survey.name}</h3>
-                  <Badge variant="secondary">
-                    {survey.responses}/{survey.target} responses
-                  </Badge>
-                </div>
-
-                {/* Updated progress bar color */}
-                <Progress
-                  value={(survey.responses / survey.target) * 100}
-                  className="mb-4 bg-gray-100"
-                  indicatorClassName="bg-[#3BD1BB]"
-                />
-
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <p className="font-medium mb-2">Age Distribution</p>
-                    {Object.entries(survey.demographics.age).map(([age, percent]) => (
-                      <div key={age} className="flex justify-between">
-                        <span>{age}</span>
-                        <span>{percent}%</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div>
-                    <p className="font-medium mb-2">Ethnicity</p>
-                    {Object.entries(survey.demographics.ethnicity).map(([ethnicity, percent]) => (
-                      <div key={ethnicity} className="flex justify-between">
-                        <span>{ethnicity}</span>
-                        <span>{percent}%</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div>
-                    <p className="font-medium mb-2">Gender</p>
-                    {Object.entries(survey.demographics.gender).map(([gender, percent]) => (
-                      <div key={gender} className="flex justify-between">
-                        <span>{gender}</span>
-                        <span>{percent}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <CardContent className="p-4">
+          {activeSurveys.map((survey) => (
+            <SurveyCard key={survey.id} {...survey} />
+          ))}
         </CardContent>
       </Card>
 
