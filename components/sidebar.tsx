@@ -32,6 +32,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+// Import the useUser hook at the top of the file
+import { useUser } from "@/contexts/user-context"
+
 interface SidebarProps {
   activeSection: string
   onSectionChange: (section: string) => void
@@ -40,6 +43,9 @@ interface SidebarProps {
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   const [expandedSections, setExpandedSections] = useState(["city-explorer", "engagement-manager"])
   const { toast } = useToast()
+
+  // Inside the Sidebar component, add this line after the useState declarations
+  const { avatar, userInfo } = useUser()
 
   // Ensure the parent sections of active items are expanded
   useEffect(() => {
@@ -200,10 +206,16 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="w-full justify-start p-2 h-auto hover:bg-gray-100">
-              <User className="w-4 h-4 mr-2" />
+              {avatar ? (
+                <div className="w-8 h-8 rounded-full overflow-hidden mr-2">
+                  <img src={avatar || "/placeholder.svg"} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <User className="w-4 h-4 mr-2" />
+              )}
               <div className="text-left">
-                <div className="text-sm font-medium">John Smith</div>
-                <div className="text-xs text-gray-500">City Manager</div>
+                <div className="text-sm font-medium">{`${userInfo.firstName} ${userInfo.lastName}`}</div>
+                <div className="text-xs text-gray-500">{userInfo.jobTitle}</div>
               </div>
               <ChevronDown className="ml-auto h-4 w-4 text-gray-500" />
             </Button>

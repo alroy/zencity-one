@@ -11,16 +11,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageHeader } from "@/components/page-header"
 import { useToast } from "@/hooks/use-toast"
 import { User, Upload, X } from "lucide-react"
+import { useUser } from "@/contexts/user-context"
 
 export function ProfileInformation() {
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [avatar, setAvatar] = useState<string | null>(null)
+  const { avatar, setAvatar, userInfo, setUserInfo } = useUser()
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Smith",
+    firstName: userInfo.firstName,
+    lastName: userInfo.lastName,
     email: "john.smith@adamscounty.gov",
-    jobTitle: "City Manager",
+    jobTitle: userInfo.jobTitle,
     department: "City Management",
     phone: "(303) 555-1234",
     timezone: "America/Denver",
@@ -34,6 +35,14 @@ export function ProfileInformation() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Update userInfo if the field is relevant
+    if (name === "firstName" || name === "lastName" || name === "jobTitle") {
+      setUserInfo({
+        ...userInfo,
+        [name]: value,
+      })
+    }
   }
 
   const handleSelectChange = (name: string, value: string) => {
@@ -72,6 +81,13 @@ export function ProfileInformation() {
   }
 
   const handleSave = () => {
+    // Update userInfo with the latest values
+    setUserInfo({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      jobTitle: formData.jobTitle,
+    })
+
     toast({
       title: "Profile Updated",
       description: "Your profile information has been updated successfully.",

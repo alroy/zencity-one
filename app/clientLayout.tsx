@@ -17,6 +17,7 @@ import { FloatingToolkit } from "@/components/floating-toolkit"
 import { ProfileInformation } from "@/components/profile/profile-information"
 import { NotificationPreferences } from "@/components/profile/notification-preferences"
 import { SecuritySettings } from "@/components/profile/security-settings"
+import { UserProvider } from "@/contexts/user-context"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState("monitor")
@@ -59,17 +60,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <html lang="en">
       <body>
-        <div className="flex h-screen bg-gray-50">
-          <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <TopBar customerName={customerName} />
-            <div className="flex-1 flex justify-center overflow-hidden">
-              <main className="w-[80%] overflow-y-auto">{renderContent()}</main>
+        <UserProvider>
+          <div className="flex h-screen bg-gray-50">
+            <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <TopBar customerName={customerName} />
+              <div className="flex-1 flex justify-center overflow-hidden">
+                <main className="w-[80%] overflow-y-auto">{renderContent()}</main>
+              </div>
+              <FloatingToolkit onSectionChange={handleSectionChange} />
             </div>
-            <FloatingToolkit onSectionChange={handleSectionChange} />
+            <Toaster />
           </div>
-          <Toaster />
-        </div>
+        </UserProvider>
       </body>
     </html>
   )
