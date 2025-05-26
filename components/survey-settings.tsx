@@ -9,12 +9,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Calendar } from "lucide-react"
+import { Plus, Calendar, LinkIcon } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import { DistributionPreviewModal } from "@/components/distribution-preview-modal"
 
 interface SurveySettingsProps {
   onBack: () => void
@@ -23,17 +25,37 @@ interface SurveySettingsProps {
   templateName?: string
 }
 
+interface CRMSegment {
+  id: string
+  name: string
+  contactCount: number
+  selected: boolean
+}
+
 export function SurveySettings({ onBack, onSave, initialTitle, templateName }: SurveySettingsProps) {
+  const { toast } = useToast()
   const [distributionMethod, setDistributionMethod] = useState("representative")
   const [selectedPlatform, setSelectedPlatform] = useState("")
   const [customParameters, setCustomParameters] = useState([{ key: "", value: "" }])
   const [httpHeaders, setHttpHeaders] = useState([{ name: "", value: "" }])
   const [httpMethod, setHttpMethod] = useState("POST")
   const [webhookUrl, setWebhookUrl] = useState("")
-  const [selectedCadence, setSelectedCadence] = useState("select")
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date()) // Current date
+  const [selectedCadence, setSelectedCadence] = useState("one-time")
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date())
   const [endDate, setEndDate] = useState<Date | undefined>()
   const [augmentWithZencity, setAugmentWithZencity] = useState(false)
+
+  // CRM-specific state
+  const [syncSchedule, setSyncSchedule] = useState("immediate")
+  const [crmSegments, setCrmSegments] = useState<CRMSegment[]>([
+    { id: "1", name: "Newsletter Subscribers", contactCount: 1287, selected: false },
+    { id: "2", name: "Downtown Business Owners", contactCount: 128, selected: false },
+    { id: "3", name: "Community Leaders", contactCount: 56, selected: false },
+    { id: "4", name: "Recent Survey Participants", contactCount: 215, selected: false },
+    { id: "5", name: "Artists", contactCount: 310, selected: false },
+  ])
+  const [segmentError, setSegmentError] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
 
   // Add state for editable fields
   const [surveyTitle, setSurveyTitle] = useState(initialTitle || "Adams County, Community Survey")
@@ -74,6 +96,47 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
       annual: "3 months",
     }
     return durations[cadence] || ""
+  }
+
+  const handleSegmentToggle = (segmentId: string) => {
+    setCrmSegments(
+      crmSegments.map((segment) => (segment.id === segmentId ? { ...segment, selected: !segment.selected } : segment)),
+    )
+    setSegmentError(false)
+  }
+
+  const handleTestSend = () => {
+    const selectedSegmentCount = crmSegments.filter((s) => s.selected).length
+    if (selectedSegmentCount === 0) {
+      setSegmentError(true)
+      return
+    }
+    toast({
+      title: "Test Survey Sent",
+      description: "A test survey has been sent to your test record in HubSpot.",
+      duration: 3000,
+    })
+  }
+
+  const handleSaveSettings = () => {
+    if (distributionMethod === "connected-crm") {
+      const selectedSegmentCount = crmSegments.filter((s) => s.selected).length
+      if (selectedSegmentCount === 0) {
+        setSegmentError(true)
+        toast({
+          title: "Validation Error",
+          description: "Please select at least one community segment.",
+          variant: "destructive",
+          duration: 3000,
+        })
+        return
+      }
+    }
+    onSave()
+  }
+
+  const getTotalSelectedContacts = () => {
+    return crmSegments.filter((s) => s.selected).reduce((total, segment) => total + segment.contactCount, 0)
   }
 
   const addCustomParameter = () => {
@@ -118,7 +181,7 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
 
             <div className="flex items-center space-x-2">
               <Button variant="outline">Save</Button>
-              <Button onClick={onSave} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
+              <Button onClick={handleSaveSettings} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
                 Publish
               </Button>
             </div>
@@ -209,7 +272,6 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                           <SelectValue placeholder="Select cadence" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="select">Select cadence</SelectItem>
                           <SelectItem value="one-time">One-time</SelectItem>
                           <SelectItem value="monthly">Monthly</SelectItem>
                           <SelectItem value="bi-monthly">Bi-monthly</SelectItem>
@@ -301,12 +363,11 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                       <div className="flex items-center gap-2 mb-1">
                         <Label htmlFor="geo-distribution">Geographical Distribution</Label>
                       </div>
-                      <Select defaultValue="select">
+                      <Select defaultValue="city-wide">
                         <SelectTrigger id="geo-distribution" className="mt-1">
                           <SelectValue placeholder="Select map" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="select">Select map</SelectItem>
                           <SelectItem value="city-wide">City-wide</SelectItem>
                           <SelectItem value="districts">By Districts</SelectItem>
                           <SelectItem value="custom">Custom Areas</SelectItem>
@@ -346,6 +407,24 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                             </Label>
                           </div>
                           <p className="text-sm text-gray-500 mt-1">Quick-fire insights for rapid feedback</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-2">
+                        <RadioGroupItem
+                          value="connected-crm"
+                          id="connected-crm"
+                          className="text-[#3BD1BB] border-[#3BD1BB] mt-1"
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="connected-crm" className="font-medium cursor-pointer">
+                              Connected CRM
+                            </Label>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Leverage your existing CRM segments for seamless targeting
+                          </p>
                         </div>
                       </div>
 
@@ -397,6 +476,102 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                       </div>
                     </RadioGroup>
                   </div>
+
+                  {/* Connected CRM Configuration */}
+                  {distributionMethod === "connected-crm" && (
+                    <div className="space-y-4 ml-6 mt-4 p-4 bg-gray-50 rounded-md border">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-green-600 flex items-center">
+                          <LinkIcon className="w-4 h-4 mr-1" />
+                          HubSpot Connected
+                        </div>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="text-[#3BD1BB] p-0 h-auto"
+                          onClick={() => {
+                            toast({
+                              title: "Connect Another CRM",
+                              description: "This feature is coming soon.",
+                              duration: 3000,
+                            })
+                          }}
+                        >
+                          Connect another CRM
+                        </Button>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <Label htmlFor="community-segments">Community Segments</Label>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="text-[#3BD1BB] p-0 h-auto"
+                            onClick={() => {
+                              toast({
+                                title: "Segments Refreshed",
+                                description: "Your HubSpot segments have been updated.",
+                                duration: 3000,
+                              })
+                            }}
+                          >
+                            Refresh segments
+                          </Button>
+                        </div>
+                        <div className={cn("border rounded-md p-2 bg-white", segmentError && "border-red-500")}>
+                          {crmSegments.map((segment) => (
+                            <div key={segment.id} className="flex items-center mb-2 last:mb-0">
+                              <Checkbox
+                                id={`segment-${segment.id}`}
+                                className="text-[#3BD1BB] border-[#3BD1BB]"
+                                checked={segment.selected}
+                                onCheckedChange={() => handleSegmentToggle(segment.id)}
+                              />
+                              <Label htmlFor={`segment-${segment.id}`} className="ml-2 cursor-pointer">
+                                {segment.name} ({segment.contactCount} contacts)
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                        {segmentError && (
+                          <p className="text-xs text-red-500 mt-1">Please select at least one segment to continue</p>
+                        )}
+                        {!segmentError && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {getTotalSelectedContacts() > 0
+                              ? `${getTotalSelectedContacts()} total contacts selected`
+                              : "Select at least one segment to distribute your survey"}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label htmlFor="sync-schedule">Sync Schedule</Label>
+                        <Select value={syncSchedule} onValueChange={setSyncSchedule}>
+                          <SelectTrigger id="sync-schedule" className="mt-1">
+                            <SelectValue placeholder="Select sync schedule" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="immediate">Immediate (send as contacts are added)</SelectItem>
+                            <SelectItem value="daily">Daily Digest (batch send once per day)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center"
+                          onClick={handleTestSend}
+                          disabled={crmSegments.filter((s) => s.selected).length === 0}
+                        >
+                          Test Send
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Third-party settings */}
                   {distributionMethod === "third-party" && (
@@ -561,7 +736,30 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
             </Card>
           </TabsContent>
         </Tabs>
+        <div className="flex justify-between mt-4">
+          <Button variant="link" className="text-[#3BD1BB]" onClick={() => setShowPreviewModal(true)}>
+            Preview distribution
+          </Button>
+          <div className="flex space-x-2">
+            <Button variant="outline">Save as Draft</Button>
+            <Button className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white" onClick={handleSaveSettings}>
+              Save Settings
+            </Button>
+          </div>
+        </div>
       </div>
+
+      <DistributionPreviewModal
+        open={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        distributionMethod={distributionMethod}
+        surveyTitle={surveyTitle}
+        selectedSegments={crmSegments.filter((s) => s.selected)}
+        totalContacts={getTotalSelectedContacts()}
+        syncSchedule={syncSchedule}
+        startDate={startDate}
+        endDate={endDate}
+      />
     </div>
   )
 }
