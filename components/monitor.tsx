@@ -380,7 +380,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
 
       {/* Top Teams Section */}
       <div className="mt-8 mb-6">
-        <h2 className="text-lg font-semibold mb-3">Top Teams</h2>
+        <h2 className="text-lg font-semibold mb-3">Top Departments</h2>
         <div className="grid grid-cols-4 gap-4">
           {Object.values(teamsData).map((team) => (
             <Card
