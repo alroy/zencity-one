@@ -399,11 +399,6 @@ export function Monitor({ onSectionChange }: MonitorProps) {
                   <Users className="h-3.5 w-3.5 mr-1" />
                   <span>{team.members} members</span>
                 </div>
-                {team.responseRate > 0 && (
-                  <div className="mt-2 text-sm">
-                    <span className="font-medium text-[#3BD1BB]">{team.responseRate}%</span> response rate
-                  </div>
-                )}
               </CardContent>
             </Card>
           ))}
