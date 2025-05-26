@@ -56,14 +56,14 @@ export function TopBar({ customerName = "Adams County" }: TopBarProps) {
       <style jsx global>{`
       `}</style>
 
-      <div className="w-full bg-white border-b border-gray-200 py-3 px-4 sticky top-0 z-10">
-        <div className="flex items-start">
+      <div className="w-full bg-white border-b border-gray-200 py-4 px-4 sticky top-0 z-10">
+        <div className="flex items-center">
           <div className="flex items-center mr-4">
             <Image
               src="/images/city-illustration.png"
               alt="City illustration"
-              width={48}
-              height={48}
+              width={42}
+              height={42}
               className="h-auto"
             />
           </div>

@@ -18,6 +18,7 @@ interface DemographicData {
 interface Theme {
   name: string
   count: number
+  quotes?: string[] // Add quotes array to the Theme interface
 }
 
 interface TrendData {
@@ -209,23 +210,32 @@ export function SurveyCard({
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  <div className="bg-white p-3 rounded border">
-                    <p className="text-sm italic">
-                      "The new bike lanes have made my commute so much safer. I appreciate the city's investment in
-                      cycling infrastructure."
-                    </p>
-                  </div>
-                  <div className="bg-white p-3 rounded border">
-                    <p className="text-sm italic">
-                      "I've noticed more people cycling since the bike lanes were installed. It's great to see the
-                      community embracing this change."
-                    </p>
-                  </div>
-                  <div className="bg-white p-3 rounded border">
-                    <p className="text-sm italic">
-                      "The protected bike lanes make me feel much more comfortable riding with my children."
-                    </p>
-                  </div>
+                  {/* Find the theme and display its quotes */}
+                  {topThemes.find((theme) => theme.name === activeTheme)?.quotes ? (
+                    // If the theme has quotes, display them
+                    topThemes
+                      .find((theme) => theme.name === activeTheme)
+                      ?.quotes?.map((quote, index) => (
+                        <div key={index} className="bg-white p-3 rounded border">
+                          <p className="text-sm italic">"{quote}"</p>
+                        </div>
+                      ))
+                  ) : (
+                    // Default quotes if the theme doesn't have specific quotes
+                    <>
+                      <div className="bg-white p-3 rounded border">
+                        <p className="text-sm italic">
+                          "I appreciate the city's attention to this issue. It's making a real difference in our
+                          community."
+                        </p>
+                      </div>
+                      <div className="bg-white p-3 rounded border">
+                        <p className="text-sm italic">
+                          "There's still room for improvement, but I can see the progress being made."
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -350,23 +360,32 @@ export function SurveyCard({
                 </Button>
               </div>
               <div className="space-y-2">
-                <div className="bg-white p-3 rounded border">
-                  <p className="text-sm italic">
-                    "The new bike lanes have made my commute so much safer. I appreciate the city's investment in
-                    cycling infrastructure."
-                  </p>
-                </div>
-                <div className="bg-white p-3 rounded border">
-                  <p className="text-sm italic">
-                    "I've noticed more people cycling since the bike lanes were installed. It's great to see the
-                    community embracing this change."
-                  </p>
-                </div>
-                <div className="bg-white p-3 rounded border">
-                  <p className="text-sm italic">
-                    "The protected bike lanes make me feel much more comfortable riding with my children."
-                  </p>
-                </div>
+                {/* Find the theme and display its quotes */}
+                {topThemes.find((theme) => theme.name === activeTheme)?.quotes ? (
+                  // If the theme has quotes, display them
+                  topThemes
+                    .find((theme) => theme.name === activeTheme)
+                    ?.quotes?.map((quote, index) => (
+                      <div key={index} className="bg-white p-3 rounded border">
+                        <p className="text-sm italic">"{quote}"</p>
+                      </div>
+                    ))
+                ) : (
+                  // Default quotes if the theme doesn't have specific quotes
+                  <>
+                    <div className="bg-white p-3 rounded border">
+                      <p className="text-sm italic">
+                        "I appreciate the city's attention to this issue. It's making a real difference in our
+                        community."
+                      </p>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <p className="text-sm italic">
+                        "There's still room for improvement, but I can see the progress being made."
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}

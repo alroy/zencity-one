@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +13,7 @@ import {
   Eye,
   BarChart3,
   ChevronRight,
+  CheckCircle,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { SurveyCard } from "@/components/survey-card"
@@ -20,11 +22,73 @@ interface MonitorProps {
   onSectionChange?: (section: string) => void
 }
 
+// Define team data type
+interface TeamData {
+  id: string
+  name: string
+  activeSurveys: number
+  totalResponses: number
+  sourcesMonitored: number
+  trendingTopics: number
+  members: number
+  responseRate: number
+}
+
 export function Monitor({ onSectionChange }: MonitorProps) {
+  // Add state for selected team
+  const [selectedTeam, setSelectedTeam] = useState<string>("all")
+
   const breadcrumbItems = [
     { label: "City Explorer", path: "city-explorer", isClickable: false },
     { label: "Monitor", isCurrent: true },
   ]
+
+  // Define team data
+  const teamsData: Record<string, TeamData> = {
+    all: {
+      id: "all",
+      name: "All Teams",
+      activeSurveys: 2,
+      totalResponses: 1470,
+      sourcesMonitored: 56,
+      trendingTopics: 3,
+      members: 12,
+      responseRate: 68,
+    },
+    cityManagement: {
+      id: "cityManagement",
+      name: "City Management",
+      activeSurveys: 1,
+      totalResponses: 847,
+      sourcesMonitored: 32,
+      trendingTopics: 2,
+      members: 5,
+      responseRate: 72,
+    },
+    parksRecreation: {
+      id: "parksRecreation",
+      name: "Parks & Recreation",
+      activeSurveys: 1,
+      totalResponses: 623,
+      sourcesMonitored: 18,
+      trendingTopics: 1,
+      members: 4,
+      responseRate: 65,
+    },
+    publicSafety: {
+      id: "publicSafety",
+      name: "Public Safety",
+      activeSurveys: 0,
+      totalResponses: 0,
+      sourcesMonitored: 24,
+      trendingTopics: 1,
+      members: 3,
+      responseRate: 0,
+    },
+  }
+
+  // Get current team data
+  const currentTeamData = teamsData[selectedTeam]
 
   // Enhanced survey data with additional metrics
   const activeSurveys = [
@@ -41,12 +105,60 @@ export function Monitor({ onSectionChange }: MonitorProps) {
         neutral: 0.2,
       },
       topThemes: [
-        { name: "Pedestrian Safety", count: 156 },
-        { name: "Business Support", count: 132 },
-        { name: "Public Spaces", count: 98 },
-        { name: "Parking", count: 87 },
-        { name: "Lighting", count: 76 },
-        { name: "Accessibility", count: 65 },
+        {
+          name: "Pedestrian Safety",
+          count: 156,
+          quotes: [
+            "The new bike lanes have made my commute so much safer. I appreciate the city's investment in cycling infrastructure.",
+            "I've noticed more people cycling since the bike lanes were installed. It's great to see the community embracing this change.",
+            "The protected bike lanes make me feel much more comfortable riding with my children.",
+          ],
+        },
+        {
+          name: "Business Support",
+          count: 132,
+          quotes: [
+            "The small business grant program has been a lifeline for my downtown shop during construction.",
+            "I appreciate the city's efforts to promote local businesses through the 'Shop Downtown' campaign.",
+            "The reduced permit fees for outdoor seating have helped restaurants like mine stay profitable during the transition.",
+          ],
+        },
+        {
+          name: "Public Spaces",
+          count: 98,
+          quotes: [
+            "The new central plaza is a wonderful gathering space for the community.",
+            "I love the additional green spaces that have been incorporated into the downtown design.",
+            "The public art installations have added so much character to our downtown area.",
+          ],
+        },
+        {
+          name: "Parking",
+          count: 87,
+          quotes: [
+            "We need more parking options downtown, especially during peak hours.",
+            "The new parking garage has helped, but it's often full by mid-morning.",
+            "I'd like to see more affordable parking options for those who work downtown all day.",
+          ],
+        },
+        {
+          name: "Lighting",
+          count: 76,
+          quotes: [
+            "The improved street lighting has made downtown feel much safer at night.",
+            "I appreciate the energy-efficient LED lights that have been installed throughout the area.",
+            "The decorative lighting adds a nice ambiance to the evening shopping experience.",
+          ],
+        },
+        {
+          name: "Accessibility",
+          count: 65,
+          quotes: [
+            "The wider sidewalks and curb cuts have made downtown much more accessible for my wheelchair.",
+            "I appreciate the audible crosswalk signals that have been installed at major intersections.",
+            "The tactile paving helps me navigate downtown independently with my visual impairment.",
+          ],
+        },
       ],
       demographics: {
         age: [
@@ -91,6 +203,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
         ],
       },
       quotasBelowTarget: 2,
+      team: "cityManagement",
     },
     {
       id: 2,
@@ -105,12 +218,60 @@ export function Monitor({ onSectionChange }: MonitorProps) {
         neutral: 0.2,
       },
       topThemes: [
-        { name: "Playground Equipment", count: 143 },
-        { name: "Trail Maintenance", count: 127 },
-        { name: "Sports Facilities", count: 112 },
-        { name: "Park Safety", count: 98 },
-        { name: "Accessibility", count: 87 },
-        { name: "Community Events", count: 76 },
+        {
+          name: "Playground Equipment",
+          count: 143,
+          quotes: [
+            "The playground equipment at Central Park is outdated and needs to be replaced with more inclusive options.",
+            "My children love the new climbing structures at Riverside Park.",
+            "We need more playground equipment suitable for toddlers and very young children.",
+          ],
+        },
+        {
+          name: "Trail Maintenance",
+          count: 127,
+          quotes: [
+            "The mountain biking trails need better maintenance, especially after rainstorms.",
+            "I appreciate the recent improvements to the hiking trail markers.",
+            "The boardwalk sections of the wetland trail need repairs in several places.",
+          ],
+        },
+        {
+          name: "Sports Facilities",
+          count: 112,
+          quotes: [
+            "We need more pickleball courts to accommodate the growing interest in the sport.",
+            "The tennis courts at Community Park need resurfacing.",
+            "I'd like to see more covered areas near the sports fields for spectators.",
+          ],
+        },
+        {
+          name: "Park Safety",
+          count: 98,
+          quotes: [
+            "The improved lighting at Sunset Park has made evening walks feel much safer.",
+            "We need more emergency call boxes along the more remote sections of trails.",
+            "The increased ranger patrols have been noticeable and appreciated.",
+          ],
+        },
+        {
+          name: "Accessibility",
+          count: 87,
+          quotes: [
+            "More parks need accessible pathways to reach all amenities.",
+            "The new adaptive playground equipment at Central Park is wonderful for children of all abilities.",
+            "I appreciate the efforts to make our natural areas more accessible with improved trails.",
+          ],
+        },
+        {
+          name: "Community Events",
+          count: 76,
+          quotes: [
+            "I'd love to see more community events in our parks, like outdoor concerts and movies.",
+            "The farmers market in the park has been a great addition to our community.",
+            "More family-friendly events would help bring the community together.",
+          ],
+        },
       ],
       demographics: {
         age: [
@@ -155,8 +316,13 @@ export function Monitor({ onSectionChange }: MonitorProps) {
         ],
       },
       quotasBelowTarget: 3,
+      team: "parksRecreation",
     },
   ]
+
+  // Filter active surveys based on selected team
+  const filteredSurveys =
+    selectedTeam === "all" ? activeSurveys : activeSurveys.filter((survey) => survey.team === selectedTeam)
 
   const trendingTopics = [
     {
@@ -166,6 +332,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
       sources: 23,
       trend: "up",
       insight: "Residents expressing frustration about increased commute times during construction",
+      team: "cityManagement",
     },
     {
       id: 2,
@@ -174,6 +341,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
       sources: 18,
       trend: "up",
       insight: "High anticipation and positive feedback about upcoming facility",
+      team: "parksRecreation",
     },
     {
       id: 3,
@@ -182,8 +350,13 @@ export function Monitor({ onSectionChange }: MonitorProps) {
       sources: 15,
       trend: "down",
       insight: "Mixed reactions to snow removal response times",
+      team: "publicSafety",
     },
   ]
+
+  // Filter trending topics based on selected team
+  const filteredTrendingTopics =
+    selectedTeam === "all" ? trendingTopics : trendingTopics.filter((topic) => topic.team === selectedTeam)
 
   // Custom function to get sentiment badge with new colors
   const getSentimentBadge = (sentiment: string) => {
@@ -205,14 +378,46 @@ export function Monitor({ onSectionChange }: MonitorProps) {
         breadcrumbItems={breadcrumbItems}
       />
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+      {/* Top Teams Section */}
+      <div className="mt-8 mb-6">
+        <h2 className="text-lg font-semibold mb-3">Top Teams</h2>
+        <div className="grid grid-cols-4 gap-4">
+          {Object.values(teamsData).map((team) => (
+            <Card
+              key={team.id}
+              className={`cursor-pointer transition-all ${
+                selectedTeam === team.id ? "border-[#3BD1BB] ring-1 ring-[#3BD1BB]/50" : "hover:border-[#3BD1BB]/50"
+              }`}
+              onClick={() => setSelectedTeam(team.id)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium">{team.name}</h3>
+                  {selectedTeam === team.id && <CheckCircle className="h-4 w-4 text-[#3BD1BB]" />}
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                  <Users className="h-3.5 w-3.5 mr-1" />
+                  <span>{team.members} members</span>
+                </div>
+                {team.responseRate > 0 && (
+                  <div className="mt-2 text-sm">
+                    <span className="font-medium text-[#3BD1BB]">{team.responseRate}%</span> response rate
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats Overview - Now dynamically updated based on selected team */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Surveys</p>
-                <p className="text-2xl font-bold">2</p>
+                <p className="text-2xl font-bold">{currentTeamData.activeSurveys}</p>
               </div>
               <BarChart3 className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -224,7 +429,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Responses</p>
-                <p className="text-2xl font-bold">1,470</p>
+                <p className="text-2xl font-bold">{currentTeamData.totalResponses}</p>
               </div>
               <Users className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -236,7 +441,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Sources Monitored</p>
-                <p className="text-2xl font-bold">56</p>
+                <p className="text-2xl font-bold">{currentTeamData.sourcesMonitored}</p>
               </div>
               <MessageCircle className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -248,7 +453,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Trending Topics</p>
-                <p className="text-2xl font-bold">3</p>
+                <p className="text-2xl font-bold">{currentTeamData.trendingTopics}</p>
               </div>
               <TrendingUp className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -266,9 +471,13 @@ export function Monitor({ onSectionChange }: MonitorProps) {
           </p>
 
           <p className="text-gray-700 leading-relaxed">
-            Residents praise Adams County's small-town charm within a metro area, strong civic engagement, and easy
-            highway access. They celebrate our cultural diversity, French heritage, clean image, and community events
-            like Adams Days. One voice noted a fading uniqueness, but overall sentiment remains strongly positive.
+            {selectedTeam === "cityManagement"
+              ? "City Management team has received positive feedback on downtown revitalization efforts. Residents appreciate the improved walkability and new business opportunities, though concerns about parking remain. Overall sentiment is 65% positive."
+              : selectedTeam === "parksRecreation"
+                ? "Parks & Recreation team has gathered valuable feedback on facility improvements. Residents are particularly enthusiastic about playground upgrades and trail maintenance, with 58% positive sentiment overall."
+                : selectedTeam === "publicSafety"
+                  ? "Public Safety team is monitoring community concerns about winter road maintenance and emergency response times. Feedback is mixed, with residents acknowledging efforts but requesting more consistent service."
+                  : "Residents praise Adams County's small-town charm within a metro area, strong civic engagement, and easy highway access. They celebrate our cultural diversity, French heritage, clean image, and community events like Adams Days. One voice noted a fading uniqueness, but overall sentiment remains strongly positive."}
           </p>
 
           <div>
@@ -287,55 +496,61 @@ export function Monitor({ onSectionChange }: MonitorProps) {
       {/* Running Surveys */}
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Running Surveys</CardTitle>
+          <CardTitle>Running Surveys {selectedTeam !== "all" && `- ${teamsData[selectedTeam].name}`}</CardTitle>
           <Button variant="outline" size="sm" onClick={() => onSectionChange && onSectionChange("survey-builder")}>
             <Eye className="w-4 h-4 mr-2" />
             Show All Surveys
           </Button>
         </CardHeader>
         <CardContent className="p-4">
-          {activeSurveys.map((survey) => (
-            <SurveyCard key={survey.id} {...survey} />
-          ))}
+          {filteredSurveys.length > 0 ? (
+            filteredSurveys.map((survey) => <SurveyCard key={survey.id} {...survey} />)
+          ) : (
+            <div className="text-center py-8 text-gray-500">No active surveys for this team</div>
+          )}
         </CardContent>
       </Card>
 
       {/* Trending Conversations */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Trending Conversations</CardTitle>
+          <CardTitle>Trending Conversations {selectedTeam !== "all" && `- ${teamsData[selectedTeam].name}`}</CardTitle>
           <p className="text-sm text-gray-600">Sentiment analysis from social media channels</p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {trendingTopics.map((topic) => (
-            <div key={topic.id} className="border rounded-lg p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-semibold">{topic.topic}</h3>
-                <div className="flex items-center space-x-2">
-                  {getSentimentBadge(topic.sentiment)}
-                  {topic.trend === "up" ? (
-                    <TrendingUp
-                      className={`w-4 h-4 ${topic.sentiment === "positive" ? "text-[#3BD1BB]" : "text-[#FC7753]"}`}
-                    />
-                  ) : (
-                    <TrendingDown
-                      className={`w-4 h-4 ${topic.sentiment === "negative" ? "text-[#3BD1BB]" : "text-[#FC7753]"}`}
-                    />
-                  )}
+          {filteredTrendingTopics.length > 0 ? (
+            filteredTrendingTopics.map((topic) => (
+              <div key={topic.id} className="border rounded-lg p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold">{topic.topic}</h3>
+                  <div className="flex items-center space-x-2">
+                    {getSentimentBadge(topic.sentiment)}
+                    {topic.trend === "up" ? (
+                      <TrendingUp
+                        className={`w-4 h-4 ${topic.sentiment === "positive" ? "text-[#3BD1BB]" : "text-[#FC7753]"}`}
+                      />
+                    ) : (
+                      <TrendingDown
+                        className={`w-4 h-4 ${topic.sentiment === "negative" ? "text-[#3BD1BB]" : "text-[#FC7753]"}`}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-600 mb-3">{topic.insight}</p>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">{topic.sources} sources</span>
+                  <Button variant="outline" size="sm">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View Sources
+                  </Button>
                 </div>
               </div>
-
-              <p className="text-sm text-gray-600 mb-3">{topic.insight}</p>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">{topic.sources} sources</span>
-                <Button variant="outline" size="sm">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View Sources
-                </Button>
-              </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">No trending topics for this team</div>
+          )}
         </CardContent>
       </Card>
     </div>

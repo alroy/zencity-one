@@ -136,8 +136,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      {/* Header with Zencity Logo - Removed border-b */}
-      <div className="p-4">
+      {/* Header with Zencity Logo - Adjusted padding for alignment with salutation */}
+      <div className="pt-6 px-4 pb-4">
         <div className="flex items-center">
           <Image src="/images/zencity-logo.png" alt="Zencity" width={120} height={30} className="h-auto" />
         </div>
