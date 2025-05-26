@@ -18,9 +18,19 @@ import {
   Users,
   LinkIcon,
   CheckCircle,
+  Bell,
+  Shield,
+  LogOut,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface SidebarProps {
   activeSection: string
@@ -58,6 +68,9 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       "internal-platforms",
       "resident-feedback",
       "integration-health",
+      "profile-information",
+      "notification-preferences",
+      "security-settings",
     ]
 
     if (functionalSections.includes(sectionId)) {
@@ -182,19 +195,39 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         </div>
       </nav>
 
-      {/* User Section */}
+      {/* User Section with Dropdown */}
       <div className="p-4 border-t border-gray-200">
-        <Button
-          variant="ghost"
-          className="w-full justify-start p-2 h-auto"
-          onClick={() => handleSectionClick("profile")}
-        >
-          <User className="w-4 h-4 mr-2" />
-          <div className="text-left">
-            <div className="text-sm font-medium">John Smith</div>
-            <div className="text-xs text-gray-500">City Manager</div>
-          </div>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="w-full justify-start p-2 h-auto hover:bg-gray-100">
+              <User className="w-4 h-4 mr-2" />
+              <div className="text-left">
+                <div className="text-sm font-medium">John Smith</div>
+                <div className="text-xs text-gray-500">City Manager</div>
+              </div>
+              <ChevronDown className="ml-auto h-4 w-4 text-gray-500" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => handleSectionClick("profile-information")}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile Information</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSectionClick("notification-preferences")}>
+              <Bell className="mr-2 h-4 w-4" />
+              <span>Notification Preferences</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSectionClick("security-settings")}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Security Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )

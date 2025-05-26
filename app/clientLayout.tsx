@@ -14,6 +14,9 @@ import { InternalPlatforms } from "@/components/integrations/internal-platforms"
 import { ResidentFeedbackPlatforms } from "@/components/integrations/resident-feedback"
 import { IntegrationHealth } from "@/components/integrations/integration-health"
 import { FloatingToolkit } from "@/components/floating-toolkit"
+import { ProfileInformation } from "@/components/profile/profile-information"
+import { NotificationPreferences } from "@/components/profile/notification-preferences"
+import { SecuritySettings } from "@/components/profile/security-settings"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState("monitor")
@@ -41,6 +44,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         return <ResidentFeedbackPlatforms />
       case "integration-health":
         return <IntegrationHealth />
+      case "profile-information":
+        return <ProfileInformation />
+      case "notification-preferences":
+        return <NotificationPreferences />
+      case "security-settings":
+        return <SecuritySettings />
       default:
         // For any other section, show the coming soon component
         return <ComingSoon section={activeSection} />
