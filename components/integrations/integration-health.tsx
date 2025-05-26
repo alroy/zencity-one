@@ -16,6 +16,9 @@ interface HealthStatus {
 export function IntegrationHealth() {
   const { toast } = useToast()
 
+  // Remove Pipedrive from the healthStatuses array since it's no longer connected
+  // The updated healthStatuses array should not include Pipedrive
+
   const healthStatuses: HealthStatus[] = [
     {
       id: "email",
@@ -24,10 +27,10 @@ export function IntegrationHealth() {
       lastSync: "2023-05-25T14:30:00Z",
     },
     {
-      id: "pipedrive",
-      name: "Pipedrive",
+      id: "hubspot",
+      name: "HubSpot",
       status: "healthy",
-      lastSync: "2023-05-25T15:45:00Z",
+      lastSync: "2023-05-25T16:00:00Z",
     },
     {
       id: "slack",

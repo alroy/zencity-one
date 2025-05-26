@@ -416,7 +416,7 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                           id="connected-crm"
                           className="text-[#3BD1BB] border-[#3BD1BB] mt-1"
                         />
-                        <div>
+                        <div className="w-full">
                           <div className="flex items-center gap-2">
                             <Label htmlFor="connected-crm" className="font-medium cursor-pointer">
                               Connected CRM
@@ -425,6 +425,104 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                           <p className="text-sm text-gray-500 mt-1">
                             Leverage your existing CRM segments for seamless targeting
                           </p>
+
+                          {/* Connected CRM Configuration - moved here */}
+                          {distributionMethod === "connected-crm" && (
+                            <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md border">
+                              <div className="flex items-center justify-between">
+                                <div className="text-sm text-green-600 flex items-center">
+                                  <LinkIcon className="w-4 h-4 mr-1" />
+                                  HubSpot Connected
+                                </div>
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="text-[#3BD1BB] p-0 h-auto"
+                                  onClick={() => {
+                                    toast({
+                                      title: "Connect Another CRM",
+                                      description: "This feature is coming soon.",
+                                      duration: 3000,
+                                    })
+                                  }}
+                                >
+                                  Connect another CRM
+                                </Button>
+                              </div>
+
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <Label htmlFor="community-segments">Community Segments</Label>
+                                  <Button
+                                    variant="link"
+                                    size="sm"
+                                    className="text-[#3BD1BB] p-0 h-auto"
+                                    onClick={() => {
+                                      toast({
+                                        title: "Segments Refreshed",
+                                        description: "Your HubSpot segments have been updated.",
+                                        duration: 3000,
+                                      })
+                                    }}
+                                  >
+                                    Refresh segments
+                                  </Button>
+                                </div>
+                                <div className={cn("border rounded-md p-2 bg-white", segmentError && "border-red-500")}>
+                                  {crmSegments.map((segment) => (
+                                    <div key={segment.id} className="flex items-center mb-2 last:mb-0">
+                                      <Checkbox
+                                        id={`segment-${segment.id}`}
+                                        className="text-[#3BD1BB] border-[#3BD1BB]"
+                                        checked={segment.selected}
+                                        onCheckedChange={() => handleSegmentToggle(segment.id)}
+                                      />
+                                      <Label htmlFor={`segment-${segment.id}`} className="ml-2 cursor-pointer">
+                                        {segment.name} ({segment.contactCount} contacts)
+                                      </Label>
+                                    </div>
+                                  ))}
+                                </div>
+                                {segmentError && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    Please select at least one segment to continue
+                                  </p>
+                                )}
+                                {!segmentError && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {getTotalSelectedContacts() > 0
+                                      ? `${getTotalSelectedContacts()} total contacts selected`
+                                      : "Select at least one segment to distribute your survey"}
+                                  </p>
+                                )}
+                              </div>
+
+                              <div>
+                                <Label htmlFor="sync-schedule">Sync Schedule</Label>
+                                <Select value={syncSchedule} onValueChange={setSyncSchedule}>
+                                  <SelectTrigger id="sync-schedule" className="mt-1">
+                                    <SelectValue placeholder="Select sync schedule" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="immediate">Immediate (send as contacts are added)</SelectItem>
+                                    <SelectItem value="daily">Daily Digest (batch send once per day)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="flex justify-end">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center"
+                                  onClick={handleTestSend}
+                                  disabled={crmSegments.filter((s) => s.selected).length === 0}
+                                >
+                                  Test Send
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -476,102 +574,6 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                       </div>
                     </RadioGroup>
                   </div>
-
-                  {/* Connected CRM Configuration */}
-                  {distributionMethod === "connected-crm" && (
-                    <div className="space-y-4 ml-6 mt-4 p-4 bg-gray-50 rounded-md border">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-green-600 flex items-center">
-                          <LinkIcon className="w-4 h-4 mr-1" />
-                          HubSpot Connected
-                        </div>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="text-[#3BD1BB] p-0 h-auto"
-                          onClick={() => {
-                            toast({
-                              title: "Connect Another CRM",
-                              description: "This feature is coming soon.",
-                              duration: 3000,
-                            })
-                          }}
-                        >
-                          Connect another CRM
-                        </Button>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <Label htmlFor="community-segments">Community Segments</Label>
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="text-[#3BD1BB] p-0 h-auto"
-                            onClick={() => {
-                              toast({
-                                title: "Segments Refreshed",
-                                description: "Your HubSpot segments have been updated.",
-                                duration: 3000,
-                              })
-                            }}
-                          >
-                            Refresh segments
-                          </Button>
-                        </div>
-                        <div className={cn("border rounded-md p-2 bg-white", segmentError && "border-red-500")}>
-                          {crmSegments.map((segment) => (
-                            <div key={segment.id} className="flex items-center mb-2 last:mb-0">
-                              <Checkbox
-                                id={`segment-${segment.id}`}
-                                className="text-[#3BD1BB] border-[#3BD1BB]"
-                                checked={segment.selected}
-                                onCheckedChange={() => handleSegmentToggle(segment.id)}
-                              />
-                              <Label htmlFor={`segment-${segment.id}`} className="ml-2 cursor-pointer">
-                                {segment.name} ({segment.contactCount} contacts)
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                        {segmentError && (
-                          <p className="text-xs text-red-500 mt-1">Please select at least one segment to continue</p>
-                        )}
-                        {!segmentError && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            {getTotalSelectedContacts() > 0
-                              ? `${getTotalSelectedContacts()} total contacts selected`
-                              : "Select at least one segment to distribute your survey"}
-                          </p>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label htmlFor="sync-schedule">Sync Schedule</Label>
-                        <Select value={syncSchedule} onValueChange={setSyncSchedule}>
-                          <SelectTrigger id="sync-schedule" className="mt-1">
-                            <SelectValue placeholder="Select sync schedule" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="immediate">Immediate (send as contacts are added)</SelectItem>
-                            <SelectItem value="daily">Daily Digest (batch send once per day)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center"
-                          onClick={handleTestSend}
-                          disabled={crmSegments.filter((s) => s.selected).length === 0}
-                        >
-                          Test Send
-                        </Button>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Third-party settings */}
                   {distributionMethod === "third-party" && (

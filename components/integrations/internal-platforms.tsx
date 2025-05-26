@@ -36,6 +36,15 @@ export function InternalPlatforms() {
       ],
     },
     {
+      id: "hubspot",
+      name: "HubSpot",
+      isConnected: true,
+      fields: [
+        { label: "API Key", key: "apiKey", type: "password" },
+        { label: "Hub ID", key: "hubId", type: "text" },
+      ],
+    },
+    {
       id: "siebel",
       name: "Siebel CRM",
       isConnected: false,
@@ -48,7 +57,7 @@ export function InternalPlatforms() {
     {
       id: "pipedrive",
       name: "Pipedrive",
-      isConnected: true,
+      isConnected: false,
       fields: [
         { label: "API Token", key: "apiToken", type: "password" },
         { label: "Company Domain", key: "domain", type: "text" },
