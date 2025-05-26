@@ -31,8 +31,9 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
   const [httpMethod, setHttpMethod] = useState("POST")
   const [webhookUrl, setWebhookUrl] = useState("")
   const [selectedCadence, setSelectedCadence] = useState("select")
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date(2025, 2, 1)) // March 1, 2025
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date()) // Current date
   const [endDate, setEndDate] = useState<Date | undefined>()
+  const [augmentWithZencity, setAugmentWithZencity] = useState(false)
 
   // Add state for editable fields
   const [surveyTitle, setSurveyTitle] = useState(initialTitle || "Adams County, Community Survey")
@@ -195,13 +196,14 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                       <Select
                         value={selectedCadence}
                         onValueChange={setSelectedCadence}
-                        disabled={distributionMethod !== "representative"}
+                        disabled={distributionMethod !== "representative" || distributionMethod === "self-distributed"}
                       >
                         <SelectTrigger
                           id="cadence"
                           className={cn(
                             "mt-1",
-                            distributionMethod !== "representative" && "opacity-50 cursor-not-allowed",
+                            (distributionMethod !== "representative" || distributionMethod === "self-distributed") &&
+                              "opacity-50 cursor-not-allowed",
                           )}
                         >
                           <SelectValue placeholder="Select cadence" />
@@ -250,8 +252,9 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                           </p>
                         )}
 
-                      {/* Show end date picker only for Fast and Self-distributed methods */}
-                      {(distributionMethod === "fast" || distributionMethod === "self-distributed") && (
+                      {/* Show end date picker only for Fast method or Self-distributed with augment */}
+                      {(distributionMethod === "fast" ||
+                        (distributionMethod === "self-distributed" && augmentWithZencity)) && (
                         <div className="mt-4">
                           <Label htmlFor="end-date">Distribution end date</Label>
                           <Popover>
@@ -363,7 +366,12 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                       </div>
                       {distributionMethod === "self-distributed" && (
                         <div className="ml-6 flex items-center space-x-2">
-                          <Checkbox id="augment" className="text-[#3BD1BB] border-[#3BD1BB]" />
+                          <Checkbox
+                            id="augment"
+                            className="text-[#3BD1BB] border-[#3BD1BB]"
+                            checked={augmentWithZencity}
+                            onCheckedChange={(checked) => setAugmentWithZencity(checked === true)}
+                          />
                           <Label htmlFor="augment" className="font-normal cursor-pointer">
                             Also augment with Zencity distribution
                           </Label>
