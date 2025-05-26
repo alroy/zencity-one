@@ -349,46 +349,6 @@ export function SurveyCard({
               </Button>
             </div>
           </div>
-
-          {/* Theme Panel (conditionally rendered) */}
-          {activeTheme && (
-            <div className="p-4 bg-gray-50 border-t">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Theme: {activeTheme}</h4>
-                <Button variant="ghost" size="sm" className="h-8 p-0" onClick={() => setActiveTheme(null)}>
-                  Close
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {/* Find the theme and display its quotes */}
-                {topThemes.find((theme) => theme.name === activeTheme)?.quotes ? (
-                  // If the theme has quotes, display them
-                  topThemes
-                    .find((theme) => theme.name === activeTheme)
-                    ?.quotes?.map((quote, index) => (
-                      <div key={index} className="bg-white p-3 rounded border">
-                        <p className="text-sm italic">"{quote}"</p>
-                      </div>
-                    ))
-                ) : (
-                  // Default quotes if the theme doesn't have specific quotes
-                  <>
-                    <div className="bg-white p-3 rounded border">
-                      <p className="text-sm italic">
-                        "I appreciate the city's attention to this issue. It's making a real difference in our
-                        community."
-                      </p>
-                    </div>
-                    <div className="bg-white p-3 rounded border">
-                      <p className="text-sm italic">
-                        "There's still room for improvement, but I can see the progress being made."
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </TooltipProvider>
