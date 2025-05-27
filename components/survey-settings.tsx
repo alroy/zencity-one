@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { DistributionPreviewModal } from "@/components/distribution-preview-modal"
 
-interface SurveySettingsProps {
+type SurveySettingsProps = {
   onBack: () => void
   onSave: () => void
   initialTitle?: string
@@ -32,7 +33,7 @@ interface CRMSegment {
   selected: boolean
 }
 
-export function SurveySettings({ onBack, onSave, initialTitle, templateName }: SurveySettingsProps) {
+const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initialTitle, templateName }) => {
   const { toast } = useToast()
   const [distributionMethod, setDistributionMethod] = useState("representative")
   const [selectedPlatform, setSelectedPlatform] = useState("")
@@ -132,6 +133,18 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
         return
       }
     }
+
+    if (distributionMethod === "internal-audience") {
+      // Add validation for internal audience
+      toast({
+        title: "Validation Error",
+        description: "Select at least one team or department.",
+        variant: "destructive",
+        duration: 3000,
+      })
+      return
+    }
+
     onSave()
   }
 
@@ -381,6 +394,10 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                     <div className="flex items-center gap-2">
                       <Label>Distribution Method</Label>
                     </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Choose where your survey goes—email lists, embedded links, CRM segments, inside your organization,
+                      or via external platforms.
+                    </p>
                     <RadioGroup value={distributionMethod} onValueChange={setDistributionMethod} className="space-y-4">
                       <div className="flex items-start space-x-2">
                         <RadioGroupItem
@@ -519,6 +536,157 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
                                   disabled={crmSegments.filter((s) => s.selected).length === 0}
                                 >
                                   Test Send
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-2">
+                        <RadioGroupItem
+                          value="internal-audience"
+                          id="internal-audience"
+                          className="text-[#3BD1BB] border-[#3BD1BB] mt-1"
+                        />
+                        <div className="w-full">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="internal-audience" className="font-medium cursor-pointer">
+                              Internal Audience
+                            </Label>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Survey your staff to measure satisfaction, boost engagement, and foster a feedback-driven
+                            culture.
+                          </p>
+
+                          {/* Internal Audience Configuration Panel */}
+                          {distributionMethod === "internal-audience" && (
+                            <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md border transition-all duration-200 ease-in-out">
+                              <div>
+                                <Label htmlFor="directory-integration">Directory Integration</Label>
+                                <Select defaultValue="azure-ad">
+                                  <SelectTrigger id="directory-integration" className="mt-1">
+                                    <SelectValue placeholder="Select directory" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="azure-ad">Azure AD</SelectItem>
+                                    <SelectItem value="okta">Okta</SelectItem>
+                                    <SelectItem value="ldap">LDAP</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="text-[#3BD1BB] p-0 h-auto mt-1"
+                                  onClick={() => {
+                                    toast({
+                                      title: "Connect Directory",
+                                      description: "This will redirect to the Integrations page.",
+                                      duration: 3000,
+                                    })
+                                  }}
+                                >
+                                  Connect directory
+                                </Button>
+                              </div>
+
+                              <div>
+                                <Label>Channels</Label>
+                                <div className="flex items-center space-x-4 mt-2">
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                      id="channel-email"
+                                      className="text-[#3BD1BB] border-[#3BD1BB]"
+                                      defaultChecked
+                                    />
+                                    <Label htmlFor="channel-email" className="cursor-pointer">
+                                      Email
+                                    </Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="channel-slack" className="text-[#3BD1BB] border-[#3BD1BB]" />
+                                    <Label htmlFor="channel-slack" className="cursor-pointer">
+                                      Slack
+                                    </Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="channel-intranet" className="text-[#3BD1BB] border-[#3BD1BB]" />
+                                    <Label htmlFor="channel-intranet" className="cursor-pointer">
+                                      Intranet Portal
+                                    </Label>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div>
+                                <Label htmlFor="group-selector">Select Department</Label>
+                                <Select>
+                                  <SelectTrigger id="group-selector" className="mt-1">
+                                    <SelectValue placeholder="Select teams/departments" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="public-works">Public Works</SelectItem>
+                                    <SelectItem value="parks-recreation">Parks and Recreation</SelectItem>
+                                    <SelectItem value="fire-department">Fire Department</SelectItem>
+                                    <SelectItem value="planning-zoning">Planning and Zoning</SelectItem>
+                                    <SelectItem value="finance">Finance</SelectItem>
+                                    <SelectItem value="housing-community">Housing and Community Development</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div>
+                                <Label>Send Schedule</Label>
+                                <RadioGroup defaultValue="immediate" className="mt-2">
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem
+                                      value="immediate"
+                                      id="send-immediate"
+                                      className="text-[#3BD1BB] border-[#3BD1BB]"
+                                    />
+                                    <Label htmlFor="send-immediate" className="cursor-pointer">
+                                      Send immediately
+                                    </Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem
+                                      value="scheduled"
+                                      id="send-scheduled"
+                                      className="text-[#3BD1BB] border-[#3BD1BB]"
+                                    />
+                                    <Label htmlFor="send-scheduled" className="cursor-pointer">
+                                      Schedule for later
+                                    </Label>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button variant="outline" size="sm" className="ml-2">
+                                          <Calendar className="h-4 w-4 mr-1" />
+                                          Select date & time
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-0" align="start">
+                                        <CalendarComponent mode="single" initialFocus />
+                                      </PopoverContent>
+                                    </Popover>
+                                  </div>
+                                </RadioGroup>
+                              </div>
+
+                              <div className="flex justify-end">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center"
+                                  onClick={() => {
+                                    toast({
+                                      title: "Test Survey Sent",
+                                      description: "A test survey has been sent to your work email.",
+                                      duration: 3000,
+                                    })
+                                  }}
+                                >
+                                  Send test to me
                                 </Button>
                               </div>
                             </div>
@@ -765,3 +933,6 @@ export function SurveySettings({ onBack, onSave, initialTitle, templateName }: S
     </div>
   )
 }
+
+export { SurveySettings }
+export default SurveySettings

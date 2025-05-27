@@ -47,7 +47,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
   const teamsData: Record<string, TeamData> = {
     all: {
       id: "all",
-      name: "All Teams",
+      name: "All Departments",
       activeSurveys: 2,
       totalResponses: 1470,
       sourcesMonitored: 56,
