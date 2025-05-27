@@ -204,27 +204,28 @@ export function FloatingToolkit({ onSectionChange }: FloatingToolkitProps) {
                 ${showAnimation ? "toolkit-button-animated toolkit-button-halo" : "toolkit-button-float"}
                 ${isAnimating ? "animating" : ""}`}
               style={{
-                width: "60px",
-                height: "60px",
+                width: "68px",
+                height: "68px",
                 padding: 0,
                 overflow: "hidden",
                 border: "none",
-                background: "#3BD1BB",
+                background: "transparent",
+                backgroundColor: "transparent",
               }}
               aria-label="Toolkit"
             >
               <div
                 className={`toolkit-icon ${dropdownOpen || isAnimating ? "toolkit-icon-rotate" : ""}`}
-                style={{ width: "60px", height: "60px", position: "relative" }}
+                style={{ width: "68px", height: "68px", position: "relative" }}
               >
                 <Image
-                  src={dropdownOpen ? "/images/fab-close-icon.png" : "/images/fab-plus-icon.png"}
+                  src={dropdownOpen ? "/images/fab-close-icon-new.png" : "/images/fab-plus-icon-new.png"}
                   alt={dropdownOpen ? "Close toolkit" : "Open toolkit"}
                   fill
-                  sizes="60px"
+                  sizes="68px"
                   priority
                   style={{
-                    objectFit: "cover",
+                    objectFit: "contain",
                     transition: "opacity 0.3s ease",
                     opacity: isAnimating ? 0.8 : 1,
                   }}
