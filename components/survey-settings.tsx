@@ -436,7 +436,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         <div className="w-full">
                           <div className="flex items-center gap-2">
                             <Label htmlFor="connected-crm" className="font-medium cursor-pointer">
-                              Connected CRM
+                              Targeted/Micro-community (CRM)
                             </Label>
                           </div>
                           <p className="text-sm text-gray-500 mt-1">
