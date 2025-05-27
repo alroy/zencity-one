@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Calendar, LinkIcon } from "lucide-react"
+import { Plus, Calendar, LinkIcon, X, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
@@ -18,6 +18,18 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { DistributionPreviewModal } from "@/components/distribution-preview-modal"
+import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 type SurveySettingsProps = {
   onBack: () => void
@@ -31,6 +43,20 @@ interface CRMSegment {
   name: string
   contactCount: number
   selected: boolean
+}
+
+interface Department {
+  id: string
+  name: string
+}
+
+interface Directory {
+  id: string
+  name: string
+  icon: React.ReactNode
+  status: "connected" | "disconnected" | "pending"
+  lastSynced?: string
+  userCount?: number
 }
 
 const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initialTitle, templateName }) => {
@@ -58,6 +84,77 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
   const [segmentError, setSegmentError] = useState(false)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
 
+  // Internal Audience state
+  const [departments, setDepartments] = useState<Department[]>([
+    { id: "public-works", name: "Public Works" },
+    { id: "parks-recreation", name: "Parks and Recreation" },
+    { id: "fire-department", name: "Fire Department" },
+    { id: "planning-zoning", name: "Planning and Zoning" },
+    { id: "finance", name: "Finance" },
+    { id: "housing-community", name: "Housing and Community Development" },
+  ])
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([])
+  const [departmentError, setDepartmentError] = useState(false)
+
+  // Directory Integration state
+  const [directories, setDirectories] = useState<Directory[]>([
+    {
+      id: "azure-ad",
+      name: "Azure Active Directory",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#0078D4">
+          <path d="M12 2L2 6v12l10 4 10-4V6L12 2zm0 4.3l6 2.4v6.6l-6 2.4-6-2.4V8.7l6-2.4z" />
+        </svg>
+      ),
+      status: "disconnected",
+    },
+    {
+      id: "okta",
+      name: "Okta",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#00297A">
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 15c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z" />
+        </svg>
+      ),
+      status: "disconnected",
+    },
+    {
+      id: "ldap",
+      name: "LDAP",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#333333">
+          <path d="M4 2h16c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2zm2 4v12h12V6H6z" />
+        </svg>
+      ),
+      status: "disconnected",
+    },
+    {
+      id: "google-workspace",
+      name: "Google Workspace",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+            fill="#4285F4"
+          />
+        </svg>
+      ),
+      status: "disconnected",
+    },
+  ])
+  const [selectedDirectory, setSelectedDirectory] = useState<string | null>(null)
+  const [showDirectoryModal, setShowDirectoryModal] = useState(false)
+  const [directoryConnectStep, setDirectoryConnectStep] = useState(1)
+  const [directoryCredentials, setDirectoryCredentials] = useState({
+    clientId: "",
+    clientSecret: "",
+    tenantId: "",
+    domain: "",
+  })
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [connectionProgress, setConnectionProgress] = useState(0)
+  const [connectionError, setConnectionError] = useState<string | null>(null)
+
   // Add state for editable fields
   const [surveyTitle, setSurveyTitle] = useState(initialTitle || "Adams County, Community Survey")
   const [internalTitle, setInternalTitle] = useState("")
@@ -69,6 +166,46 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
       setSurveyTitle(initialTitle)
     }
   }, [initialTitle])
+
+  // Simulate connection progress
+  useEffect(() => {
+    if (isConnecting) {
+      const timer = setInterval(() => {
+        setConnectionProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(timer)
+            setIsConnecting(false)
+
+            // Simulate successful connection
+            if (selectedDirectory && Math.random() > 0.2) {
+              // 80% success rate for demo
+              setDirectories((prev) =>
+                prev.map((dir) =>
+                  dir.id === selectedDirectory
+                    ? {
+                        ...dir,
+                        status: "connected",
+                        lastSynced: new Date().toISOString(),
+                        userCount: Math.floor(Math.random() * 500) + 100,
+                      }
+                    : dir,
+                ),
+              )
+              setDirectoryConnectStep(3) // Success step
+              return 100
+            } else {
+              // Simulate failure
+              setConnectionError("Authentication failed. Please check your credentials and try again.")
+              setDirectoryConnectStep(4) // Error step
+              return 0
+            }
+          }
+          return prev + 10
+        })
+      }, 300)
+      return () => clearInterval(timer)
+    }
+  }, [isConnecting, selectedDirectory])
 
   const platforms = [
     "SeeClickFix (CivicPlus)",
@@ -106,6 +243,27 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
     setSegmentError(false)
   }
 
+  const handleDepartmentSelect = (departmentId: string) => {
+    setSelectedDepartments((prev) => {
+      // If already selected, remove it
+      if (prev.includes(departmentId)) {
+        return prev.filter((id) => id !== departmentId)
+      }
+      // Otherwise add it
+      return [...prev, departmentId]
+    })
+    setDepartmentError(false)
+  }
+
+  const handleRemoveDepartment = (departmentId: string) => {
+    setSelectedDepartments((prev) => prev.filter((id) => id !== departmentId))
+  }
+
+  const getDepartmentName = (departmentId: string): string => {
+    const department = departments.find((dept) => dept.id === departmentId)
+    return department ? department.name : departmentId
+  }
+
   const handleTestSend = () => {
     const selectedSegmentCount = crmSegments.filter((s) => s.selected).length
     if (selectedSegmentCount === 0) {
@@ -135,14 +293,28 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
     }
 
     if (distributionMethod === "internal-audience") {
-      // Add validation for internal audience
-      toast({
-        title: "Validation Error",
-        description: "Select at least one team or department.",
-        variant: "destructive",
-        duration: 3000,
-      })
-      return
+      if (selectedDepartments.length === 0) {
+        setDepartmentError(true)
+        toast({
+          title: "Validation Error",
+          description: "Select at least one department.",
+          variant: "destructive",
+          duration: 3000,
+        })
+        return
+      }
+
+      // Check if a directory is connected
+      const hasConnectedDirectory = directories.some((dir) => dir.status === "connected")
+      if (!hasConnectedDirectory) {
+        toast({
+          title: "Directory Required",
+          description: "Please connect at least one directory to distribute to internal audience.",
+          variant: "destructive",
+          duration: 3000,
+        })
+        return
+      }
     }
 
     onSave()
@@ -178,6 +350,61 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
     const updated = [...httpHeaders]
     updated[index][field] = value
     setHttpHeaders(updated)
+  }
+
+  const handleDirectorySelect = (directoryId: string) => {
+    setSelectedDirectory(directoryId)
+    setDirectoryConnectStep(1)
+    setConnectionError(null)
+    setShowDirectoryModal(true)
+  }
+
+  const handleDirectoryConnect = () => {
+    setDirectoryConnectStep(2)
+    setIsConnecting(true)
+    setConnectionProgress(0)
+  }
+
+  const handleDirectoryDisconnect = (directoryId: string) => {
+    setDirectories((prev) =>
+      prev.map((dir) =>
+        dir.id === directoryId
+          ? {
+              ...dir,
+              status: "disconnected",
+              lastSynced: undefined,
+              userCount: undefined,
+            }
+          : dir,
+      ),
+    )
+
+    toast({
+      title: "Directory Disconnected",
+      description: `${directories.find((d) => d.id === directoryId)?.name} has been disconnected.`,
+      duration: 3000,
+    })
+  }
+
+  const getConnectedDirectoryCount = () => {
+    return directories.filter((dir) => dir.status === "connected").length
+  }
+
+  const getTotalUserCount = () => {
+    return directories
+      .filter((dir) => dir.status === "connected")
+      .reduce((total, dir) => total + (dir.userCount || 0), 0)
+  }
+
+  const resetDirectoryConnection = () => {
+    setDirectoryConnectStep(1)
+    setConnectionError(null)
+    setConnectionProgress(0)
+    setIsConnecting(false)
+  }
+
+  const getSelectedDirectoryName = () => {
+    return directories.find((dir) => dir.id === selectedDirectory)?.name || "Directory"
   }
 
   return (
@@ -563,36 +790,120 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                           {/* Internal Audience Configuration Panel */}
                           {distributionMethod === "internal-audience" && (
                             <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md border transition-all duration-200 ease-in-out">
-                              <div>
-                                <Label htmlFor="directory-integration">Directory Integration</Label>
-                                <Select defaultValue="azure-ad">
-                                  <SelectTrigger id="directory-integration" className="mt-1">
-                                    <SelectValue placeholder="Select directory" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="azure-ad">Azure AD</SelectItem>
-                                    <SelectItem value="okta">Okta</SelectItem>
-                                    <SelectItem value="ldap">LDAP</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="text-[#3BD1BB] p-0 h-auto mt-1"
-                                  onClick={() => {
-                                    toast({
-                                      title: "Connect Directory",
-                                      description: "This will redirect to the Integrations page.",
-                                      duration: 3000,
-                                    })
-                                  }}
-                                >
-                                  Connect directory
-                                </Button>
+                              {/* Directory Integration Section */}
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-base font-medium">Directory Integration</Label>
+                                  {getConnectedDirectoryCount() > 0 && (
+                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      {getConnectedDirectoryCount()} Connected
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                <p className="text-sm text-gray-600">
+                                  Connect to your organization's directory to access employee information for survey
+                                  distribution. This allows you to target specific departments and teams.
+                                </p>
+
+                                {getConnectedDirectoryCount() === 0 ? (
+                                  <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-200">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Directory Required</AlertTitle>
+                                    <AlertDescription>
+                                      Connect at least one directory to distribute surveys to your internal audience.
+                                    </AlertDescription>
+                                  </Alert>
+                                ) : (
+                                  <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-200">
+                                    <AlertDescription className="flex items-center">
+                                      <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                                      {getTotalUserCount()} users available across {getConnectedDirectoryCount()}{" "}
+                                      {getConnectedDirectoryCount() === 1 ? "directory" : "directories"}
+                                    </AlertDescription>
+                                  </Alert>
+                                )}
+
+                                <div className="space-y-3 mt-2">
+                                  {directories.map((directory) => (
+                                    <div
+                                      key={directory.id}
+                                      className={cn(
+                                        "flex items-center justify-between p-3 rounded-md border",
+                                        directory.status === "connected" ? "bg-green-50 border-green-200" : "bg-white",
+                                      )}
+                                    >
+                                      <div className="flex items-center space-x-3">
+                                        <div className="flex-shrink-0">{directory.icon}</div>
+                                        <div>
+                                          <p className="font-medium">{directory.name}</p>
+                                          {directory.status === "connected" ? (
+                                            <div className="text-xs text-gray-500 flex items-center mt-1">
+                                              <CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />
+                                              Connected • {directory.userCount} users
+                                              {directory.lastSynced && (
+                                                <span className="ml-2">
+                                                  • Last synced: {new Date(directory.lastSynced).toLocaleDateString()}
+                                                </span>
+                                              )}
+                                            </div>
+                                          ) : (
+                                            <p className="text-xs text-gray-500 mt-1">Not connected</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        {directory.status === "connected" ? (
+                                          <div className="flex space-x-2">
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className="text-gray-600"
+                                              onClick={() => {
+                                                toast({
+                                                  title: "Sync Started",
+                                                  description: `Syncing ${directory.name} directory...`,
+                                                  duration: 3000,
+                                                })
+                                              }}
+                                            >
+                                              <RefreshCw className="w-3 h-3 mr-1" />
+                                              Sync
+                                            </Button>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              className="text-red-600 border-red-200 hover:bg-red-50"
+                                              onClick={() => handleDirectoryDisconnect(directory.id)}
+                                            >
+                                              Disconnect
+                                            </Button>
+                                          </div>
+                                        ) : (
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-[#3BD1BB]"
+                                            onClick={() => handleDirectorySelect(directory.id)}
+                                          >
+                                            Connect
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
 
+                              <Separator />
+
+                              {/* Channels Section */}
                               <div>
-                                <Label>Channels</Label>
+                                <Label className="text-base font-medium">Distribution Channels</Label>
+                                <p className="text-sm text-gray-600 mt-1 mb-2">
+                                  Select how you want to distribute the survey to your internal audience.
+                                </p>
                                 <div className="flex items-center space-x-4 mt-2">
                                   <div className="flex items-center space-x-2">
                                     <Checkbox
@@ -619,58 +930,58 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                                 </div>
                               </div>
 
-                              <div>
-                                <Label htmlFor="group-selector">Select Department</Label>
-                                <Select>
-                                  <SelectTrigger id="group-selector" className="mt-1">
-                                    <SelectValue placeholder="Select teams/departments" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="public-works">Public Works</SelectItem>
-                                    <SelectItem value="parks-recreation">Parks and Recreation</SelectItem>
-                                    <SelectItem value="fire-department">Fire Department</SelectItem>
-                                    <SelectItem value="planning-zoning">Planning and Zoning</SelectItem>
-                                    <SelectItem value="finance">Finance</SelectItem>
-                                    <SelectItem value="housing-community">Housing and Community Development</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
+                              <Separator />
 
+                              {/* Department Selection */}
                               <div>
-                                <Label>Send Schedule</Label>
-                                <RadioGroup defaultValue="immediate" className="mt-2">
-                                  <div className="flex items-center space-x-2">
-                                    <RadioGroupItem
-                                      value="immediate"
-                                      id="send-immediate"
-                                      className="text-[#3BD1BB] border-[#3BD1BB]"
-                                    />
-                                    <Label htmlFor="send-immediate" className="cursor-pointer">
-                                      Send immediately
-                                    </Label>
+                                <Label htmlFor="departments" className="text-base font-medium">
+                                  Target Departments
+                                </Label>
+                                <p className="text-sm text-gray-600 mt-1 mb-2">
+                                  Select which departments should receive this survey. You can select multiple
+                                  departments.
+                                </p>
+                                <div className="mt-2">
+                                  {departments.map((department) => (
+                                    <div key={department.id} className="flex items-center mb-2 last:mb-0">
+                                      <Checkbox
+                                        id={`department-${department.id}`}
+                                        className="text-[#3BD1BB] border-[#3BD1BB]"
+                                        checked={selectedDepartments.includes(department.id)}
+                                        onCheckedChange={() => handleDepartmentSelect(department.id)}
+                                        disabled={getConnectedDirectoryCount() === 0}
+                                      />
+                                      <Label htmlFor={`department-${department.id}`} className="ml-2 cursor-pointer">
+                                        {department.name}
+                                      </Label>
+                                    </div>
+                                  ))}
+                                </div>
+                                {departmentError && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    Please select at least one department to continue
+                                  </p>
+                                )}
+                                {selectedDepartments.length > 0 && (
+                                  <div className="mt-3">
+                                    <Label className="text-sm">Selected Departments:</Label>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {selectedDepartments.map((deptId) => (
+                                        <Badge key={deptId} variant="secondary" className="flex items-center gap-1">
+                                          {getDepartmentName(deptId)}
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-4 w-4 p-0 hover:bg-transparent"
+                                            onClick={() => handleRemoveDepartment(deptId)}
+                                          >
+                                            <X className="h-3 w-3" />
+                                          </Button>
+                                        </Badge>
+                                      ))}
+                                    </div>
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <RadioGroupItem
-                                      value="scheduled"
-                                      id="send-scheduled"
-                                      className="text-[#3BD1BB] border-[#3BD1BB]"
-                                    />
-                                    <Label htmlFor="send-scheduled" className="cursor-pointer">
-                                      Schedule for later
-                                    </Label>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <Button variant="outline" size="sm" className="ml-2">
-                                          <Calendar className="h-4 w-4 mr-1" />
-                                          Select date & time
-                                        </Button>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0" align="start">
-                                        <CalendarComponent mode="single" initialFocus />
-                                      </PopoverContent>
-                                    </Popover>
-                                  </div>
-                                </RadioGroup>
+                                )}
                               </div>
 
                               <div className="flex justify-end">
@@ -679,6 +990,26 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                                   size="sm"
                                   className="flex items-center"
                                   onClick={() => {
+                                    if (getConnectedDirectoryCount() === 0) {
+                                      toast({
+                                        title: "Directory Required",
+                                        description: "Please connect a directory before sending test surveys.",
+                                        variant: "destructive",
+                                        duration: 3000,
+                                      })
+                                      return
+                                    }
+
+                                    if (selectedDepartments.length === 0) {
+                                      toast({
+                                        title: "Departments Required",
+                                        description: "Please select at least one department.",
+                                        variant: "destructive",
+                                        duration: 3000,
+                                      })
+                                      return
+                                    }
+
                                     toast({
                                       title: "Test Survey Sent",
                                       description: "A test survey has been sent to your work email.",
@@ -918,6 +1249,269 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
           </div>
         </div>
       </div>
+
+      {/* Directory Connection Modal */}
+      <Dialog open={showDirectoryModal} onOpenChange={setShowDirectoryModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {directoryConnectStep === 1 && `Connect to ${getSelectedDirectoryName()}`}
+              {directoryConnectStep === 2 && "Connecting..."}
+              {directoryConnectStep === 3 && "Connection Successful"}
+              {directoryConnectStep === 4 && "Connection Failed"}
+            </DialogTitle>
+            <DialogDescription>
+              {directoryConnectStep === 1 && "Enter your credentials to connect to your directory service."}
+              {directoryConnectStep === 2 && "Please wait while we establish a connection..."}
+              {directoryConnectStep === 3 && "Your directory has been successfully connected."}
+              {directoryConnectStep === 4 && "We encountered an issue while connecting to your directory."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {directoryConnectStep === 1 && (
+            <>
+              <div className="grid gap-4 py-4">
+                {selectedDirectory === "azure-ad" && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="tenant-id" className="text-right">
+                        Tenant ID
+                      </Label>
+                      <Input
+                        id="tenant-id"
+                        value={directoryCredentials.tenantId}
+                        onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, tenantId: e.target.value })}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client-id" className="text-right">
+                        Client ID
+                      </Label>
+                      <Input
+                        id="client-id"
+                        value={directoryCredentials.clientId}
+                        onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, clientId: e.target.value })}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client-secret" className="text-right">
+                        Client Secret
+                      </Label>
+                      <Input
+                        id="client-secret"
+                        type="password"
+                        value={directoryCredentials.clientSecret}
+                        onChange={(e) =>
+                          setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
+                        }
+                        className="col-span-3"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {selectedDirectory === "okta" && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="domain" className="text-right">
+                        Okta Domain
+                      </Label>
+                      <Input
+                        id="domain"
+                        value={directoryCredentials.domain}
+                        onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, domain: e.target.value })}
+                        className="col-span-3"
+                        placeholder="your-domain.okta.com"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="api-token" className="text-right">
+                        API Token
+                      </Label>
+                      <Input
+                        id="api-token"
+                        type="password"
+                        value={directoryCredentials.clientSecret}
+                        onChange={(e) =>
+                          setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
+                        }
+                        className="col-span-3"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {selectedDirectory === "ldap" && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="ldap-url" className="text-right">
+                        LDAP URL
+                      </Label>
+                      <Input
+                        id="ldap-url"
+                        value={directoryCredentials.domain}
+                        onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, domain: e.target.value })}
+                        className="col-span-3"
+                        placeholder="ldap://your-ldap-server:389"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="bind-dn" className="text-right">
+                        Bind DN
+                      </Label>
+                      <Input
+                        id="bind-dn"
+                        value={directoryCredentials.clientId}
+                        onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, clientId: e.target.value })}
+                        className="col-span-3"
+                        placeholder="cn=admin,dc=example,dc=com"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="bind-password" className="text-right">
+                        Bind Password
+                      </Label>
+                      <Input
+                        id="bind-password"
+                        type="password"
+                        value={directoryCredentials.clientSecret}
+                        onChange={(e) =>
+                          setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
+                        }
+                        className="col-span-3"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {selectedDirectory === "google-workspace" && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client-id" className="text-right">
+                        Client ID
+                      </Label>
+                      <Input
+                        id="client-id"
+                        value={directoryCredentials.clientId}
+                        onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, clientId: e.target.value })}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client-secret" className="text-right">
+                        Client Secret
+                      </Label>
+                      <Input
+                        id="client-secret"
+                        type="password"
+                        value={directoryCredentials.clientSecret}
+                        onChange={(e) =>
+                          setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
+                        }
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="domain" className="text-right">
+                        Domain
+                      </Label>
+                      <Input
+                        id="domain"
+                        value={directoryCredentials.domain}
+                        onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, domain: e.target.value })}
+                        className="col-span-3"
+                        placeholder="your-domain.com"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="col-span-4 text-xs text-gray-500 mt-2">
+                  <p>
+                    Your credentials are securely stored and used only for directory synchronization. Learn more about{" "}
+                    <a href="#" className="text-[#3BD1BB] hover:underline">
+                      how we handle your data
+                    </a>
+                    .
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowDirectoryModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleDirectoryConnect} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
+                  Connect
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+
+          {directoryConnectStep === 2 && (
+            <div className="py-6">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <Progress value={connectionProgress} className="w-full" />
+                <p className="text-sm text-gray-500">Establishing connection and syncing directory data...</p>
+              </div>
+            </div>
+          )}
+
+          {directoryConnectStep === 3 && (
+            <>
+              <div className="py-6">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="rounded-full bg-green-100 p-3">
+                    <CheckCircle2 className="h-8 w-8 text-green-600" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium text-gray-900">Directory Connected Successfully</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Your directory has been connected and synchronized. You can now target departments for your
+                      survey.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  onClick={() => setShowDirectoryModal(false)}
+                  className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
+                >
+                  Continue
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+
+          {directoryConnectStep === 4 && (
+            <>
+              <div className="py-6">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="rounded-full bg-red-100 p-3">
+                    <AlertCircle className="h-8 w-8 text-red-600" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium text-gray-900">Connection Failed</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {connectionError || "We encountered an issue while connecting to your directory."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowDirectoryModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={resetDirectoryConnection} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
+                  Try Again
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <DistributionPreviewModal
         open={showPreviewModal}
