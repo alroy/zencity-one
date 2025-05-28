@@ -17,8 +17,17 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { DistributionPreviewModal } from "@/components/distribution-preview-modal"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
@@ -809,8 +818,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
 
                                 <p className="text-sm text-gray-600">
                                   Connect to your organization's directory to access employee information for survey
-                                  distribution.{" "}
-                                  <strong>Once connected, you'll be able to select target departments below.</strong>
+                                  distribution. <strong>This step is required</strong> before you can select target
+                                  departments.
                                 </p>
 
                                 {getConnectedDirectoryCount() === 0 ? (
@@ -937,92 +946,104 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                                 </div>
                               </div>
 
-                              {/* Department Selection - Only show when at least one directory is connected */}
-                              {getConnectedDirectoryCount() > 0 ? (
-                                <>
-                                  <Separator />
+                              <Separator />
 
-                                  <div className="animate-in fade-in-50 duration-500">
-                                    <div className="flex items-center justify-between">
-                                      <Label htmlFor="departments" className="text-base font-medium">
-                                        Target Departments
+                              {/* Department Selection */}
+                              <div>
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="departments" className="text-base font-medium">
+                                    Target Departments
+                                  </Label>
+                                  {getConnectedDirectoryCount() === 0 ? (
+                                    <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200">
+                                      Unavailable
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      Available
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                {getConnectedDirectoryCount() === 0 ? (
+                                  <Alert variant="warning" className="mt-2 bg-amber-50 text-amber-800 border-amber-200">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Directory Connection Required</AlertTitle>
+                                    <AlertDescription>
+                                      You need to connect at least one directory before you can select target
+                                      departments. Please connect a directory using the options above.
+                                    </AlertDescription>
+                                  </Alert>
+                                ) : (
+                                  <p className="text-sm text-gray-600 mt-1 mb-2">
+                                    Select which departments should receive this survey. You can select multiple
+                                    departments.
+                                  </p>
+                                )}
+
+                                <div
+                                  className={cn(
+                                    "mt-2 transition-opacity duration-200",
+                                    getConnectedDirectoryCount() === 0
+                                      ? "opacity-50 pointer-events-none"
+                                      : "opacity-100",
+                                  )}
+                                >
+                                  {departments.map((department) => (
+                                    <div key={department.id} className="flex items-center mb-2 last:mb-0">
+                                      <Checkbox
+                                        id={`department-${department.id}`}
+                                        className={cn(
+                                          "text-[#3BD1BB] border-[#3BD1BB]",
+                                          getConnectedDirectoryCount() === 0 && "cursor-not-allowed",
+                                        )}
+                                        checked={selectedDepartments.includes(department.id)}
+                                        onCheckedChange={() => handleDepartmentSelect(department.id)}
+                                        disabled={getConnectedDirectoryCount() === 0}
+                                      />
+                                      <Label
+                                        htmlFor={`department-${department.id}`}
+                                        className={cn(
+                                          "ml-2",
+                                          getConnectedDirectoryCount() === 0
+                                            ? "text-gray-400 cursor-not-allowed"
+                                            : "cursor-pointer",
+                                        )}
+                                      >
+                                        {department.name}
                                       </Label>
-                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                                        Available
-                                      </Badge>
                                     </div>
+                                  ))}
+                                </div>
 
-                                    <p className="text-sm text-gray-600 mt-1 mb-3">
-                                      Now that you've connected a directory, you can select which departments should
-                                      receive this survey. You can select multiple departments.
-                                    </p>
+                                {departmentError && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    Please select at least one department to continue
+                                  </p>
+                                )}
 
-                                    <div className="space-y-2 pl-1">
-                                      {departments.map((department) => (
-                                        <div key={department.id} className="flex items-center">
-                                          <Checkbox
-                                            id={`department-${department.id}`}
-                                            className="text-[#3BD1BB] border-[#3BD1BB]"
-                                            checked={selectedDepartments.includes(department.id)}
-                                            onCheckedChange={() => handleDepartmentSelect(department.id)}
-                                          />
-                                          <Label
-                                            htmlFor={`department-${department.id}`}
-                                            className="ml-2 cursor-pointer font-normal"
+                                {selectedDepartments.length > 0 && (
+                                  <div className="mt-3">
+                                    <Label className="text-sm">Selected Departments:</Label>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {selectedDepartments.map((deptId) => (
+                                        <Badge key={deptId} variant="secondary" className="flex items-center gap-1">
+                                          {getDepartmentName(deptId)}
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-4 w-4 p-0 hover:bg-transparent"
+                                            onClick={() => handleRemoveDepartment(deptId)}
                                           >
-                                            {department.name}
-                                          </Label>
-                                        </div>
+                                            <X className="h-3 w-3" />
+                                          </Button>
+                                        </Badge>
                                       ))}
                                     </div>
-
-                                    {departmentError && (
-                                      <p className="text-xs text-red-500 mt-2">
-                                        Please select at least one department to continue
-                                      </p>
-                                    )}
-
-                                    {selectedDepartments.length > 0 && (
-                                      <div className="mt-3">
-                                        <Label className="text-sm text-gray-600">Selected Departments:</Label>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                          {selectedDepartments.map((deptId) => (
-                                            <Badge key={deptId} variant="secondary" className="flex items-center gap-1">
-                                              {getDepartmentName(deptId)}
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-4 w-4 p-0 hover:bg-transparent"
-                                                onClick={() => handleRemoveDepartment(deptId)}
-                                              >
-                                                <X className="h-3 w-3" />
-                                              </Button>
-                                            </Badge>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
                                   </div>
-                                </>
-                              ) : (
-                                // Show informative message when no directories are connected
-                                <div className="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                  <div className="flex items-start space-x-2">
-                                    <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                                    <div>
-                                      <p className="text-sm font-medium text-amber-800">
-                                        Target Departments will appear here
-                                      </p>
-                                      <p className="text-sm text-amber-700 mt-1">
-                                        Once you connect a directory above, you'll be able to select specific
-                                        departments to target with your survey. This ensures we can properly distribute
-                                        the survey to the right teams within your organization.
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
+                                )}
+                              </div>
 
                               <div className="flex justify-end">
                                 <Button
@@ -1477,137 +1498,120 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         id="domain"
                         value={directoryCredentials.domain}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, domain: e.target.value })}
-                        placeholder="Enter your Google Workspace domain"
+                        placeholder="your-domain.com"
                       />
                       <p className="text-xs text-gray-500">Your Google Workspace domain</p>
                     </div>
                   </>
                 )}
-              </div>
 
-              <div className="flex justify-end space-x-2 py-4">
-                <Button variant="outline" onClick={resetDirectoryConnection}>
+                <div className="text-xs text-gray-500 mt-4 p-3 bg-blue-50 rounded-md">
+                  <p>
+                    Your credentials are securely stored and used only for directory synchronization. Learn more about{" "}
+                    <a href="#" className="text-[#3BD1BB] hover:underline">
+                      how we handle your data
+                    </a>
+                    .
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowDirectoryModal(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleDirectoryConnect}>Connect</Button>
-              </div>
+                <Button onClick={handleDirectoryConnect} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
+                  Connect
+                </Button>
+              </DialogFooter>
             </>
           )}
 
           {directoryConnectStep === 2 && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" fill="currentColor" />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              <p className="text-sm text-gray-500">Establishing secure connection... {connectionProgress}%</p>
+            <div className="py-6">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <Progress value={connectionProgress} className="w-full" />
+                <p className="text-sm text-gray-500">Establishing connection and syncing directory data...</p>
+              </div>
             </div>
           )}
 
           {directoryConnectStep === 3 && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <CheckCircle2 className="h-10 w-10 text-green-500 mb-4" />
-              <p className="text-lg font-semibold">Successfully Connected!</p>
-              <p className="text-sm text-gray-500">
-                Your directory is now connected and ready for employee data synchronization.
-              </p>
-              <div className="flex justify-center mt-4">
-                <Button onClick={() => setShowDirectoryModal(false)}>Close</Button>
+            <>
+              <div className="py-6">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="rounded-full bg-green-100 p-3">
+                    <CheckCircle2 className="h-8 w-8 text-green-600" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium text-gray-900">Directory Connected Successfully</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Your directory has been connected and synchronized. You can now select target departments for your
+                      survey in the "Target Departments" section.
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-md w-full text-sm text-blue-700">
+                    <p className="flex items-center">
+                      <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                      The Target Departments section is now enabled
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
+              <DialogFooter>
+                <Button
+                  onClick={() => setShowDirectoryModal(false)}
+                  className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
+                >
+                  Continue to Department Selection
+                </Button>
+              </DialogFooter>
+            </>
           )}
 
           {directoryConnectStep === 4 && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-              <p className="text-lg font-semibold">Connection Failed</p>
-              <p className="text-sm text-gray-500">{connectionError}</p>
-              <div className="flex justify-center space-x-2 mt-4">
-                <Button variant="outline" onClick={resetDirectoryConnection}>
+            <>
+              <div className="py-6">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="rounded-full bg-red-100 p-3">
+                    <AlertCircle className="h-8 w-8 text-red-600" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium text-gray-900">Connection Failed</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {connectionError || "We encountered an issue while connecting to your directory."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowDirectoryModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={resetDirectoryConnection} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
                   Try Again
                 </Button>
-                <Button onClick={() => setShowDirectoryModal(false)}>Close</Button>
-              </div>
-            </div>
+              </DialogFooter>
+            </>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Preview Distribution Modal */}
-      <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Preview Distribution</DialogTitle>
-            <DialogDescription>
-              This is a preview of how your survey will be distributed based on your current settings.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <p>
-              <strong>Survey Title:</strong> {surveyTitle}
-            </p>
-            <p>
-              <strong>Distribution Method:</strong> {distributionMethod}
-            </p>
-            {distributionMethod === "connected-crm" && (
-              <>
-                <p>
-                  <strong>CRM:</strong> HubSpot
-                </p>
-                <p>
-                  <strong>Selected Segments:</strong>
-                </p>
-                <ul>
-                  {crmSegments
-                    .filter((s) => s.selected)
-                    .map((segment) => (
-                      <li key={segment.id}>{segment.name}</li>
-                    ))}
-                </ul>
-              </>
-            )}
-            {distributionMethod === "internal-audience" && (
-              <>
-                <p>
-                  <strong>Distribution Channels:</strong> Email, Slack, Intranet Portal
-                </p>
-                <p>
-                  <strong>Target Departments:</strong>
-                </p>
-                <ul>
-                  {selectedDepartments.map((deptId) => (
-                    <li key={deptId}>{getDepartmentName(deptId)}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-            {distributionMethod === "third-party" && (
-              <>
-                <p>
-                  <strong>Platform:</strong> {selectedPlatform}
-                </p>
-                {selectedPlatform === "Custom webhook" && (
-                  <>
-                    <p>
-                      <strong>Webhook URL:</strong> {webhookUrl}
-                    </p>
-                    <p>
-                      <strong>HTTP Method:</strong> {httpMethod}
-                    </p>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setShowPreviewModal(false)}>Close</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DistributionPreviewModal
+        open={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        distributionMethod={distributionMethod}
+        surveyTitle={surveyTitle}
+        selectedSegments={crmSegments.filter((s) => s.selected)}
+        totalContacts={getTotalSelectedContacts()}
+        syncSchedule={syncSchedule}
+        startDate={startDate}
+        endDate={endDate}
+        selectedDepartments={selectedDepartments}
+        departmentNames={selectedDepartments.map((id) => getDepartmentName(id))}
+        selectedPlatform={selectedPlatform}
+        webhookUrl={webhookUrl}
+        httpMethod={httpMethod}
+      />
     </div>
   )
 }
