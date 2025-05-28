@@ -379,6 +379,20 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
       ),
     )
 
+    // Check if this was the last connected directory and clear selected departments if so
+    const remainingConnectedDirectories = directories.filter(
+      (dir) => dir.id !== directoryId && dir.status === "connected",
+    ).length
+
+    if (remainingConnectedDirectories === 0) {
+      setSelectedDepartments([])
+      toast({
+        title: "Departments Cleared",
+        description: "Selected departments have been cleared as no directories are connected.",
+        duration: 3000,
+      })
+    }
+
     toast({
       title: "Directory Disconnected",
       description: `${directories.find((d) => d.id === directoryId)?.name} has been disconnected.`,
@@ -804,7 +818,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
 
                                 <p className="text-sm text-gray-600">
                                   Connect to your organization's directory to access employee information for survey
-                                  distribution. This allows you to target specific departments and teams.
+                                  distribution. <strong>This step is required</strong> before you can select target
+                                  departments.
                                 </p>
 
                                 {getConnectedDirectoryCount() === 0 ? (
@@ -813,6 +828,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                                     <AlertTitle>Directory Required</AlertTitle>
                                     <AlertDescription>
                                       Connect at least one directory to distribute surveys to your internal audience.
+                                      Once connected, you'll be able to select target departments.
                                     </AlertDescription>
                                   </Alert>
                                 ) : (
@@ -934,34 +950,79 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
 
                               {/* Department Selection */}
                               <div>
-                                <Label htmlFor="departments" className="text-base font-medium">
-                                  Target Departments
-                                </Label>
-                                <p className="text-sm text-gray-600 mt-1 mb-2">
-                                  Select which departments should receive this survey. You can select multiple
-                                  departments.
-                                </p>
-                                <div className="mt-2">
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="departments" className="text-base font-medium">
+                                    Target Departments
+                                  </Label>
+                                  {getConnectedDirectoryCount() === 0 ? (
+                                    <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200">
+                                      Unavailable
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      Available
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                {getConnectedDirectoryCount() === 0 ? (
+                                  <Alert variant="warning" className="mt-2 bg-amber-50 text-amber-800 border-amber-200">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Directory Connection Required</AlertTitle>
+                                    <AlertDescription>
+                                      You need to connect at least one directory before you can select target
+                                      departments. Please connect a directory using the options above.
+                                    </AlertDescription>
+                                  </Alert>
+                                ) : (
+                                  <p className="text-sm text-gray-600 mt-1 mb-2">
+                                    Select which departments should receive this survey. You can select multiple
+                                    departments.
+                                  </p>
+                                )}
+
+                                <div
+                                  className={cn(
+                                    "mt-2 transition-opacity duration-200",
+                                    getConnectedDirectoryCount() === 0
+                                      ? "opacity-50 pointer-events-none"
+                                      : "opacity-100",
+                                  )}
+                                >
                                   {departments.map((department) => (
                                     <div key={department.id} className="flex items-center mb-2 last:mb-0">
                                       <Checkbox
                                         id={`department-${department.id}`}
-                                        className="text-[#3BD1BB] border-[#3BD1BB]"
+                                        className={cn(
+                                          "text-[#3BD1BB] border-[#3BD1BB]",
+                                          getConnectedDirectoryCount() === 0 && "cursor-not-allowed",
+                                        )}
                                         checked={selectedDepartments.includes(department.id)}
                                         onCheckedChange={() => handleDepartmentSelect(department.id)}
                                         disabled={getConnectedDirectoryCount() === 0}
                                       />
-                                      <Label htmlFor={`department-${department.id}`} className="ml-2 cursor-pointer">
+                                      <Label
+                                        htmlFor={`department-${department.id}`}
+                                        className={cn(
+                                          "ml-2",
+                                          getConnectedDirectoryCount() === 0
+                                            ? "text-gray-400 cursor-not-allowed"
+                                            : "cursor-pointer",
+                                        )}
+                                      >
                                         {department.name}
                                       </Label>
                                     </div>
                                   ))}
                                 </div>
+
                                 {departmentError && (
                                   <p className="text-xs text-red-500 mt-1">
                                     Please select at least one department to continue
                                   </p>
                                 )}
+
                                 {selectedDepartments.length > 0 && (
                                   <div className="mt-3">
                                     <Label className="text-sm">Selected Departments:</Label>
@@ -1484,8 +1545,14 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                   <div className="text-center">
                     <h3 className="text-lg font-medium text-gray-900">Directory Connected Successfully</h3>
                     <p className="text-sm text-gray-500 mt-1">
-                      Your directory has been connected and synchronized. You can now target departments for your
-                      survey.
+                      Your directory has been connected and synchronized. You can now select target departments for your
+                      survey in the "Target Departments" section.
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-md w-full text-sm text-blue-700">
+                    <p className="flex items-center">
+                      <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                      The Target Departments section is now enabled
                     </p>
                   </div>
                 </div>
@@ -1495,7 +1562,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                   onClick={() => setShowDirectoryModal(false)}
                   className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
                 >
-                  Continue
+                  Continue to Department Selection
                 </Button>
               </DialogFooter>
             </>
