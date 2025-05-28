@@ -1252,7 +1252,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
 
       {/* Directory Connection Modal */}
       <Dialog open={showDirectoryModal} onOpenChange={setShowDirectoryModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {directoryConnectStep === 1 && `Connect to ${getSelectedDirectoryName()}`}
@@ -1270,33 +1270,39 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
 
           {directoryConnectStep === 1 && (
             <>
-              <div className="grid gap-4 py-4">
+              <div className="space-y-5 py-4">
                 {selectedDirectory === "azure-ad" && (
                   <>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="tenant-id" className="text-right">
+                    <div className="space-y-2">
+                      <Label htmlFor="tenant-id" className="block text-sm font-medium">
                         Tenant ID
                       </Label>
                       <Input
                         id="tenant-id"
                         value={directoryCredentials.tenantId}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, tenantId: e.target.value })}
-                        className="col-span-3"
+                        placeholder="Enter your Azure AD tenant ID"
                       />
+                      <p className="text-xs text-gray-500">
+                        The unique identifier for your Azure Active Directory tenant
+                      </p>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client-id" className="text-right">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="client-id" className="block text-sm font-medium">
                         Client ID
                       </Label>
                       <Input
                         id="client-id"
                         value={directoryCredentials.clientId}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, clientId: e.target.value })}
-                        className="col-span-3"
+                        placeholder="Enter your application (client) ID"
                       />
+                      <p className="text-xs text-gray-500">The application ID registered in your Azure portal</p>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client-secret" className="text-right">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="client-secret" className="block text-sm font-medium">
                         Client Secret
                       </Label>
                       <Input
@@ -1306,28 +1312,30 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         onChange={(e) =>
                           setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
                         }
-                        className="col-span-3"
+                        placeholder="Enter your client secret"
                       />
+                      <p className="text-xs text-gray-500">The secret key generated for your application</p>
                     </div>
                   </>
                 )}
 
                 {selectedDirectory === "okta" && (
                   <>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="domain" className="text-right">
+                    <div className="space-y-2">
+                      <Label htmlFor="domain" className="block text-sm font-medium">
                         Okta Domain
                       </Label>
                       <Input
                         id="domain"
                         value={directoryCredentials.domain}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, domain: e.target.value })}
-                        className="col-span-3"
                         placeholder="your-domain.okta.com"
                       />
+                      <p className="text-xs text-gray-500">Your Okta organization's domain</p>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="api-token" className="text-right">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="api-token" className="block text-sm font-medium">
                         API Token
                       </Label>
                       <Input
@@ -1337,40 +1345,43 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         onChange={(e) =>
                           setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
                         }
-                        className="col-span-3"
+                        placeholder="Enter your Okta API token"
                       />
+                      <p className="text-xs text-gray-500">The API token generated in your Okta admin console</p>
                     </div>
                   </>
                 )}
 
                 {selectedDirectory === "ldap" && (
                   <>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="ldap-url" className="text-right">
+                    <div className="space-y-2">
+                      <Label htmlFor="ldap-url" className="block text-sm font-medium">
                         LDAP URL
                       </Label>
                       <Input
                         id="ldap-url"
                         value={directoryCredentials.domain}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, domain: e.target.value })}
-                        className="col-span-3"
                         placeholder="ldap://your-ldap-server:389"
                       />
+                      <p className="text-xs text-gray-500">The URL of your LDAP server including protocol and port</p>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="bind-dn" className="text-right">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="bind-dn" className="block text-sm font-medium">
                         Bind DN
                       </Label>
                       <Input
                         id="bind-dn"
                         value={directoryCredentials.clientId}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, clientId: e.target.value })}
-                        className="col-span-3"
                         placeholder="cn=admin,dc=example,dc=com"
                       />
+                      <p className="text-xs text-gray-500">The distinguished name used to bind to the LDAP server</p>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="bind-password" className="text-right">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="bind-password" className="block text-sm font-medium">
                         Bind Password
                       </Label>
                       <Input
@@ -1380,27 +1391,30 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         onChange={(e) =>
                           setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
                         }
-                        className="col-span-3"
+                        placeholder="Enter your bind password"
                       />
+                      <p className="text-xs text-gray-500">The password for the bind DN account</p>
                     </div>
                   </>
                 )}
 
                 {selectedDirectory === "google-workspace" && (
                   <>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client-id" className="text-right">
+                    <div className="space-y-2">
+                      <Label htmlFor="client-id" className="block text-sm font-medium">
                         Client ID
                       </Label>
                       <Input
                         id="client-id"
                         value={directoryCredentials.clientId}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, clientId: e.target.value })}
-                        className="col-span-3"
+                        placeholder="Enter your Google client ID"
                       />
+                      <p className="text-xs text-gray-500">The client ID from your Google Cloud Console</p>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client-secret" className="text-right">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="client-secret" className="block text-sm font-medium">
                         Client Secret
                       </Label>
                       <Input
@@ -1410,25 +1424,27 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         onChange={(e) =>
                           setDirectoryCredentials({ ...directoryCredentials, clientSecret: e.target.value })
                         }
-                        className="col-span-3"
+                        placeholder="Enter your Google client secret"
                       />
+                      <p className="text-xs text-gray-500">The client secret from your Google Cloud Console</p>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="domain" className="text-right">
+
+                    <div className="space-y-2">
+                      <Label htmlFor="domain" className="block text-sm font-medium">
                         Domain
                       </Label>
                       <Input
                         id="domain"
                         value={directoryCredentials.domain}
                         onChange={(e) => setDirectoryCredentials({ ...directoryCredentials, domain: e.target.value })}
-                        className="col-span-3"
                         placeholder="your-domain.com"
                       />
+                      <p className="text-xs text-gray-500">Your Google Workspace domain</p>
                     </div>
                   </>
                 )}
 
-                <div className="col-span-4 text-xs text-gray-500 mt-2">
+                <div className="text-xs text-gray-500 mt-4 p-3 bg-blue-50 rounded-md">
                   <p>
                     Your credentials are securely stored and used only for directory synchronization. Learn more about{" "}
                     <a href="#" className="text-[#3BD1BB] hover:underline">
