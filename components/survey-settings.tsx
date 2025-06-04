@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Calendar, LinkIcon, X, CheckCircle2, AlertCircle, RefreshCw, Info } from "lucide-react"
+import { Plus, Calendar, LinkIcon, X, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
@@ -30,7 +30,6 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type SurveySettingsProps = {
   onBack: () => void
@@ -1151,26 +1150,41 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                                   checked={augmentEngagementWithZencity}
                                   onCheckedChange={(checked) => setAugmentEngagementWithZencity(checked === true)}
                                 />
-                                <div className="flex items-center space-x-1">
-                                  <Label htmlFor="augment-engagement" className="font-normal cursor-pointer">
-                                    Distribute via Zencity (additional costs might apply)
-                                  </Label>
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
-                                      </TooltipTrigger>
-                                      <TooltipContent className="max-w-xs">
-                                        <p>
-                                          When selecting Zencity distribution, you'll boost your survey's reach through
-                                          additional channels beyond the engagement minisite. Be sure to set an end date
-                                          for this extended distribution period.
-                                        </p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </div>
+                                <Label htmlFor="augment-engagement" className="font-normal cursor-pointer">
+                                  Also augment with Zencity distribution (additional costs might apply)
+                                </Label>
                               </div>
+
+                              {/* Show end date picker when Zencity distribution is selected */}
+                              {augmentEngagementWithZencity && (
+                                <div className="mt-4">
+                                  <Label htmlFor="engagement-end-date">Distribution end date</Label>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        className="w-full justify-between text-left font-normal mt-1"
+                                        id="engagement-end-date"
+                                      >
+                                        <span>{endDate ? format(endDate, "MMMM d, yyyy") : "Select date"}</span>
+                                        <Calendar className="h-4 w-4" />
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                      <CalendarComponent
+                                        mode="single"
+                                        selected={endDate}
+                                        onSelect={setEndDate}
+                                        initialFocus
+                                        disabled={(date) => (startDate ? date < startDate : false)}
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    Set when the extended Zencity distribution should end
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1200,7 +1214,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                             onCheckedChange={(checked) => setAugmentWithZencity(checked === true)}
                           />
                           <Label htmlFor="augment" className="font-normal cursor-pointer">
-                            Distribute via Zencity (additional costs might apply)
+                            Also augment with Zencity distribution
                           </Label>
                         </div>
                       )}
