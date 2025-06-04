@@ -72,6 +72,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
   const [endDate, setEndDate] = useState<Date | undefined>()
   const [augmentWithZencity, setAugmentWithZencity] = useState(false)
 
+  // Add the engagement survey state variables
   const [engagementType, setEngagementType] = useState("")
   const [augmentEngagementWithZencity, setAugmentEngagementWithZencity] = useState(false)
 
@@ -1126,14 +1127,14 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                             <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md border transition-all duration-200 ease-in-out">
                               <div>
                                 <Label htmlFor="engagement-type" className="text-base font-medium">
-                                  Engagement Type
+                                  Engagement
                                 </Label>
                                 <p className="text-sm text-gray-600 mt-1 mb-2">
-                                  Select the type of engagement survey you want to conduct.
+                                  Select the engagement to which you'd like to add your survey.
                                 </p>
                                 <Select value={engagementType} onValueChange={setEngagementType}>
                                   <SelectTrigger id="engagement-type" className="mt-1">
-                                    <SelectValue placeholder="Select engagement type" />
+                                    <SelectValue placeholder="Select engagement" />
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="all-hands-questions">All hands questions</SelectItem>
