@@ -160,28 +160,6 @@ export function Monitor({ onSectionChange }: MonitorProps) {
           ],
         },
       ],
-      demographics: {
-        age: [
-          { name: "18-34", current: 271, target: 400, percentage: 68 },
-          { name: "35-54", current: 381, target: 400, percentage: 95 },
-          { name: "55+", current: 195, target: 400, percentage: 49 },
-        ],
-        gender: [
-          { name: "Female", current: 457, target: 600, percentage: 76 },
-          { name: "Male", current: 364, target: 600, percentage: 61 },
-          { name: "Other", current: 26, target: 0, percentage: 100 },
-        ],
-        ethnicity: [
-          { name: "White", current: 491, target: 600, percentage: 82 },
-          { name: "Hispanic", current: 212, target: 300, percentage: 71 },
-          { name: "Black", current: 102, target: 180, percentage: 57 },
-          { name: "Asian", current: 42, target: 120, percentage: 35 },
-        ],
-        other: [
-          { name: "Homeowner", current: 423, target: 500, percentage: 85 },
-          { name: "Renter", current: 424, target: 700, percentage: 61 },
-        ],
-      },
       trends: {
         responseRate: [
           { date: "May 19", value: 42 },
@@ -202,7 +180,6 @@ export function Monitor({ onSectionChange }: MonitorProps) {
           { date: "May 25", value: 7.3 },
         ],
       },
-      quotasBelowTarget: 2,
       team: "cityManagement",
     },
     {
@@ -273,28 +250,6 @@ export function Monitor({ onSectionChange }: MonitorProps) {
           ],
         },
       ],
-      demographics: {
-        age: [
-          { name: "18-34", current: 174, target: 250, percentage: 70 },
-          { name: "35-54", current: 324, target: 350, percentage: 93 },
-          { name: "55+", current: 125, target: 200, percentage: 63 },
-        ],
-        gender: [
-          { name: "Female", current: 361, target: 400, percentage: 90 },
-          { name: "Male", current: 243, target: 400, percentage: 61 },
-          { name: "Other", current: 19, target: 0, percentage: 100 },
-        ],
-        ethnicity: [
-          { name: "White", current: 386, target: 400, percentage: 97 },
-          { name: "Hispanic", current: 137, target: 200, percentage: 69 },
-          { name: "Black", current: 62, target: 120, percentage: 52 },
-          { name: "Asian", current: 38, target: 80, percentage: 48 },
-        ],
-        other: [
-          { name: "Parents", current: 312, target: 400, percentage: 78 },
-          { name: "Non-Parents", current: 311, target: 400, percentage: 78 },
-        ],
-      },
       trends: {
         responseRate: [
           { date: "May 19", value: 32 },
@@ -315,7 +270,6 @@ export function Monitor({ onSectionChange }: MonitorProps) {
           { date: "May 25", value: 8.0 },
         ],
       },
-      quotasBelowTarget: 3,
       team: "parksRecreation",
     },
   ]
