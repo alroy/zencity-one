@@ -456,29 +456,96 @@ export function Monitor({ onSectionChange }: MonitorProps) {
         </Card>
       </div>
 
-      {/* Community Engagement Summary Bar */}
-      <div className="mt-8 mb-6 bg-gray-50 border rounded-lg p-6">
-        <div className="space-y-3">
-          <h2 className="text-xl font-semibold text-gray-900">Community Engagement at a Glance</h2>
+      {/* Community Engagement at a Glance - Redesigned */}
+      <div className="mt-8 mb-6 bg-white border rounded-lg p-6">
+        <div className="space-y-4">
+          {/* Header */}
+          <div className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-[#3BD1BB]" />
+            <h2 className="text-xl font-semibold text-gray-900">Community Engagement at a Glance</h2>
+          </div>
 
-          <p className="text-sm text-gray-600 italic">
-            Synthesized from resident feedback submitted via the engagement minisite over the past month.
+          <p className="text-sm text-gray-600">
+            Synthesized from resident feedback submitted via multiple engagement methods over the past month
           </p>
 
-          <p className="text-gray-700 leading-relaxed">
-            {selectedTeam === "cityManagement"
-              ? "City Management team has received positive feedback on downtown revitalization efforts. Residents appreciate the improved walkability and new business opportunities, though concerns about parking remain. Overall sentiment is 65% positive."
-              : selectedTeam === "parksRecreation"
-                ? "Parks & Recreation team has gathered valuable feedback on facility improvements. Residents are particularly enthusiastic about playground upgrades and trail maintenance, with 58% positive sentiment overall."
-                : selectedTeam === "publicSafety"
-                  ? "Public Safety team is monitoring community concerns about winter road maintenance and emergency response times. Feedback is mixed, with residents acknowledging efforts but requesting more consistent service."
-                  : "Residents praise Adams County's small-town charm within a metro area, strong civic engagement, and easy highway access. They celebrate our cultural diversity, French heritage, clean image, and community events like Adams Days. One voice noted a fading uniqueness, but overall sentiment remains strongly positive."}
-          </p>
+          {/* Content Sections */}
+          <div className="space-y-6 mt-6">
+            {/* Positive Sentiment */}
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Positive Sentiment</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedTeam === "cityManagement"
+                    ? "City Management team has received positive feedback on downtown revitalization efforts. Residents appreciate the improved walkability and new business opportunities, though concerns about parking remain."
+                    : selectedTeam === "parksRecreation"
+                      ? "Parks & Recreation team has gathered valuable feedback on facility improvements. Residents are particularly enthusiastic about playground upgrades and trail maintenance."
+                      : selectedTeam === "publicSafety"
+                        ? "Public Safety team is monitoring community concerns about winter road maintenance and emergency response times. Feedback is mixed, with residents acknowledging efforts but requesting more consistent service."
+                        : "Residents praise Adams County's small-town charm within a metro area, strong civic engagement, and easy highway access. They celebrate our cultural diversity, French heritage, clean image, and community events like Adams Days."}
+                </p>
+              </div>
+            </div>
 
-          <div>
+            {/* Areas for Improvement */}
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-6 h-6 bg-orange-100 rounded flex items-center justify-center">
+                  <svg className="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Areas for Improvement</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedTeam === "cityManagement"
+                    ? "Some residents have expressed concerns about parking availability downtown and the impact of construction on local businesses during the revitalization process."
+                    : selectedTeam === "parksRecreation"
+                      ? "Residents have noted the need for more accessible playground equipment and better maintenance of remote trail sections, particularly after weather events."
+                      : selectedTeam === "publicSafety"
+                        ? "Community members have requested more consistent snow removal schedules and improved communication about emergency response protocols."
+                        : "Some residents noted concerns about a fading uniqueness as the area develops, and expressed interest in more diverse dining options and improved public transportation."}
+                </p>
+              </div>
+            </div>
+
+            {/* Sentiment Breakdown */}
+            <div className="flex items-center space-x-6 pt-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span className="text-sm text-gray-700">Positive (68%)</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <span className="text-sm text-gray-700">Neutral (22%)</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <span className="text-sm text-gray-700">Negative (10%)</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4">
             <Button
               variant="outline"
-              className="mt-2 border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10"
+              className="border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10"
               onClick={() => onSectionChange && onSectionChange("citizen-participation")}
             >
               View full participation stats
