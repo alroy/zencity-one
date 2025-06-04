@@ -72,6 +72,9 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
   const [endDate, setEndDate] = useState<Date | undefined>()
   const [augmentWithZencity, setAugmentWithZencity] = useState(false)
 
+  const [engagementType, setEngagementType] = useState("")
+  const [augmentEngagementWithZencity, setAugmentEngagementWithZencity] = useState(false)
+
   // CRM-specific state
   const [syncSchedule, setSyncSchedule] = useState("immediate")
   const [crmSegments, setCrmSegments] = useState<CRMSegment[]>([
@@ -513,13 +516,19 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                       <Select
                         value={selectedCadence}
                         onValueChange={setSelectedCadence}
-                        disabled={distributionMethod !== "representative" || distributionMethod === "self-distributed"}
+                        disabled={
+                          distributionMethod !== "representative" ||
+                          distributionMethod === "self-distributed" ||
+                          distributionMethod === "engagement-survey"
+                        }
                       >
                         <SelectTrigger
                           id="cadence"
                           className={cn(
                             "mt-1",
-                            (distributionMethod !== "representative" || distributionMethod === "self-distributed") &&
+                            (distributionMethod !== "representative" ||
+                              distributionMethod === "self-distributed" ||
+                              distributionMethod === "engagement-survey") &&
                               "opacity-50 cursor-not-allowed",
                           )}
                         >
@@ -609,7 +618,11 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         type="number"
                         value={sampleSize}
                         onChange={(e) => setSampleSize(e.target.value)}
-                        className="mt-1"
+                        className={cn(
+                          "mt-1",
+                          distributionMethod === "engagement-survey" && "opacity-50 cursor-not-allowed bg-gray-50",
+                        )}
+                        disabled={distributionMethod === "engagement-survey"}
                       />
                     </div>
 
@@ -617,8 +630,14 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                       <div className="flex items-center gap-2 mb-1">
                         <Label htmlFor="geo-distribution">Geographical Distribution</Label>
                       </div>
-                      <Select defaultValue="city-wide">
-                        <SelectTrigger id="geo-distribution" className="mt-1">
+                      <Select defaultValue="city-wide" disabled={distributionMethod === "engagement-survey"}>
+                        <SelectTrigger
+                          id="geo-distribution"
+                          className={cn(
+                            "mt-1",
+                            distributionMethod === "engagement-survey" && "opacity-50 cursor-not-allowed",
+                          )}
+                        >
                           <SelectValue placeholder="Select map" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1080,6 +1099,59 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                                 >
                                   Send test to me
                                 </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-2">
+                        <RadioGroupItem
+                          value="engagement-survey"
+                          id="engagement-survey"
+                          className="text-[#3BD1BB] border-[#3BD1BB] mt-1"
+                        />
+                        <div className="w-full">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="engagement-survey" className="font-medium cursor-pointer">
+                              Engagement Survey
+                            </Label>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Capture resident voices clearly and quickly, turning insights into community action.
+                          </p>
+
+                          {/* Engagement Survey Configuration Panel */}
+                          {distributionMethod === "engagement-survey" && (
+                            <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md border transition-all duration-200 ease-in-out">
+                              <div>
+                                <Label htmlFor="engagement-type" className="text-base font-medium">
+                                  Engagement Type
+                                </Label>
+                                <p className="text-sm text-gray-600 mt-1 mb-2">
+                                  Select the type of engagement survey you want to conduct.
+                                </p>
+                                <Select value={engagementType} onValueChange={setEngagementType}>
+                                  <SelectTrigger id="engagement-type" className="mt-1">
+                                    <SelectValue placeholder="Select engagement type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="all-hands-questions">All hands questions</SelectItem>
+                                    <SelectItem value="how-to-use-generative-ai">How to use Generative AI</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="augment-engagement"
+                                  className="text-[#3BD1BB] border-[#3BD1BB]"
+                                  checked={augmentEngagementWithZencity}
+                                  onCheckedChange={(checked) => setAugmentEngagementWithZencity(checked === true)}
+                                />
+                                <Label htmlFor="augment-engagement" className="font-normal cursor-pointer">
+                                  Also augment with Zencity distribution (additional costs might apply)
+                                </Label>
                               </div>
                             </div>
                           )}
