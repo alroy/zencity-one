@@ -1134,7 +1134,13 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                                 </p>
                                 <Select value={engagementType} onValueChange={setEngagementType}>
                                   <SelectTrigger id="engagement-type" className="mt-1">
-                                    <SelectValue placeholder="Select engagement" />
+                                    <SelectValue
+                                      placeholder={
+                                        distributionMethod === "engagement-survey"
+                                          ? "Select Project"
+                                          : "Select engagement"
+                                      }
+                                    />
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="all-hands-questions">All hands questions</SelectItem>
