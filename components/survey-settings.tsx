@@ -73,8 +73,9 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
   const [augmentWithZencity, setAugmentWithZencity] = useState(false)
 
   // Add the engagement survey state variables
-  const [engagementType, setEngagementType] = useState("")
   const [augmentEngagementWithZencity, setAugmentEngagementWithZencity] = useState(false)
+  const [includeInProject, setIncludeInProject] = useState(false)
+  const [selectedProjectForEngagement, setSelectedProjectForEngagement] = useState("")
 
   // CRM-specific state
   const [syncSchedule, setSyncSchedule] = useState("immediate")
@@ -1125,29 +1126,42 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                           {/* Engagement Survey Configuration Panel */}
                           {distributionMethod === "engagement-survey" && (
                             <div className="space-y-4 mt-4 p-4 bg-gray-50 rounded-md border transition-all duration-200 ease-in-out">
-                              <div>
-                                <Label htmlFor="engagement-type" className="text-base font-medium">
-                                  Engagement
-                                </Label>
-                                <p className="text-sm text-gray-600 mt-1 mb-2">
-                                  Select the engagement to which you'd like to add your survey.
-                                </p>
-                                <Select value={engagementType} onValueChange={setEngagementType}>
-                                  <SelectTrigger id="engagement-type" className="mt-1">
-                                    <SelectValue
-                                      placeholder={
-                                        distributionMethod === "engagement-survey"
-                                          ? "Select Project"
-                                          : "Select engagement"
-                                      }
-                                    />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="all-hands-questions">All hands questions</SelectItem>
-                                    <SelectItem value="how-to-use-generative-ai">How to use Generative AI</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id="include-in-project"
+                                    className="text-[#3BD1BB] border-[#3BD1BB]"
+                                    checked={includeInProject}
+                                    onCheckedChange={(checked) => setIncludeInProject(checked === true)}
+                                  />
+                                  <Label htmlFor="include-in-project" className="font-normal cursor-pointer">
+                                    Include in Project
+                                  </Label>
+                                </div>
                               </div>
+
+                              {includeInProject && (
+                                <div className="space-y-2">
+                                  <Label htmlFor="select-project-for-engagement" className="text-base font-medium">
+                                    Select Project
+                                  </Label>
+                                  <Select
+                                    value={selectedProjectForEngagement}
+                                    onValueChange={setSelectedProjectForEngagement}
+                                  >
+                                    <SelectTrigger id="select-project-for-engagement" className="mt-1">
+                                      <SelectValue placeholder="Select a project" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="better-city-parks">Better city parks</SelectItem>
+                                      <SelectItem value="all-hands-questions">All hands questions</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    Associate this engagement survey with a specific project for targeted analysis.
+                                  </p>
+                                </div>
+                              )}
 
                               <div className="flex items-center space-x-2">
                                 <Checkbox

@@ -95,10 +95,10 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   const menuItems = [
     {
       id: "city-explorer",
-      title: "Monitor",
+      title: "City Explorer",
       icon: Monitor,
       children: [
-        { id: "monitor", title: "Community Pulse", icon: Monitor, badge: "3" },
+        { id: "monitor", title: "Monitor", icon: Monitor, badge: "3" },
         { id: "research-assistant", title: "Research Assistant", icon: MessageSquare },
         { id: "workflows", title: "Workflows", icon: Workflow },
       ],
