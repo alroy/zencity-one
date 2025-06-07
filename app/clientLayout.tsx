@@ -20,7 +20,7 @@ import { SecuritySettings } from "@/components/profile/security-settings"
 import { UserProvider } from "@/contexts/user-context"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [activeSection, setActiveSection] = useState("monitor")
+  const [activeSection, setActiveSection] = useState("community-pulse")
   const [sectionOptions, setSectionOptions] = useState<any>(null)
   const customerName = "Adams County" // This would typically come from a context or API
 
@@ -33,7 +33,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const renderContent = () => {
     console.log(`Rendering content for section: ${activeSection}`)
     switch (activeSection) {
-      case "monitor":
+      case "community-pulse":
         return <Monitor onSectionChange={handleSectionChange} />
       case "research-assistant":
         return <ResearchAssistant onSectionChange={handleSectionChange} />

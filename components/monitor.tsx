@@ -40,7 +40,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
 
   const breadcrumbItems = [
     { label: "City Explorer", path: "city-explorer", isClickable: false },
-    { label: "Monitor", isCurrent: true },
+    { label: "Community Pulse", isCurrent: true },
   ]
 
   // Define team data
@@ -327,7 +327,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
   return (
     <div className="p-6 pt-0">
       <PageHeader
-        title="Monitor"
+        title="Community Pulse"
         description="Real-time insights from your community"
         breadcrumbItems={breadcrumbItems}
       />
