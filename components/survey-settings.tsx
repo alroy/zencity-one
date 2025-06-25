@@ -30,6 +30,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { QuestionnaireBuilder } from "@/components/questionnaire-builder" // Import the new component
 
 type SurveySettingsProps = {
   onBack: () => void
@@ -37,6 +38,8 @@ type SurveySettingsProps = {
   initialTitle?: string
   templateName?: string
   initialDistributionMethod?: string
+  initialView?: "settings" | "build" // Add initialView prop
+  isPISTemplate?: boolean // Add isPISTemplate prop
 }
 
 interface CRMSegment {
@@ -66,6 +69,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
   initialTitle,
   templateName,
   initialDistributionMethod,
+  initialView = "settings", // Default to "settings"
+  isPISTemplate = false, // Default to false
 }) => {
   const { toast } = useToast()
   const [distributionMethod, setDistributionMethod] = useState("representative")
@@ -238,7 +243,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
   const breadcrumbItems = [
     { label: "Engagement Manager", path: "engagement-manager", isClickable: false },
     { label: "Survey Manager", path: "survey-builder", isClickable: true },
-    { label: "New Survey", isCurrent: true },
+    { label: initialTitle || "New Survey", isCurrent: true }, // Make title dynamic
   ]
 
   const getDistributionDuration = (cadence: string): string => {
@@ -442,9 +447,11 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
   return (
     <div>
       <div className="space-y-6">
-        <PageHeader title="New Survey" breadcrumbItems={breadcrumbItems} onNavigate={onBack} />
+        <PageHeader title={initialTitle || "New Survey"} breadcrumbItems={breadcrumbItems} onNavigate={onBack} />
 
-        <Tabs defaultValue="settings" className="w-full">
+        <Tabs defaultValue={initialView} className="w-full">
+          {" "}
+          {/* Use initialView for defaultValue */}
           <div className="flex items-center justify-between mb-4">
             <TabsList>
               <TabsTrigger value="build">Build</TabsTrigger>
@@ -458,19 +465,22 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
               </Button>
             </div>
           </div>
-
           <TabsContent value="build" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold">Survey Builder</h3>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Survey building interface would go here</p>
-              </CardContent>
-            </Card>
+            {isPISTemplate ? (
+              <QuestionnaireBuilder />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <h3 className="text-lg font-semibold">Survey Builder</h3>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">Survey building interface would go here for non-PIS templates.</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
-
           <TabsContent value="settings" className="space-y-4">
+            {/* ... existing settings tab content ... */}
             <Card>
               <CardHeader>
                 <h2 className="text-xl font-semibold">Settings</h2>
@@ -1229,7 +1239,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                           id="self-distributed"
                           className="text-[#3BD1BB] border-[#3BD1BB] mt-1"
                         />
-                        <div>
+                        <div className="w-full">
                           <div className="flex items-center gap-2">
                             <Label htmlFor="self-distributed" className="font-medium cursor-pointer">
                               Self-distributed
@@ -1258,7 +1268,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                           id="third-party"
                           className="text-[#3BD1BB] border-[#3BD1BB] mt-1"
                         />
-                        <div>
+                        <div className="w-full">
                           <div className="flex items-center gap-2">
                             <Label htmlFor="third-party" className="font-medium cursor-pointer">
                               Post Interaction triggered
@@ -1753,5 +1763,6 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
   )
 }
 
+// ... existing export ...
 export { SurveySettings }
 export default SurveySettings

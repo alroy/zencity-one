@@ -16,13 +16,14 @@ interface SurveyManagerProps {
 }
 
 export function SurveyManager({ initialOptions }: SurveyManagerProps) {
-  const [view, setView] = useState<"list" | "template" | "settings">("list")
+  const [view, setView] = useState<"list" | "template" | "settings" | "build">("list") // Add "build" to view types
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [templateFilter, setTemplateFilter] = useState<string[] | undefined>(undefined)
   const [templateNames, setTemplateNames] = useState<Record<string, string> | undefined>(undefined)
   const [surveyTitle, setSurveyTitle] = useState<string | undefined>(undefined)
   const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>(undefined)
   const [initialDistributionForSettings, setInitialDistributionForSettings] = useState<string | undefined>(undefined)
+  const [isPISTemplate, setIsPISTemplate] = useState(false) // Add this state
 
   // Initialize with any passed options
   useEffect(() => {
@@ -59,17 +60,19 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
 
   const handleSelectTemplate = (template: SurveyTemplate) => {
     const templateDisplayName = templateNames?.[template.id] || template.name
-    setSelectedTemplate(templateDisplayName) // Store the display name for the settings page
-    setSurveyTitle(templateDisplayName) // Set initial survey title based on template name
+    setSelectedTemplate(templateDisplayName)
+    setSurveyTitle(templateDisplayName)
+    setShowTemplateModal(false)
 
     if (template.label === "PIS") {
       setInitialDistributionForSettings("third-party")
+      setIsPISTemplate(true) // Set PIS template flag
+      setView("build") // Navigate directly to build tab for PIS templates
     } else {
       setInitialDistributionForSettings(undefined)
+      setIsPISTemplate(false) // Reset PIS template flag
+      setView("settings")
     }
-
-    setShowTemplateModal(false)
-    setView("settings")
   }
 
   const handleEditSurvey = (surveyId: number) => {
@@ -119,7 +122,8 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
     { label: "Survey Manager", isCurrent: true },
   ]
 
-  if (view === "settings") {
+  if (view === "settings" || view === "build") {
+    // Update condition to include "build"
     return (
       <div className="p-6 pt-0">
         <SurveySettings
@@ -127,7 +131,9 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
           onSave={handleSave}
           initialTitle={surveyTitle}
           templateName={selectedTemplate}
-          initialDistributionMethod={initialDistributionForSettings} // Add this line
+          initialDistributionMethod={initialDistributionForSettings}
+          initialView={view} // Pass the initial view
+          isPISTemplate={isPISTemplate} // Pass the PIS template flag
         />
       </div>
     )
