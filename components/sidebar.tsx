@@ -49,7 +49,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
   // Ensure the parent sections of active items are expanded
   useEffect(() => {
-    if (activeSection === "community-pulse" || activeSection === "research-assistant") {
+    if (activeSection === "monitor" || activeSection === "research-assistant") {
       setExpandedSections((prev) => (prev.includes("city-explorer") ? prev : [...prev, "city-explorer"]))
     } else if (activeSection === "survey-builder") {
       setExpandedSections((prev) => (prev.includes("engagement-manager") ? prev : [...prev, "engagement-manager"]))
@@ -68,7 +68,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
   const handleSectionClick = (sectionId: string) => {
     const functionalSections = [
-      "community-pulse",
+      "monitor",
       "research-assistant",
       "survey-builder",
       "internal-platforms",
@@ -98,7 +98,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       title: "City Explorer",
       icon: Monitor,
       children: [
-        { id: "community-pulse", title: "Community Pulse", icon: Monitor, badge: "3" },
+        { id: "monitor", title: "Monitor", icon: Monitor, badge: "3" },
         { id: "research-assistant", title: "Research Assistant", icon: MessageSquare },
         { id: "workflows", title: "Workflows", icon: Workflow },
       ],

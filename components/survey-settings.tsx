@@ -1248,7 +1248,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
                         <div>
                           <div className="flex items-center gap-2">
                             <Label htmlFor="third-party" className="font-medium cursor-pointer">
-                              3rd-party triggered
+                              Post Interaction triggered
                             </Label>
                           </div>
                           <p className="text-sm text-gray-500 mt-1">

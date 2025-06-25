@@ -30,72 +30,86 @@ export function SurveyTemplateModal({
     {
       id: "community-survey",
       name: "Community Survey",
-      icon: "/community-survey.png",
+      icon: "/images/community-interaction-1.png",
+      byline: "Gauge overall resident satisfaction and priorities.",
     },
     {
       id: "blockwise",
       name: "Blockwise",
       icon: "/city-blocks-map-illustration.png",
+      byline: "Gather localized feedback on a block-by-block basis.",
     },
     {
       id: "experience-survey",
       name: "Experience Survey",
-      icon: "/people-conversation-illustration.png",
+      icon: "/images/community-interaction-2.png",
+      byline: "Measure resident experiences with specific city services.",
     },
     {
       id: "pulse",
       name: "Pulse",
       icon: "/pulse-survey-illustration.png",
+      byline: "Quickly check in on community sentiment on a single topic.",
     },
     {
       id: "engagement",
       name: "Engagement",
-      icon: "/community-engagement.png",
+      icon: "/images/community-engagement-park.png",
+      byline: "Assess the effectiveness of your community engagement efforts.",
     },
     {
       id: "transportation",
       name: "Transportation City Meter",
-      icon: "/city-blocks-map-illustration.png", // Reusing city blocks image
+      icon: "/transportation-survey-illustration.png",
+      byline: "Understand transportation habits and infrastructure needs.",
     },
     {
       id: "health-wellbeing",
       name: "Health and Wellbeing",
-      icon: "/people-conversation-illustration.png", // Reusing people conversation image
+      icon: "/images/community-agreement.png",
+      byline: "Explore community health concerns and wellness priorities.",
     },
     {
       id: "city-pulse",
       name: "City Pulse",
-      icon: "/pulse-survey-illustration.png", // Reusing pulse survey image
+      icon: "/city-pulse-illustration.png",
+      byline: "A recurring survey to track community sentiment over time.",
     },
     {
       id: "police-engagement",
       name: "Police Engagement",
-      icon: "/police-community-illustration.png",
+      icon: "/images/police-trust-dialogue.png",
+      byline: "Measure trust and perception of local law enforcement.",
     },
     {
       id: "parks-survey",
       name: "City Parks Survey",
-      icon: "/community-survey.png", // Reusing community survey image
+      icon: "/parks-recreation-illustration.png",
+      byline: "Collect feedback on park usage, quality, and improvements.",
     },
     {
       id: "whats-your-view",
       name: "What's Your View On...",
-      icon: "/opinion-poll-illustration.png",
+      icon: "/images/opinion-poll-clipboard.png",
+      byline: "A flexible template for any specific issue or proposal.",
     },
     {
       id: "quick-pulse",
       name: "Quick Pulse",
-      icon: "/pulse-survey-illustration.png",
+      icon: "/pulse-survey-concept.png",
+      byline: "A very short, fast survey for immediate feedback.",
     },
     {
       id: "mini-survey",
       name: "Mini Survey",
-      icon: "/opinion-poll-illustration.png",
+      icon: "/images/mini-survey-review.png",
+      byline: "A brief survey with a few questions on a focused topic.",
     },
     {
       id: "custom-survey",
       name: "Custom Survey",
       icon: "/custom-form-illustration.png",
+      byline: "Start from scratch and build your own survey.",
     },
   ]
 
@@ -176,33 +190,33 @@ export function SurveyTemplateModal({
                 <span className="sr-only">Back to recommended templates</span>
               </Button>
             )}
-            <DialogTitle>
-              {showingAllTemplates ? "All Templates" : "Create a new survey: Choose a template"}
-            </DialogTitle>
+            <DialogTitle>{showingAllTemplates ? "All Templates" : "Choose a template"}</DialogTitle>
           </div>
         </DialogHeader>
 
         <div className="py-6 overflow-y-auto max-h-[60vh] pr-2">
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {filteredTemplates.map((template) => (
               <Card
                 key={template.id}
-                className={`cursor-pointer hover:shadow-lg transition-shadow p-4 
-                  ${
-                    selectedTemplate === template.id
-                      ? "border-[#3BD1BB] ring-2 ring-[#3BD1BB]/50"
-                      : "border-[#3BD1BB]/20 hover:border-[#3BD1BB]/50"
-                  }`}
+                className={`cursor-pointer hover:shadow-lg transition-shadow overflow-hidden ${
+                  selectedTemplate === template.id
+                    ? "border-[#3BD1BB] ring-2 ring-[#3BD1BB]/50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
                 onClick={() => handleTemplateClick(template.id)}
               >
-                <div className="aspect-video mb-3 bg-gray-50 rounded-lg overflow-hidden">
+                <div className="h-32 bg-gray-100">
                   <img
-                    src={template.icon || "/placeholder.svg"}
-                    alt={template.name}
+                    src={template.icon || "/placeholder.svg?width=200&height=128&query=survey+template"}
+                    alt={`${template.name} template icon`}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-center font-medium">{template.name}</h3>
+                <div className="p-4">
+                  <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                  <p className="text-sm text-gray-600 mt-1">{template.byline}</p>
+                </div>
               </Card>
             ))}
           </div>

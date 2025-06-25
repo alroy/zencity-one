@@ -8,19 +8,19 @@ import { ComingSoon } from "@/components/coming-soon"
 import ClientLayout from "./clientLayout"
 
 export default function ZencityPlatform() {
-  const [activeSection, setActiveSection] = useState("community-pulse")
+  const [activeSection, setActiveSection] = useState("monitor")
 
   // Get the active section from the URL or localStorage on initial load
   useEffect(() => {
-    const section = window.location.pathname.split("/").pop() || "community-pulse"
-    if (["community-pulse", "research-assistant", "survey-builder"].includes(section)) {
+    const section = window.location.pathname.split("/").pop() || "monitor"
+    if (["monitor", "research-assistant", "survey-builder"].includes(section)) {
       setActiveSection(section)
     }
   }, [])
 
   const renderContent = () => {
     switch (activeSection) {
-      case "community-pulse":
+      case "monitor":
         return <Monitor />
       case "research-assistant":
         return <ResearchAssistant />
