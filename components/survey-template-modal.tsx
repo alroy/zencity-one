@@ -4,12 +4,21 @@ import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge" // Import Badge component
 import { ChevronLeft } from "lucide-react"
+
+interface SurveyTemplate {
+  id: string
+  name: string
+  icon: string
+  byline: string
+  label?: string // Added optional label property
+}
 
 interface SurveyTemplateModalProps {
   open: boolean
   onClose: () => void
-  onSelectTemplate: (template: string) => void
+  onSelectTemplate: (template: SurveyTemplate) => void
   templateFilter?: string[]
   templateNames?: Record<string, string>
 }
@@ -22,11 +31,11 @@ export function SurveyTemplateModal({
   templateNames,
 }: SurveyTemplateModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
-  const [filteredTemplates, setFilteredTemplates] = useState<typeof allTemplates>([])
+  const [filteredTemplates, setFilteredTemplates] = useState<SurveyTemplate[]>([])
   const [showingAllTemplates, setShowingAllTemplates] = useState(false)
-  const [originalFilteredTemplates, setOriginalFilteredTemplates] = useState<typeof allTemplates>([])
+  const [originalFilteredTemplates, setOriginalFilteredTemplates] = useState<SurveyTemplate[]>([])
 
-  const allTemplates = [
+  const allTemplates: SurveyTemplate[] = [
     {
       id: "community-survey",
       name: "Community Survey",
@@ -94,6 +103,20 @@ export function SurveyTemplateModal({
       byline: "A flexible template for any specific issue or proposal.",
     },
     {
+      id: "call-center-experience",
+      name: "Call Center Experience",
+      icon: "/images/call-center-experience.png",
+      byline: "Post-call satisfaction and resolution tracking.",
+      label: "PIS",
+    },
+    {
+      id: "law-enforcement-interaction",
+      name: "Law Enforcement Interaction",
+      icon: "/images/law-enforcement-interaction.png",
+      byline: "Post-incident feedback for police interactions with built-in sensitivity filters.",
+      label: "PIS",
+    },
+    {
       id: "quick-pulse",
       name: "Quick Pulse",
       icon: "/pulse-survey-concept.png",
@@ -142,7 +165,7 @@ export function SurveyTemplateModal({
   }, [templateFilter, templateNames, open])
 
   // Helper function to ensure Custom Survey is always last
-  const sortTemplatesWithCustomLast = (templates: typeof allTemplates) => {
+  const sortTemplatesWithCustomLast = (templates: SurveyTemplate[]) => {
     const customSurveyIndex = templates.findIndex((t) => t.id === "custom-survey")
     if (customSurveyIndex !== -1) {
       const customSurvey = templates.splice(customSurveyIndex, 1)[0]
@@ -157,7 +180,10 @@ export function SurveyTemplateModal({
 
   const handleNext = () => {
     if (selectedTemplate) {
-      onSelectTemplate(selectedTemplate)
+      const templateObject = allTemplates.find((t) => t.id === selectedTemplate)
+      if (templateObject) {
+        onSelectTemplate(templateObject)
+      }
     }
   }
 
@@ -214,7 +240,14 @@ export function SurveyTemplateModal({
                   />
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                    {template.label && (
+                      <Badge variant="outline" className="text-xs bg-sky-100 text-sky-700 border-sky-200">
+                        {template.label}
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-600 mt-1">{template.byline}</p>
                 </div>
               </Card>

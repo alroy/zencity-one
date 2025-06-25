@@ -36,6 +36,7 @@ type SurveySettingsProps = {
   onSave: () => void
   initialTitle?: string
   templateName?: string
+  initialDistributionMethod?: string
 }
 
 interface CRMSegment {
@@ -59,7 +60,13 @@ interface Directory {
   userCount?: number
 }
 
-const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initialTitle, templateName }) => {
+const SurveySettings: React.FC<SurveySettingsProps> = ({
+  onBack,
+  onSave,
+  initialTitle,
+  templateName,
+  initialDistributionMethod,
+}) => {
   const { toast } = useToast()
   const [distributionMethod, setDistributionMethod] = useState("representative")
   const [selectedPlatform, setSelectedPlatform] = useState("")
@@ -171,6 +178,12 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ onBack, onSave, initial
       setSurveyTitle(initialTitle)
     }
   }, [initialTitle])
+
+  useEffect(() => {
+    if (initialDistributionMethod) {
+      setDistributionMethod(initialDistributionMethod)
+    }
+  }, [initialDistributionMethod])
 
   // Simulate connection progress
   useEffect(() => {

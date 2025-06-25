@@ -22,6 +22,7 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
   const [templateNames, setTemplateNames] = useState<Record<string, string> | undefined>(undefined)
   const [surveyTitle, setSurveyTitle] = useState<string | undefined>(undefined)
   const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>(undefined)
+  const [initialDistributionForSettings, setInitialDistributionForSettings] = useState<string | undefined>(undefined)
 
   // Initialize with any passed options
   useEffect(() => {
@@ -47,10 +48,26 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
     setShowTemplateModal(true)
   }
 
-  const handleSelectTemplate = (templateId: string) => {
-    // Find the template name based on the ID
-    const templateName = getTemplateNameById(templateId)
-    setSelectedTemplate(templateName)
+  interface SurveyTemplate {
+    // Ensure this interface is available or define it
+    id: string
+    name: string
+    icon: string
+    byline: string
+    label?: string
+  }
+
+  const handleSelectTemplate = (template: SurveyTemplate) => {
+    const templateDisplayName = templateNames?.[template.id] || template.name
+    setSelectedTemplate(templateDisplayName) // Store the display name for the settings page
+    setSurveyTitle(templateDisplayName) // Set initial survey title based on template name
+
+    if (template.label === "PIS") {
+      setInitialDistributionForSettings("third-party")
+    } else {
+      setInitialDistributionForSettings(undefined)
+    }
+
     setShowTemplateModal(false)
     setView("settings")
   }
@@ -110,6 +127,7 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
           onSave={handleSave}
           initialTitle={surveyTitle}
           templateName={selectedTemplate}
+          initialDistributionMethod={initialDistributionForSettings} // Add this line
         />
       </div>
     )
