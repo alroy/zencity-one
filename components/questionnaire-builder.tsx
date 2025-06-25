@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { ContentSidebar } from "@/components/content-sidebar" // Import the new sidebar
 
 interface Question {
   id: string
@@ -58,45 +59,52 @@ const initialQuestions: Question[] = [
 
 export function QuestionnaireBuilder() {
   return (
-    <div className="space-y-6">
-      {initialQuestions.map((question) => (
-        <div key={question.id} className="relative">
-          <Badge
-            variant="secondary"
-            className="absolute -top-3 left-4 px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-700 border-purple-200"
-          >
-            {question.labelType === "char" && question.label !== "C" ? question.label : ""}
-            {question.labelType === "number" ? question.label : ""}
-            {question.label === "C" ? "C" : ""}
-            {question.label === "C" && <span className="ml-1.5 font-normal text-purple-600">Completion End Page</span>}
-          </Badge>
-          <Card className="pt-6">
-            <CardContent>
-              {question.type === "rating" && (
-                <>
-                  <p className="font-medium mb-4">{question.text}</p>
-                  <RadioGroup>
-                    {question.options?.map((option) => (
-                      <div key={option.value} className="flex items-center space-x-2 mb-2">
-                        <RadioGroupItem value={option.value} id={`${question.id}-${option.value}`} />
-                        <Label htmlFor={`${question.id}-${option.value}`} className="font-normal">
-                          {option.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </>
+    <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex-1 space-y-6">
+        {initialQuestions.map((question) => (
+          <div key={question.id} className="relative">
+            <Badge
+              variant="secondary"
+              className="absolute -top-3 left-4 px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-700 border-purple-200"
+            >
+              {question.labelType === "char" && question.label !== "C" ? question.label : ""}
+              {question.labelType === "number" ? question.label : ""}
+              {question.label === "C" ? "C" : ""}
+              {question.label === "C" && (
+                <span className="ml-1.5 font-normal text-purple-600">Completion End Page</span>
               )}
-              {question.type === "completion" && (
-                <>
-                  <h3 className="text-xl font-semibold mb-2">{question.title}</h3>
-                  <p className="text-gray-600">{question.completionText}</p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      ))}
+            </Badge>
+            <Card className="pt-6">
+              <CardContent>
+                {question.type === "rating" && (
+                  <>
+                    <p className="font-medium mb-4">{question.text}</p>
+                    <RadioGroup>
+                      {question.options?.map((option) => (
+                        <div key={option.value} className="flex items-center space-x-2 mb-2">
+                          <RadioGroupItem value={option.value} id={`${question.id}-${option.value}`} />
+                          <Label htmlFor={`${question.id}-${option.value}`} className="font-normal">
+                            {option.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </>
+                )}
+                {question.type === "completion" && (
+                  <>
+                    <h3 className="text-xl font-semibold mb-2">{question.title}</h3>
+                    <p className="text-gray-600">{question.completionText}</p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        ))}
+      </div>
+      <div className="w-full md:w-72">
+        <ContentSidebar />
+      </div>
     </div>
   )
 }
