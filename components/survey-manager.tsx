@@ -5,6 +5,8 @@ import { SurveyList } from "@/components/survey-list"
 import { SurveyTemplateModal } from "@/components/survey-template-modal"
 import { SurveySettings } from "@/components/survey-settings"
 import { PageHeader } from "@/components/page-header"
+import type { GeneratedSurveyData } from "@/components/survey-preview-modal"
+import type { Question } from "@/components/questionnaire-builder"
 
 interface SurveyManagerProps {
   initialOptions?: {
@@ -12,6 +14,7 @@ interface SurveyManagerProps {
     templateFilter?: string[]
     templateNames?: Record<string, string>
     surveyTitle?: string
+    generatedSurvey?: GeneratedSurveyData // Add this line
   }
 }
 
@@ -24,6 +27,7 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>(undefined)
   const [initialDistributionForSettings, setInitialDistributionForSettings] = useState<string | undefined>(undefined)
   const [isPISTemplate, setIsPISTemplate] = useState(false) // Add this state
+  const [initialQuestionsForBuilder, setInitialQuestionsForBuilder] = useState<Question[] | undefined>(undefined) // New state
 
   // Initialize with any passed options
   useEffect(() => {
@@ -37,8 +41,19 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
       if (initialOptions.templateNames) {
         setTemplateNames(initialOptions.templateNames)
       }
-      if (initialOptions.surveyTitle) {
+      if (initialOptions.surveyTitle && !initialOptions.generatedSurvey) {
+        // Only set if not a generated survey to avoid override
         setSurveyTitle(initialOptions.surveyTitle)
+      }
+      if (initialOptions.generatedSurvey) {
+        const { title, distributionMethod, questions } = initialOptions.generatedSurvey
+        setSurveyTitle(title)
+        // Use a generic name or the generated title for templateName display
+        setSelectedTemplate(title)
+        setInitialDistributionForSettings(distributionMethod)
+        setInitialQuestionsForBuilder(questions)
+        setIsPISTemplate(false) // Generated surveys are not PIS by default
+        setView("build") // Go directly to builder
       }
     }
   }, [initialOptions])
@@ -132,8 +147,9 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
           initialTitle={surveyTitle}
           templateName={selectedTemplate}
           initialDistributionMethod={initialDistributionForSettings}
-          initialView={view} // Pass the initial view
-          isPISTemplate={isPISTemplate} // Pass the PIS template flag
+          initialView={view}
+          isPISTemplate={isPISTemplate}
+          initialQuestions={initialQuestionsForBuilder} // Add this prop
         />
       </div>
     )

@@ -4,11 +4,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ContentSidebar } from "@/components/content-sidebar" // Import the new sidebar
+import { ContentSidebar } from "@/components/content-sidebar"
 
-interface Question {
+// Export Question type for use in other components
+export interface Question {
   id: string
-  type: "rating" | "completion"
+  type: "rating" | "completion" | "multiple-choice" | "open-ended" // Added new types
   text?: string
   options?: { value: string; label: string }[]
   title?: string
@@ -17,7 +18,7 @@ interface Question {
   labelType: "number" | "char"
 }
 
-const initialQuestions: Question[] = [
+const defaultInitialQuestions: Question[] = [
   {
     id: "q1",
     type: "rating",
@@ -57,11 +58,18 @@ const initialQuestions: Question[] = [
   },
 ]
 
-export function QuestionnaireBuilder() {
+interface QuestionnaireBuilderProps {
+  initialQuestions?: Question[]
+}
+
+export function QuestionnaireBuilder({ initialQuestions: initialQuestionsProp }: QuestionnaireBuilderProps) {
+  const questionsToRender =
+    initialQuestionsProp && initialQuestionsProp.length > 0 ? initialQuestionsProp : defaultInitialQuestions
+
   return (
     <div className="flex flex-col md:flex-row gap-6">
       <div className="flex-1 space-y-6">
-        {initialQuestions.map((question) => (
+        {questionsToRender.map((question) => (
           <div key={question.id} className="relative">
             <Badge
               variant="secondary"
@@ -89,6 +97,31 @@ export function QuestionnaireBuilder() {
                         </div>
                       ))}
                     </RadioGroup>
+                  </>
+                )}
+                {question.type === "multiple-choice" && ( // Render multiple choice
+                  <>
+                    <p className="font-medium mb-4">{question.text}</p>
+                    <RadioGroup>
+                      {question.options?.map((option) => (
+                        <div key={option.value} className="flex items-center space-x-2 mb-2">
+                          <RadioGroupItem value={option.value} id={`${question.id}-${option.value}`} />
+                          <Label htmlFor={`${question.id}-${option.value}`} className="font-normal">
+                            {option.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </>
+                )}
+                {question.type === "open-ended" && ( // Render open-ended
+                  <>
+                    <p className="font-medium mb-4">{question.text}</p>
+                    <textarea
+                      className="w-full p-2 border rounded-md text-sm"
+                      rows={3}
+                      placeholder="Type your answer here..."
+                    />
                   </>
                 )}
                 {question.type === "completion" && (

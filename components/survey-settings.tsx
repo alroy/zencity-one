@@ -31,6 +31,7 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { QuestionnaireBuilder } from "@/components/questionnaire-builder" // Import the new component
+import type { Question } from "@/components/questionnaire-builder"
 
 type SurveySettingsProps = {
   onBack: () => void
@@ -40,6 +41,7 @@ type SurveySettingsProps = {
   initialDistributionMethod?: string
   initialView?: "settings" | "build" // Add initialView prop
   isPISTemplate?: boolean // Add isPISTemplate prop
+  initialQuestions?: Question[] // Add this line
 }
 
 interface CRMSegment {
@@ -71,6 +73,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
   initialDistributionMethod,
   initialView = "settings", // Default to "settings"
   isPISTemplate = false, // Default to false
+  initialQuestions, // Add this
 }) => {
   const { toast } = useToast()
   const [distributionMethod, setDistributionMethod] = useState("representative")
@@ -466,15 +469,18 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
             </div>
           </div>
           <TabsContent value="build" className="space-y-4">
-            {isPISTemplate ? (
-              <QuestionnaireBuilder />
+            {isPISTemplate || (initialQuestions && initialQuestions.length > 0) ? (
+              <QuestionnaireBuilder initialQuestions={initialQuestions} />
             ) : (
               <Card>
                 <CardHeader>
                   <h3 className="text-lg font-semibold">Survey Builder</h3>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">Survey building interface would go here for non-PIS templates.</p>
+                  <p className="text-gray-600">
+                    Select a template or use Research Assistance to generate survey questions. The builder will appear
+                    here.
+                  </p>
                 </CardContent>
               </Card>
             )}

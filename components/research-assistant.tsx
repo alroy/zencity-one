@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, MessageSquare, BarChart3, Users, ExternalLink, Lightbulb } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { ClarifyingSurveyModal, type ClarifyingFormData } from "@/components/clarifying-survey-modal"
+import { SurveyPreviewModal, type GeneratedSurveyData } from "@/components/survey-preview-modal"
+import type { Question } from "@/components/questionnaire-builder"
 
 interface ResearchAssistantProps {
   onSectionChange?: (section: string, options?: any) => void
@@ -16,6 +19,10 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
   const [query, setQuery] = useState("")
   const [hasSearched, setHasSearched] = useState(false)
   const [currentResults, setCurrentResults] = useState<typeof allSearchResults.default>([])
+  const [showClarifyingModal, setShowClarifyingModal] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [clarifyingQuery, setClarifyingQuery] = useState("")
+  const [generatedSurveyData, setGeneratedSurveyData] = useState<GeneratedSurveyData | undefined>(undefined)
 
   const breadcrumbItems = [
     { label: "City Explorer", path: "city-explorer", isClickable: false },
@@ -170,40 +177,212 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
   }
 
   const handleCreateQuickSurvey = () => {
-    if (onSectionChange) {
-      // Extract the main topic from the query
-      let topic = "General"
+    if (query.trim()) {
+      setClarifyingQuery(query) // Set the query for the clarifying modal
+      setShowClarifyingModal(true)
+    } else {
+      // Optionally, prompt user to enter a query first or use a default
+      setClarifyingQuery("General Community Feedback")
+      setShowClarifyingModal(true)
+    }
+  }
 
-      if (query.includes("transportation") || query.includes("transit")) {
-        topic = "Transportation"
-      } else if (query.includes("bike")) {
-        topic = "Bike Lanes"
-      } else if (query.includes("engagement") || query.includes("campaign")) {
-        topic = "Community Engagement"
-      } else if (query.includes("park")) {
-        topic = "Parks"
-      } else if (query.includes("safety") || query.includes("police")) {
-        topic = "Public Safety"
-      } else if (query.includes("housing")) {
-        topic = "Housing"
-      } else if (query.includes("health")) {
-        topic = "Health"
+  const handleClarifyingModalSubmit = (formData: ClarifyingFormData) => {
+    // Simulate API call and survey generation
+    const { intent, audience, tags, originalQuery } = formData
+
+    // --- Start of new title and goal generation logic ---
+    let topic = "General Topic" // Default topic
+    const lowerQuery = originalQuery.toLowerCase()
+
+    if (lowerQuery.includes("transportation") || lowerQuery.includes("transit")) {
+      topic = "Public Transit"
+    } else if (lowerQuery.includes("bike lanes") || lowerQuery.includes("bike")) {
+      topic = "Bike Lanes"
+    } else if (lowerQuery.includes("community engagement") || lowerQuery.includes("campaign")) {
+      topic = "Community Engagement"
+    } else if (lowerQuery.includes("park")) {
+      topic = "Parks"
+    } else if (lowerQuery.includes("safety") || lowerQuery.includes("police")) {
+      topic = "Public Safety"
+    } else if (lowerQuery.includes("housing")) {
+      topic = "Housing"
+    } else if (lowerQuery.includes("health")) {
+      topic = "Public Health"
+    } else if (tags.length > 0) {
+      // Fallback to the first tag if no keyword match
+      const firstTag = tags[0]
+      topic = firstTag.charAt(0).toUpperCase() + firstTag.slice(1) // Capitalize first tag
+    } else {
+      // Fallback for very generic queries with no tags
+      const words = originalQuery.split(" ")
+      if (words.length > 2 && words.length <= 4) {
+        // Use 1-2 words if query is short-ish
+        topic = words
+          .slice(0, 2)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")
+      } else if (words.length > 0) {
+        topic = words[0].charAt(0).toUpperCase() + words[0].slice(1) // First word capitalized
+      } else {
+        topic = "Community" // Absolute fallback
       }
+    }
 
-      // Create contextual template names
-      const templateNames = {
-        "quick-pulse": `Quick Pulse on ${topic}`,
-        "mini-survey": `Mini Survey: ${topic}`,
-        "custom-survey": "Custom Survey",
+    let intentKeyword = ""
+    switch (intent) {
+      case "Priority Tradeoff":
+        intentKeyword = "Priorities"
+        break
+      case "Budget Allocation Preferences":
+        intentKeyword = "Budget"
+        break
+      case "General Feedback":
+        intentKeyword = "Feedback"
+        break
+      case "Sentiment Analysis":
+        intentKeyword = "Sentiment"
+        break
+      default:
+        intentKeyword = ""
+    }
+
+    let generatedTitle = topic
+    if (intentKeyword) {
+      generatedTitle += ` ${intentKeyword}`
+    }
+    generatedTitle += " Survey"
+
+    // Ensure title is concise (aim for 3-4 words)
+    const titleWords = generatedTitle.split(" ")
+    if (titleWords.length > 4) {
+      // If topic + intentKeyword + "Survey" is too long, try topic + "Survey"
+      const shorterTitle = `${topic} Survey`
+      const shorterTitleWords = shorterTitle.split(" ")
+      if (shorterTitleWords.length <= 4 && shorterTitleWords.length >= 2) {
+        generatedTitle = shorterTitle
+      } else {
+        // If topic itself is long (e.g., "Community Engagement"), just use that + "Survey"
+        // Or if topic is short, and intent made it long, this is a fallback.
+        // If topic was like "Public Safety" (2 words), "Public Safety Survey" is 3 words.
+        // If topic was "Community Engagement" (2 words), "Community Engagement Survey" is 3 words.
+        // If topic was "Some Very Long Topic Name From Tag" (6 words), this won't shorten it enough.
+        // So, if topic is more than 2 words, shorten topic.
+        const topicWords = topic.split(" ")
+        if (topicWords.length > 2) {
+          const shortTopic = topicWords.slice(0, 2).join(" ")
+          generatedTitle = `${shortTopic} Survey`
+        } else {
+          generatedTitle = `${topic} Survey` // Default to topic + Survey if other attempts are too long or short
+        }
       }
+    }
+    // Final check: if title is just "Survey" or one word + "Survey"
+    if (generatedTitle.split(" ").length < 2 && topic !== "General Topic") {
+      generatedTitle = `${topic} Survey`
+    } else if (generatedTitle.split(" ").length < 2) {
+      generatedTitle = "Community Feedback Survey" // A sensible default
+    }
 
-      // Navigate to survey manager with template modal open and filtered
-      onSectionChange("survey-builder", {
-        showTemplateModal: true,
-        templateFilter: ["quick-pulse", "mini-survey", "custom-survey"],
-        templateNames: templateNames,
-        surveyTitle: query || `${topic} Survey`,
+    const generatedGoal = `To understand ${intent.toLowerCase()} regarding "${originalQuery}" from the ${audience.replace("-", " ")} audience. This survey focuses on ${topic.toLowerCase()}.`
+    // --- End of new title and goal generation logic ---
+
+    const sampleQuestions: Question[] = [
+      {
+        id: "gen_q1",
+        type: "rating",
+        text: `On a scale of 1-5, how important is the issue of "${originalQuery}" to you?`,
+        options: [
+          { value: "1", label: "1 - Not important at all" },
+          { value: "2", label: "2" },
+          { value: "3", label: "3 - Neutral" },
+          { value: "4", label: "4" },
+          { value: "5", label: "5 - Extremely important" },
+        ],
+        label: "1",
+        labelType: "number",
+      },
+      {
+        id: "gen_q2",
+        type: "open-ended",
+        text: `What are your primary concerns or suggestions related to "${originalQuery}"?`,
+        label: "2",
+        labelType: "number",
+      },
+    ]
+
+    if (intent === "Priority Tradeoff") {
+      sampleQuestions.push({
+        id: "gen_q3_tradeoff",
+        type: "multiple-choice",
+        text: `If resources were limited, which aspect of "${originalQuery}" should be prioritized? (Select one)`,
+        options: [
+          { value: "option1", label: "Aspect A (e.g., Funding)" },
+          { value: "option2", label: "Aspect B (e.g., Awareness)" },
+          { value: "option3", label: "Aspect C (e.g., Infrastructure)" },
+        ],
+        label: "3",
+        labelType: "number",
       })
+    } else if (intent === "Budget Allocation Preferences") {
+      sampleQuestions.push({
+        id: "gen_q3_budget",
+        type: "multiple-choice",
+        text: `How would you prefer budget to be allocated for "${originalQuery}"?`,
+        options: [
+          { value: "increase", label: "Increase significantly" },
+          { value: "maintain", label: "Maintain current levels" },
+          { value: "decrease", label: "Decrease slightly" },
+        ],
+        label: "3",
+        labelType: "number",
+      })
+    } else {
+      sampleQuestions.push({
+        id: "gen_q3_general",
+        type: "multiple-choice",
+        text: `Which of the following best describes your opinion on "${originalQuery}"?`,
+        options: [
+          { value: "positive", label: "Very Positive" },
+          { value: "neutral", label: "Neutral" },
+          { value: "negative", label: "Very Negative" },
+        ],
+        label: "3",
+        labelType: "number",
+      })
+    }
+    sampleQuestions.push({
+      id: "completion_generated",
+      type: "completion",
+      title: "Thank You!",
+      completionText: "Your feedback is valuable to us.",
+      label: "C",
+      labelType: "char",
+    })
+
+    const surveyData: GeneratedSurveyData = {
+      title: generatedTitle,
+      goal: generatedGoal,
+      distributionMethod: audience, // Use the audience value directly
+      questions: sampleQuestions,
+      originalQuery: formData.originalQuery,
+      clarifyingFormData: formData,
+    }
+
+    setGeneratedSurveyData(surveyData)
+    setShowClarifyingModal(false)
+    setShowPreviewModal(true)
+  }
+
+  const handleOpenBuilderFromPreview = () => {
+    if (generatedSurveyData && onSectionChange) {
+      onSectionChange("survey-builder", {
+        generatedSurvey: generatedSurveyData,
+      })
+      setShowPreviewModal(false)
+      setGeneratedSurveyData(undefined) // Clear data after use
+      setHasSearched(false) // Reset search state
+      setQuery("") // Clear search query
     }
   }
 
@@ -412,6 +591,19 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
           </div>
         )}
       </div>
+
+      <ClarifyingSurveyModal
+        open={showClarifyingModal}
+        onClose={() => setShowClarifyingModal(false)}
+        onSubmit={handleClarifyingModalSubmit}
+        initialQuery={clarifyingQuery}
+      />
+      <SurveyPreviewModal
+        open={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        surveyData={generatedSurveyData}
+        onOpenBuilder={handleOpenBuilderFromPreview}
+      />
     </div>
   )
 }
