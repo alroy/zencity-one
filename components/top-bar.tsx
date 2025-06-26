@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { useToast } from "@/hooks/use-toast"
+// Removed useToast as it's not used in this component based on the latest requirements
+// import { useToast } from "@/hooks/use-toast"
 
 interface TopBarProps {
   customerName: string
@@ -11,51 +12,63 @@ interface TopBarProps {
 export function TopBar({ customerName = "Adams County" }: TopBarProps) {
   const [currentTime, setCurrentTime] = useState<string>("")
   const [greeting, setGreeting] = useState<string>("")
-  const [weather, setWeather] = useState<string>("50°F")
-  const [showAnimation, setShowAnimation] = useState(false)
+  const [weather, setWeather] = useState<string>("50°F") // Keeping weather as per original component
 
-  const { toast } = useToast()
+  // Removed toast as it's not used
+  // const { toast } = useToast()
 
   useEffect(() => {
-    // Check if animation has been shown this session
-    const hasShownAnimation = sessionStorage.getItem("toolkitButtonAnimated")
-    if (!hasShownAnimation) {
-      setShowAnimation(true)
-      sessionStorage.setItem("toolkitButtonAnimated", "true")
-    }
+    const updateDateTime = () => {
+      const now = new Date() // Current moment
 
-    // Update time every minute
-    const updateTime = () => {
-      const now = new Date()
-      const hours = now.getHours()
-      const minutes = now.getMinutes()
-      const formattedTime = `${hours % 12 || 12}:${minutes.toString().padStart(2, "0")} ${hours >= 12 ? "pm" : "am"}`
-      setCurrentTime(formattedTime)
+      // Get current hour in Adams County (America/New_York) for salutation
+      const hourFormatter = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        hour12: false, // Use 24-hour format for easier logic
+        timeZone: "America/New_York",
+      })
+      const currentHourInNewYork = Number.parseInt(hourFormatter.format(now))
 
-      // Set greeting based on time of day
-      if (hours >= 5 && hours < 12) {
-        setGreeting("Good morning,")
-      } else if (hours >= 12 && hours < 18) {
-        setGreeting("Good afternoon,")
+      // Refined Salutation logic with four intervals based on New York hour
+      if (currentHourInNewYork >= 5 && currentHourInNewYork < 12) {
+        // 5:00 AM to 11:59 AM (hours 5-11)
+        setGreeting("Good Morning,")
+      } else if (currentHourInNewYork >= 12 && currentHourInNewYork < 17) {
+        // 12:00 PM to 4:59 PM (hours 12-16)
+        setGreeting("Good Afternoon,")
+      } else if (currentHourInNewYork >= 17 && currentHourInNewYork < 21) {
+        // 5:00 PM to 8:59 PM (hours 17-20)
+        setGreeting("Good Evening,")
       } else {
-        setGreeting("Good evening,")
+        // 9:00 PM to 4:59 AM (hours 21-4)
+        setGreeting("Good Night,")
       }
+
+      // Format time for display in Adams County (America/New_York)
+      const timeFormatter = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit", // Added seconds for real-time feel
+        hour12: true,
+        timeZone: "America/New_York",
+        timeZoneName: "short", // Displays EDT/EST
+      })
+      setCurrentTime(timeFormatter.format(now))
     }
 
-    updateTime()
-    const interval = setInterval(updateTime, 60000) // Update every minute
+    updateDateTime() // Initial call
+    const intervalId = setInterval(updateDateTime, 1000) // Update every second
 
     // Mock weather data - in a real app, you would fetch this from a weather API
+    // This is kept from the original component structure.
     setWeather("50°F")
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(intervalId) // Cleanup interval on component unmount
+  }, []) // Empty dependency array ensures this runs once on mount
 
   return (
     <>
-      <style jsx global>{`
-      `}</style>
-
+      {/* Removed style jsx global as it was empty and not used */}
       <div className="w-full bg-white border-b border-gray-200 py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center">
           <div className="flex items-center mr-4">
@@ -69,7 +82,7 @@ export function TopBar({ customerName = "Adams County" }: TopBarProps) {
           </div>
           <div className="flex flex-col">
             <div className="text-sm text-gray-600">
-              Time: {currentTime} | Weather: {weather}
+              Time in Adams County: {currentTime} | Weather: {weather}
             </div>
             <div className="text-lg font-medium text-gray-800">
               {greeting} {customerName}
