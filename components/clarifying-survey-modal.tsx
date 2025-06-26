@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area" // Ensure ScrollArea is imported
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
@@ -70,6 +70,7 @@ const tagsTaxonomy = [
 const timelineUrgencyOptions = ["ASAP", "Within 1 week", "Within 2 weeks", "Within 1 month"]
 
 export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }: ClarifyingSurveyModalProps) {
+  const [step, setStep] = useState(1)
   const [intent, setIntent] = useState<string>("")
   const [audience, setAudience] = useState<string>("")
   const [timelineDate, setTimelineDate] = useState<Date | undefined>()
@@ -78,20 +79,32 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
 
   useEffect(() => {
     if (open) {
+      // Reset all state when modal opens
+      setStep(1)
       setIntent("")
       setAudience("")
       setTimelineDate(undefined)
       setTimelineUrgency("none")
       setSelectedTags([])
     }
-  }, [open, initialQuery])
+  }, [open])
 
   const handleTagChange = (tag: string) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }
 
+  const handleNext = () => {
+    if (isStep1Valid) {
+      setStep(2)
+    }
+  }
+
+  const handleBack = () => {
+    setStep(1)
+  }
+
   const handleSubmit = () => {
-    if (!intent || !audience) return
+    if (!isStep1Valid) return
     onSubmit({
       intent,
       audience,
@@ -102,18 +115,23 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
     })
   }
 
+  const isStep1Valid = intent && audience
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Create Quick Survey</DialogTitle>
+          <DialogTitle>Create Quick Survey: Step {step} of 2</DialogTitle>
           <DialogDescription>
-            Help us tailor the survey by providing a few more details. Your research query: "{initialQuery}"
+            {step === 1
+              ? "First, tell us about the survey's purpose and audience."
+              : "Now, add some optional tags to help categorize your survey."}
           </DialogDescription>
         </DialogHeader>
-        {/* Main scroll area for the entire modal content if it overflows */}
-        <ScrollArea className="flex-grow py-4 pr-6">
-          <div className="space-y-6">
+
+        {/* Step 1: Intent, Audience, Timeline */}
+        {step === 1 && (
+          <div className="space-y-6 py-4 pr-6">
             <div>
               <Label htmlFor="intent">Intent</Label>
               <Select value={intent} onValueChange={setIntent}>
@@ -167,7 +185,7 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
                   </PopoverContent>
                 </Popover>
                 <Select value={timelineUrgency} onValueChange={setTimelineUrgency}>
-                  <SelectTrigger className={cn(timelineUrgency === "none" && "text-muted-foreground")}>
+                  <SelectTrigger className={cn("mt-1 w-full", timelineUrgency === "none" && "text-muted-foreground")}>
                     <SelectValue placeholder="Or select urgency" />
                   </SelectTrigger>
                   <SelectContent>
@@ -181,20 +199,16 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
                 </Select>
               </div>
             </div>
+          </div>
+        )}
 
-            <div>
-              <Label>Tags (Optional)</Label>
-              {/* 
-                This ScrollArea is specifically for the tags.
-                It's set to a maximum height of `max-h-32` (8rem / 128px).
-                If the list of tags inside is taller than this, a vertical scrollbar 
-                will appear for THIS specific area, making all tags accessible.
-                The visibility of the scrollbar itself (e.g., always vs. on hover/scroll)
-                is generally controlled by the operating system and browser settings.
-                This setup ensures the *functionality* of scrolling is present when needed.
-              */}
-              <ScrollArea className="max-h-32 mt-1 rounded-md border p-4">
-                <div className="space-y-2">
+        {/* Step 2: Tags */}
+        {step === 2 && (
+          <div className="py-4 pr-6 flex-grow flex flex-col">
+            <Label>Tags (Optional)</Label>
+            <div className="flex-grow mt-1">
+              <ScrollArea className="h-full rounded-md border">
+                <div className="p-4 space-y-2">
                   {tagsTaxonomy.map((tag) => (
                     <div key={tag} className="flex items-center space-x-2">
                       <Checkbox
@@ -211,18 +225,37 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
               </ScrollArea>
             </div>
           </div>
-        </ScrollArea>
+        )}
+
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!intent || !audience}
-            className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
-          >
-            Generate Survey Draft
-          </Button>
+          {step === 1 && (
+            <>
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={!isStep1Valid}
+                className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
+              >
+                Next
+              </Button>
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <Button variant="outline" onClick={handleBack}>
+                Back
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!isStep1Valid}
+                className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
+              >
+                Generate Survey Draft
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
