@@ -645,9 +645,10 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                         onChange={(e) => setSampleSize(e.target.value)}
                         className={cn(
                           "mt-1",
-                          distributionMethod === "engagement-survey" && "opacity-50 cursor-not-allowed bg-gray-50",
+                          (distributionMethod === "third-party" || distributionMethod === "engagement-survey") &&
+                            "opacity-50 cursor-not-allowed bg-gray-50",
                         )}
-                        disabled={distributionMethod === "engagement-survey"}
+                        disabled={distributionMethod === "third-party" || distributionMethod === "engagement-survey"}
                       />
                     </div>
 
@@ -655,12 +656,16 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                       <div className="flex items-center gap-2 mb-1">
                         <Label htmlFor="geo-distribution">Geographical Distribution</Label>
                       </div>
-                      <Select defaultValue="city-wide" disabled={distributionMethod === "engagement-survey"}>
+                      <Select
+                        defaultValue="city-wide"
+                        disabled={distributionMethod === "third-party" || distributionMethod === "engagement-survey"}
+                      >
                         <SelectTrigger
                           id="geo-distribution"
                           className={cn(
                             "mt-1",
-                            distributionMethod === "engagement-survey" && "opacity-50 cursor-not-allowed",
+                            (distributionMethod === "third-party" || distributionMethod === "engagement-survey") &&
+                              "opacity-50 cursor-not-allowed",
                           )}
                         >
                           <SelectValue placeholder="Select map" />
