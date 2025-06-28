@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import {
   Dialog,
@@ -27,6 +29,7 @@ export interface ClarifyingFormData {
   timelineUrgency?: string
   tags: string[]
   originalQuery: string
+  uploadedFiles?: File[] // Add this line
 }
 
 interface ClarifyingSurveyModalProps {
@@ -77,6 +80,11 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
   const [timelineUrgency, setTimelineUrgency] = useState<string>("none")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
+  // Add these new state variables for file upload
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [uploadError, setUploadError] = useState<string>("")
+  const [isUploading, setIsUploading] = useState(false)
+
   useEffect(() => {
     if (open) {
       // Reset all state when modal opens
@@ -86,21 +94,101 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
       setTimelineDate(undefined)
       setTimelineUrgency("none")
       setSelectedTags([])
+      // Add these reset lines
+      setUploadedFiles([])
+      setUploadError("")
+      setIsUploading(false)
     }
   }, [open])
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files) return
+
+    setIsUploading(true)
+    setUploadError("")
+
+    try {
+      const validFiles: File[] = []
+      const maxSize = 10 * 1024 * 1024 // 10MB
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ]
+
+      for (const file of Array.from(files)) {
+        // Check file type
+        if (!allowedTypes.includes(file.type)) {
+          setUploadError(`"${file.name}" is not a supported file type. Please upload PDF or Word documents only.`)
+          setIsUploading(false)
+          return
+        }
+
+        // Check file size
+        if (file.size > maxSize) {
+          setUploadError(`"${file.name}" exceeds the 10MB size limit. Please choose a smaller file.`)
+          setIsUploading(false)
+          return
+        }
+
+        validFiles.push(file)
+      }
+
+      // Simulate upload delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      setUploadedFiles((prev) => [...prev, ...validFiles])
+      setIsUploading(false)
+
+      // Clear the input so the same file can be uploaded again if needed
+      event.target.value = ""
+    } catch (error) {
+      setUploadError("An error occurred while uploading the file. Please try again.")
+      setIsUploading(false)
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+    setUploadError("")
+  }
+
+  const getFileIcon = (file: File) => {
+    if (file.type === "application/pdf") {
+      return "📄"
+    } else if (file.type.includes("word") || file.type.includes("document")) {
+      return "📝"
+    }
+    return "📎"
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes"
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  }
 
   const handleTagChange = (tag: string) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }
 
   const handleNext = () => {
-    if (isStep1Valid) {
+    if (step === 1 && isStep1Valid) {
       setStep(2)
+    } else if (step === 2) {
+      setStep(3)
     }
   }
 
   const handleBack = () => {
-    setStep(1)
+    if (step === 2) {
+      setStep(1)
+    } else if (step === 3) {
+      setStep(2)
+    }
   }
 
   const handleSubmit = () => {
@@ -112,6 +200,7 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
       timelineUrgency: timelineUrgency === "none" ? undefined : timelineUrgency,
       tags: selectedTags,
       originalQuery: initialQuery,
+      uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined, // Add this line
     })
   }
 
@@ -121,11 +210,13 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Create Quick Survey: Step {step} of 2</DialogTitle>
+          <DialogTitle>Create Quick Survey: Step {step} of 3</DialogTitle>
           <DialogDescription>
             {step === 1
               ? "First, tell us about the survey's purpose and audience."
-              : "Now, add some optional tags to help categorize your survey."}
+              : step === 2
+                ? "Now, add some optional tags to help categorize your survey."
+                : "Finally, you can upload additional context documents to help inform your survey (optional)."}
           </DialogDescription>
         </DialogHeader>
 
@@ -227,6 +318,114 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
           </div>
         )}
 
+        {/* Step 3: File Upload */}
+        {step === 3 && (
+          <div className="py-4 pr-6 flex-grow flex flex-col space-y-4">
+            <div>
+              <Label className="text-base font-medium">Additional Context (Optional)</Label>
+              <p className="text-sm text-gray-600 mt-1 mb-4">
+                Upload documents that provide additional context for your survey. This could include policy documents,
+                research reports, or other relevant materials.
+              </p>
+            </div>
+
+            {/* Upload Area */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                multiple
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+              />
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <div className="space-y-2">
+                  <div className="text-4xl">📁</div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {isUploading ? "Uploading..." : "Click to upload files"}
+                    </p>
+                    <p className="text-xs text-gray-500">PDF or Word documents, up to 10MB each</p>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#3BD1BB]"></div>
+                <span>Processing file...</span>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {uploadError && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <div className="flex items-start">
+                  <div className="text-red-400 mr-2">⚠️</div>
+                  <div>
+                    <h4 className="text-sm font-medium text-red-800">Upload Error</h4>
+                    <p className="text-sm text-red-700 mt-1">{uploadError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Uploaded Files List */}
+            {uploadedFiles.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Uploaded Files ({uploadedFiles.length})</Label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-green-50 border border-green-200 rounded-md p-3"
+                    >
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <span className="text-lg">{getFileIcon(file)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                          <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                        </div>
+                        <div className="flex items-center text-green-600">
+                          <span className="text-sm mr-1">✓</span>
+                          <span className="text-xs">Uploaded</span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        className="ml-2 h-8 w-8 p-0 text-gray-400 hover:text-red-600"
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* File Guidelines */}
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="flex items-start">
+                <div className="text-blue-400 mr-2">💡</div>
+                <div>
+                  <h4 className="text-sm font-medium text-blue-800">Tips for better results</h4>
+                  <ul className="text-sm text-blue-700 mt-1 space-y-1">
+                    <li>• Include relevant policy documents or research reports</li>
+                    <li>• Upload meeting minutes or stakeholder feedback</li>
+                    <li>• Add any background materials that provide context</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <DialogFooter>
           {step === 1 && (
             <>
@@ -247,9 +446,19 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
               <Button variant="outline" onClick={handleBack}>
                 Back
               </Button>
+              <Button onClick={handleNext} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
+                Next
+              </Button>
+            </>
+          )}
+          {step === 3 && (
+            <>
+              <Button variant="outline" onClick={handleBack}>
+                Back
+              </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!isStep1Valid}
+                disabled={!isStep1Valid || isUploading}
                 className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
               >
                 Generate Survey Draft

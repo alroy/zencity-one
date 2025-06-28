@@ -189,7 +189,15 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
 
   const handleClarifyingModalSubmit = (formData: ClarifyingFormData) => {
     // Simulate API call and survey generation
-    const { intent, audience, tags, originalQuery } = formData
+    const { intent, audience, tags, originalQuery, uploadedFiles } = formData
+
+    // Log uploaded files for demonstration (in real app, these would be processed)
+    if (uploadedFiles && uploadedFiles.length > 0) {
+      console.log(
+        "Uploaded files for survey context:",
+        uploadedFiles.map((f) => f.name),
+      )
+    }
 
     // --- Start of new title and goal generation logic ---
     let topic = "General Topic" // Default topic
@@ -427,7 +435,7 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
                   <Button
                     key={index}
                     variant="outline"
-                    className="w-full text-left justify-start"
+                    className="w-full text-left justify-start bg-transparent"
                     onClick={() => handleExampleQuery(example)}
                   >
                     <MessageSquare className="w-4 h-4 mr-2 text-[#3BD1BB]" />
@@ -456,7 +464,7 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10"
+                      className="border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10 bg-transparent"
                       onClick={handleCreateQuickSurvey}
                     >
                       <Users className="w-4 h-4 mr-2" />
@@ -502,7 +510,7 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10"
+                          className="border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10 bg-transparent"
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />
                           View Complete Analysis
