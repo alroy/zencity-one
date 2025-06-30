@@ -54,6 +54,9 @@ export function TopBar({ customerName = "Adams County" }: TopBarProps) {
         timeZoneName: "short", // Displays EDT/EST
       })
       setCurrentTime(timeFormatter.format(now))
+
+      // Update document title with current temperature
+      document.title = `${weather} - Zencity Platform`
     }
 
     updateDateTime() // Initial call
