@@ -6,8 +6,27 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, Search, Edit, Copy, MoreVertical, X, Filter, SlidersHorizontal } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import {
+  Plus,
+  Search,
+  Edit,
+  Copy,
+  MoreVertical,
+  X,
+  Filter,
+  SlidersHorizontal,
+  Settings,
+  Clock,
+  Pause,
+  Play,
+} from "lucide-react"
 
 interface SurveyListProps {
   onCreateNew: () => void
@@ -34,6 +53,7 @@ export function SurveyList({ onCreateNew, onEditSurvey }: SurveyListProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [filteredSurveys, setFilteredSurveys] = useState<Survey[]>([])
   const [showFilters, setShowFilters] = useState(true)
+  const [pausedSurveys, setPausedSurveys] = useState<Set<number>>(new Set())
 
   // Sample survey data
   const surveys: Survey[] = [
@@ -199,6 +219,19 @@ export function SurveyList({ onCreateNew, onEditSurvey }: SurveyListProps) {
     return methodNames[method] || method
   }
 
+  // Toggle pause/resume state for a survey
+  const togglePauseResume = (surveyId: number) => {
+    setPausedSurveys((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(surveyId)) {
+        newSet.delete(surveyId)
+      } else {
+        newSet.add(surveyId)
+      }
+      return newSet
+    })
+  }
+
   // Initialize filtered surveys on component mount
   useEffect(() => {
     setFilteredSurveys(surveys)
@@ -299,7 +332,7 @@ export function SurveyList({ onCreateNew, onEditSurvey }: SurveyListProps) {
             </Select>
 
             {hasActiveFilters() && (
-              <Button variant="outline" size="sm" onClick={resetFilters} className="text-xs">
+              <Button variant="outline" size="sm" onClick={resetFilters} className="text-xs bg-transparent">
                 Reset Filters
               </Button>
             )}
@@ -432,17 +465,44 @@ export function SurveyList({ onCreateNew, onEditSurvey }: SurveyListProps) {
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Copy className="w-4 h-4 mr-2" />
-                              Duplicate
+                          <DropdownMenuContent align="end" className="w-52 p-1">
+                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md">
+                              <Copy className="w-4 h-4 mr-3 text-gray-600" />
+                              Copy Cycle ID
                             </DropdownMenuItem>
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                            <DropdownMenuItem>Archive</DropdownMenuItem>
+                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md">
+                              <Settings className="w-4 h-4 mr-3 text-gray-600" />
+                              Cycle settings
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md">
+                              <Clock className="w-4 h-4 mr-3 text-gray-600" />
+                              Extend cycle
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md"
+                              onClick={() => togglePauseResume(survey.id)}
+                            >
+                              {pausedSurveys.has(survey.id) ? (
+                                <>
+                                  <Play className="w-4 h-4 mr-3 text-gray-600" />
+                                  Resume cycle
+                                </>
+                              ) : (
+                                <>
+                                  <Pause className="w-4 h-4 mr-3 text-gray-600" />
+                                  Pause cycle
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-1 bg-gray-200" />
+                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-red-50 rounded-md text-red-600">
+                              <X className="w-4 h-4 mr-3 text-red-500" />
+                              End cycle
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
