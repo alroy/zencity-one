@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, MessageSquare, BarChart3, Users, ExternalLink, Lightbulb } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
-import { ClarifyingSurveyModal, type ClarifyingFormData } from "@/components/clarifying-survey-modal"
+import {
+  ClarifyingSurveyModal,
+  type ClarifyingFormData,
+  type PrePopulationData,
+} from "@/components/clarifying-survey-modal"
 import { SurveyPreviewModal, type GeneratedSurveyData } from "@/components/survey-preview-modal"
 import type { Question } from "@/components/questionnaire-builder"
 
@@ -23,6 +27,7 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [clarifyingQuery, setClarifyingQuery] = useState("")
   const [generatedSurveyData, setGeneratedSurveyData] = useState<GeneratedSurveyData | undefined>(undefined)
+  const [prePopulationData, setPrePopulationData] = useState<PrePopulationData | undefined>(undefined)
 
   const breadcrumbItems = [
     { label: "City Explorer", path: "city-explorer", isClickable: false },
@@ -178,11 +183,123 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
 
   const handleCreateQuickSurvey = () => {
     if (query.trim()) {
-      setClarifyingQuery(query) // Set the query for the clarifying modal
+      setClarifyingQuery(query)
+
+      // Generate pre-population data based on the query and search results
+      const lowerQuery = query.toLowerCase()
+      let suggestedIntent = ""
+      let suggestedAudience = ""
+      const suggestedTags: string[] = []
+      let suggestedTimelineUrgency = ""
+      let suggestedTimelineDate: Date | undefined = undefined
+
+      // Determine intent based on query keywords
+      if (lowerQuery.includes("should we") || lowerQuery.includes("funding") || lowerQuery.includes("budget")) {
+        suggestedIntent = "Budget Allocation Preferences"
+        suggestedTimelineUrgency = "Within 1 month"
+      } else if (lowerQuery.includes("what are") || lowerQuery.includes("saying") || lowerQuery.includes("opinion")) {
+        suggestedIntent = "Sentiment Analysis"
+        suggestedTimelineUrgency = "Within 2 weeks"
+      } else if (lowerQuery.includes("how effective") || lowerQuery.includes("evaluation")) {
+        suggestedIntent = "Service Evaluation"
+        suggestedTimelineUrgency = "Within 2 weeks"
+      } else if (lowerQuery.includes("priorities") || lowerQuery.includes("important")) {
+        suggestedIntent = "Community Priorities"
+        suggestedTimelineUrgency = "Within 1 month"
+      } else {
+        suggestedIntent = "Needs Assessment"
+        suggestedTimelineUrgency = "Within 2 weeks"
+      }
+
+      // Determine audience based on query context
+      if (lowerQuery.includes("public") || lowerQuery.includes("residents") || lowerQuery.includes("community")) {
+        if (lowerQuery.includes("quick") || lowerQuery.includes("fast")) {
+          suggestedAudience = "fast"
+        } else {
+          suggestedAudience = "representative"
+        }
+      } else if (lowerQuery.includes("staff") || lowerQuery.includes("employee") || lowerQuery.includes("internal")) {
+        suggestedAudience = "internal-audience"
+      } else {
+        suggestedAudience = "representative" // Default to representative
+      }
+
+      // Determine tags based on query keywords
+      if (lowerQuery.includes("transportation") || lowerQuery.includes("transit") || lowerQuery.includes("bike")) {
+        suggestedTags.push("Transportation & Mobility")
+      }
+      if (lowerQuery.includes("safety") || lowerQuery.includes("police") || lowerQuery.includes("crime")) {
+        suggestedTags.push("Public Safety")
+      }
+      if (lowerQuery.includes("park") || lowerQuery.includes("recreation")) {
+        suggestedTags.push("Parks & Recreation")
+      }
+      if (lowerQuery.includes("budget") || lowerQuery.includes("funding") || lowerQuery.includes("money")) {
+        suggestedTags.push("Budget & Priorities")
+      }
+      if (
+        lowerQuery.includes("engagement") ||
+        lowerQuery.includes("campaign") ||
+        lowerQuery.includes("participation")
+      ) {
+        suggestedTags.push("Community Engagement")
+      }
+      if (lowerQuery.includes("health") || lowerQuery.includes("wellness")) {
+        suggestedTags.push("Public Health")
+      }
+      if (
+        lowerQuery.includes("climate") ||
+        lowerQuery.includes("environment") ||
+        lowerQuery.includes("sustainability")
+      ) {
+        suggestedTags.push("Climate & Sustainability")
+      }
+      if (lowerQuery.includes("housing") || lowerQuery.includes("development")) {
+        suggestedTags.push("Economic Development")
+      }
+      if (
+        lowerQuery.includes("infrastructure") ||
+        lowerQuery.includes("construction") ||
+        lowerQuery.includes("capital")
+      ) {
+        suggestedTags.push("Infrastructure & Capital Projects")
+      }
+      if (lowerQuery.includes("equity") || lowerQuery.includes("inclusion") || lowerQuery.includes("diversity")) {
+        suggestedTags.push("Equity & Inclusion")
+      }
+
+      // Set suggested timeline date (default to 2 weeks from now for most cases)
+      const defaultDate = new Date()
+      if (suggestedTimelineUrgency === "Within 1 week") {
+        defaultDate.setDate(defaultDate.getDate() + 7)
+      } else if (suggestedTimelineUrgency === "Within 2 weeks") {
+        defaultDate.setDate(defaultDate.getDate() + 14)
+      } else if (suggestedTimelineUrgency === "Within 1 month") {
+        defaultDate.setDate(defaultDate.getDate() + 30)
+      } else {
+        defaultDate.setDate(defaultDate.getDate() + 14) // Default to 2 weeks
+      }
+      suggestedTimelineDate = defaultDate
+
+      setPrePopulationData({
+        suggestedIntent,
+        suggestedAudience,
+        suggestedTags,
+        suggestedTimelineUrgency,
+        suggestedTimelineDate,
+      })
+
       setShowClarifyingModal(true)
     } else {
-      // Optionally, prompt user to enter a query first or use a default
+      // Fallback for empty query
       setClarifyingQuery("General Community Feedback")
+      setPrePopulationData({
+        suggestedIntent: "Needs Assessment",
+        suggestedAudience: "representative",
+        suggestedTags: ["Community Engagement"],
+        suggestedTimelineUrgency: "Within 2 weeks",
+        suggestedTimelineDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
+      })
       setShowClarifyingModal(true)
     }
   }
@@ -605,6 +722,7 @@ export function ResearchAssistant({ onSectionChange }: ResearchAssistantProps) {
         onClose={() => setShowClarifyingModal(false)}
         onSubmit={handleClarifyingModalSubmit}
         initialQuery={clarifyingQuery}
+        prePopulationData={prePopulationData}
       />
       <SurveyPreviewModal
         open={showPreviewModal}

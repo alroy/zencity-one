@@ -32,11 +32,21 @@ export interface ClarifyingFormData {
   uploadedFiles?: File[] // Add this line
 }
 
+// Add new interface for pre-population
+export interface PrePopulationData {
+  suggestedIntent?: string
+  suggestedAudience?: string
+  suggestedTags?: string[]
+  suggestedTimelineUrgency?: string
+  suggestedTimelineDate?: Date
+}
+
 interface ClarifyingSurveyModalProps {
   open: boolean
   onClose: () => void
   onSubmit: (formData: ClarifyingFormData) => void
   initialQuery: string
+  prePopulationData?: PrePopulationData // Add this line
 }
 
 const intentOptions = [
@@ -72,7 +82,13 @@ const tagsTaxonomy = [
 
 const timelineUrgencyOptions = ["ASAP", "Within 1 week", "Within 2 weeks", "Within 1 month"]
 
-export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }: ClarifyingSurveyModalProps) {
+export function ClarifyingSurveyModal({
+  open,
+  onClose,
+  onSubmit,
+  initialQuery,
+  prePopulationData,
+}: ClarifyingSurveyModalProps) {
   const [step, setStep] = useState(1)
   const [intent, setIntent] = useState<string>("")
   const [audience, setAudience] = useState<string>("")
@@ -89,17 +105,29 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
     if (open) {
       // Reset all state when modal opens
       setStep(1)
-      setIntent("")
-      setAudience("")
-      setTimelineDate(undefined)
-      setTimelineUrgency("none")
-      setSelectedTags([])
-      // Add these reset lines
+
+      // Pre-populate fields if data is provided
+      if (prePopulationData) {
+        setIntent(prePopulationData.suggestedIntent || "")
+        setAudience(prePopulationData.suggestedAudience || "")
+        setTimelineDate(prePopulationData.suggestedTimelineDate)
+        setTimelineUrgency(prePopulationData.suggestedTimelineUrgency || "none")
+        setSelectedTags(prePopulationData.suggestedTags || [])
+      } else {
+        // Reset to empty if no pre-population data
+        setIntent("")
+        setAudience("")
+        setTimelineDate(undefined)
+        setTimelineUrgency("none")
+        setSelectedTags([])
+      }
+
+      // Reset file upload state
       setUploadedFiles([])
       setUploadError("")
       setIsUploading(false)
     }
-  }, [open])
+  }, [open, prePopulationData])
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -256,38 +284,49 @@ export function ClarifyingSurveyModal({ open, onClose, onSubmit, initialQuery }:
             </div>
 
             <div>
-              <Label>Timeline (Optional)</Label>
-              <div className="grid grid-cols-2 gap-4 mt-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !timelineDate && "text-muted-foreground",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {timelineDate ? format(timelineDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={timelineDate} onSelect={setTimelineDate} initialFocus />
-                  </PopoverContent>
-                </Popover>
-                <Select value={timelineUrgency} onValueChange={setTimelineUrgency}>
-                  <SelectTrigger className={cn("mt-1 w-full", timelineUrgency === "none" && "text-muted-foreground")}>
-                    <SelectValue placeholder="Or select urgency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No deadline</SelectItem>
-                    {timelineUrgencyOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Label>Timeline</Label>
+              <p className="text-sm text-gray-600 mb-2">When do you need the survey results?</p>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="timeline-date" className="text-sm">
+                    Target Date
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal mt-1",
+                          !timelineDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {timelineDate ? format(timelineDate, "PPP") : <span>Select target date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" selected={timelineDate} onSelect={setTimelineDate} initialFocus />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div>
+                  <Label htmlFor="timeline-urgency" className="text-sm">
+                    Urgency Level
+                  </Label>
+                  <Select value={timelineUrgency} onValueChange={setTimelineUrgency}>
+                    <SelectTrigger className="mt-1 w-full">
+                      <SelectValue placeholder="Select urgency level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No specific deadline</SelectItem>
+                      <SelectItem value="ASAP">ASAP</SelectItem>
+                      <SelectItem value="Within 1 week">Within 1 week</SelectItem>
+                      <SelectItem value="Within 2 weeks">Within 2 weeks</SelectItem>
+                      <SelectItem value="Within 1 month">Within 1 month</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </div>
