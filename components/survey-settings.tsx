@@ -176,7 +176,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
   const [connectionError, setConnectionError] = useState<string | null>(null)
 
   // Add state for editable fields
-  const [surveyTitle, setSurveyTitle] = useState(initialTitle || "Adams County, Community Survey")
+  const [surveyTitle, setSurveyTitle] = useState(initialTitle || "Willowbrook County, Community Survey")
   const [internalTitle, setInternalTitle] = useState("")
   const [sampleSize, setSampleSize] = useState("1000")
 
@@ -499,7 +499,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="customer">Customer</Label>
-                      <Input id="customer" defaultValue="Adams County" readOnly className="mt-1 bg-gray-50" />
+                      <Input id="customer" defaultValue="Willowbrook County" readOnly className="mt-1 bg-gray-50" />
                     </div>
 
                     <div>
@@ -617,7 +617,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="w-full justify-between text-left font-normal mt-1"
+                                className="w-full justify-between text-left font-normal mt-1 bg-transparent"
                                 id="end-date"
                               >
                                 <span>{endDate ? format(endDate, "MMMM d, yyyy") : "Select date"}</span>
@@ -827,7 +827,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="flex items-center"
+                                  className="flex items-center bg-transparent"
                                   onClick={handleTestSend}
                                   disabled={crmSegments.filter((s) => s.selected).length === 0}
                                 >
@@ -930,7 +930,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                                             <Button
                                               variant="outline"
                                               size="sm"
-                                              className="text-gray-600"
+                                              className="text-gray-600 bg-transparent"
                                               onClick={() => {
                                                 toast({
                                                   title: "Sync Started",
@@ -945,7 +945,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                                             <Button
                                               variant="outline"
                                               size="sm"
-                                              className="text-red-600 border-red-200 hover:bg-red-50"
+                                              className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
                                               onClick={() => handleDirectoryDisconnect(directory.id)}
                                             >
                                               Disconnect
@@ -955,7 +955,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                                           <Button
                                             variant="outline"
                                             size="sm"
-                                            className="text-[#3BD1BB]"
+                                            className="text-[#3BD1BB] bg-transparent"
                                             onClick={() => handleDirectorySelect(directory.id)}
                                           >
                                             Connect
@@ -1104,7 +1104,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="flex items-center"
+                                  className="flex items-center bg-transparent"
                                   onClick={() => {
                                     if (getConnectedDirectoryCount() === 0) {
                                       toast({
@@ -1217,7 +1217,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
                                     <PopoverTrigger asChild>
                                       <Button
                                         variant="outline"
-                                        className="w-full justify-between text-left font-normal mt-1"
+                                        className="w-full justify-between text-left font-normal mt-1 bg-transparent"
                                         id="engagement-end-date"
                                       >
                                         <span>{endDate ? format(endDate, "MMMM d, yyyy") : "Select date"}</span>

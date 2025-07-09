@@ -22,7 +22,7 @@ import { UserProvider } from "@/contexts/user-context"
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState("monitor")
   const [sectionOptions, setSectionOptions] = useState<any>(null)
-  const customerName = "Adams County" // This would typically come from a context or API
+  const customerName = "Willowbrook County" // This would typically come from a context or API
 
   const handleSectionChange = (section: string, options?: any) => {
     console.log(`Setting active section to: ${section}`, options)

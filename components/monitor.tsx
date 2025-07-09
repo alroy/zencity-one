@@ -447,7 +447,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
                       ? "Parks & Recreation team has gathered valuable feedback on facility improvements. Residents are particularly enthusiastic about playground upgrades and trail maintenance."
                       : selectedTeam === "publicSafety"
                         ? "Public Safety team is monitoring community concerns about winter road maintenance and emergency response times. Feedback is mixed, with residents acknowledging efforts but requesting more consistent service."
-                        : "Residents praise Adams County's small-town charm within a metro area, strong civic engagement, and easy highway access. They celebrate our cultural diversity, French heritage, clean image, and community events like Adams Days."}
+                        : "Residents praise Willowbrook County's small-town charm within a metro area, strong civic engagement, and easy highway access. They celebrate our cultural diversity, French heritage, clean image, and community events like Willowbrook Days."}
                 </p>
               </div>
             </div>
@@ -499,7 +499,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
           <div className="pt-4">
             <Button
               variant="outline"
-              className="border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10"
+              className="border-[#3BD1BB] text-[#3BD1BB] hover:bg-[#3BD1BB]/10 bg-transparent"
               onClick={() => onSectionChange && onSectionChange("citizen-participation")}
             >
               View full participation stats

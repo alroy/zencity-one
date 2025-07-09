@@ -20,10 +20,10 @@ export function ProfileInformation() {
   const [formData, setFormData] = useState({
     firstName: userInfo.firstName,
     lastName: userInfo.lastName,
-    email: "john.smith@adamscounty.gov",
+    email: "john.smith@willowbrookcounty.gov",
     jobTitle: userInfo.jobTitle,
     department: "City Management",
-    phone: "(303) 555-1234",
+    phone: "(303) 555-1234)",
     timezone: "America/Denver",
   })
 
@@ -133,7 +133,12 @@ export function ProfileInformation() {
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
               </div>
               <div>
-                <Button variant="outline" size="sm" className="flex items-center" onClick={handleAvatarClick}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center bg-transparent"
+                  onClick={handleAvatarClick}
+                >
                   <Upload className="mr-2 h-4 w-4" />
                   Upload Photo
                 </Button>

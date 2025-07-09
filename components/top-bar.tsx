@@ -9,7 +9,7 @@ interface TopBarProps {
   customerName: string
 }
 
-export function TopBar({ customerName = "Adams County" }: TopBarProps) {
+export function TopBar({ customerName = "Willowbrook County" }: TopBarProps) {
   const [currentTime, setCurrentTime] = useState<string>("")
   const [greeting, setGreeting] = useState<string>("")
   const [weather, setWeather] = useState<string>("50°F") // Keeping weather as per original component
@@ -21,7 +21,7 @@ export function TopBar({ customerName = "Adams County" }: TopBarProps) {
     const updateDateTime = () => {
       const now = new Date() // Current moment
 
-      // Get current hour in Adams County (America/New_York) for salutation
+      // Get current hour in Willowbrook County (America/New_York) for salutation
       const hourFormatter = new Intl.DateTimeFormat("en-US", {
         hour: "numeric",
         hour12: false, // Use 24-hour format for easier logic
@@ -44,7 +44,7 @@ export function TopBar({ customerName = "Adams County" }: TopBarProps) {
         setGreeting("Good Night,")
       }
 
-      // Format time for display in Adams County (America/New_York)
+      // Format time for display in Willowbrook County (America/New_York)
       const timeFormatter = new Intl.DateTimeFormat("en-US", {
         hour: "numeric",
         minute: "2-digit",
@@ -85,7 +85,7 @@ export function TopBar({ customerName = "Adams County" }: TopBarProps) {
           </div>
           <div className="flex flex-col">
             <div className="text-sm text-gray-600">
-              Time in Adams County: {currentTime} | Weather: {weather}
+              Time in Willowbrook County: {currentTime} | Weather: {weather}
             </div>
             <div className="text-lg font-medium text-gray-800">
               {greeting} {customerName}
