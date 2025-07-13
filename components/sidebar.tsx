@@ -21,6 +21,7 @@ import {
   Bell,
   Shield,
   LogOut,
+  List,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
@@ -52,7 +53,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     if (activeSection === "monitor" || activeSection === "research-assistant") {
       setExpandedSections((prev) => (prev.includes("city-explorer") ? prev : [...prev, "city-explorer"]))
     } else if (activeSection === "survey-builder") {
-      setExpandedSections((prev) => (prev.includes("engagement-manager") ? prev : [...prev, "engagement-manager"]))
+      setExpandedSections((prev) => (prev.includes("survey-manager") ? prev : [...prev, "survey-manager"]))
     } else if (
       activeSection === "internal-platforms" ||
       activeSection === "resident-feedback" ||
@@ -104,11 +105,11 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       ],
     },
     {
-      id: "engagement-manager",
-      title: "Engagement Manager",
-      icon: Users,
+      id: "survey-manager",
+      title: "Survey Manager",
+      icon: FileText,
       children: [
-        { id: "survey-builder", title: "Survey Manager", icon: FileText, badge: "2" },
+        { id: "survey-builder", title: "All Surveys", icon: List, badge: "2" },
         { id: "citizen-participation", title: "Residents Participation", icon: Users },
       ],
     },

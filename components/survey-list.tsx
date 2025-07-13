@@ -26,11 +26,17 @@ import {
   Clock,
   Pause,
   Play,
+  ChevronDown,
+  FilePlus,
+  Bot,
+  LayoutTemplate,
 } from "lucide-react"
 
 interface SurveyListProps {
   onCreateNew: () => void
   onEditSurvey: (surveyId: number) => void
+  onCreateFromScratch: () => void
+  onGenerateWithAI: () => void
 }
 
 // Define survey interface for type safety
@@ -45,7 +51,7 @@ interface Survey {
   createdBy: { initials: string; color: string }
 }
 
-export function SurveyList({ onCreateNew, onEditSurvey }: SurveyListProps) {
+export function SurveyList({ onCreateNew, onEditSurvey, onCreateFromScratch, onGenerateWithAI }: SurveyListProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [cadenceFilter, setCadenceFilter] = useState("all")
@@ -253,10 +259,29 @@ export function SurveyList({ onCreateNew, onEditSurvey }: SurveyListProps) {
             </Badge>
           )}
         </div>
-        <Button onClick={onCreateNew} className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Create New survey
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Survey
+              <ChevronDown className="w-4 h-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onCreateNew}>
+              <LayoutTemplate className="mr-2 h-4 w-4" />
+              <span>Start from a template</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onCreateFromScratch}>
+              <FilePlus className="mr-2 h-4 w-4" />
+              <span>Start from scratch</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onGenerateWithAI}>
+              <Bot className="mr-2 h-4 w-4" />
+              <span>Generate using Survey AI</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Filters Section */}

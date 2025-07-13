@@ -244,9 +244,9 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({
   ]
 
   const breadcrumbItems = [
-    { label: "Engagement Manager", path: "engagement-manager", isClickable: false },
-    { label: "Survey Manager", path: "survey-builder", isClickable: true },
-    { label: initialTitle || "New Survey", isCurrent: true }, // Make title dynamic
+    { label: "Survey Manager", path: "survey-manager", isClickable: false },
+    { label: "All Surveys", path: "survey-builder", isClickable: true },
+    { label: initialTitle || "New Survey", isCurrent: true },
   ]
 
   const getDistributionDuration = (cadence: string): string => {
