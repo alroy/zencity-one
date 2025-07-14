@@ -21,20 +21,23 @@ import { CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
 
 export interface ClarifyingFormData {
   intent: string
+  mainGoal: string
   audience: string
   timelineDate?: Date
   timelineUrgency?: string
   tags: string[]
   originalQuery: string
-  uploadedFiles?: File[] // Add this line
+  uploadedFiles?: File[]
 }
 
 // Add new interface for pre-population
 export interface PrePopulationData {
   suggestedIntent?: string
+  suggestedMainGoal?: string
   suggestedAudience?: string
   suggestedTags?: string[]
   suggestedTimelineUrgency?: string
@@ -91,6 +94,7 @@ export function ClarifyingSurveyModal({
 }: ClarifyingSurveyModalProps) {
   const [step, setStep] = useState(1)
   const [intent, setIntent] = useState<string>("")
+  const [mainGoal, setMainGoal] = useState<string>("")
   const [audience, setAudience] = useState<string>("")
   const [timelineDate, setTimelineDate] = useState<Date | undefined>()
   const [timelineUrgency, setTimelineUrgency] = useState<string>("none")
@@ -109,6 +113,7 @@ export function ClarifyingSurveyModal({
       // Pre-populate fields if data is provided
       if (prePopulationData) {
         setIntent(prePopulationData.suggestedIntent || "")
+        setMainGoal(prePopulationData.suggestedMainGoal || "")
         setAudience(prePopulationData.suggestedAudience || "")
         setTimelineDate(prePopulationData.suggestedTimelineDate)
         setTimelineUrgency(prePopulationData.suggestedTimelineUrgency || "none")
@@ -116,6 +121,7 @@ export function ClarifyingSurveyModal({
       } else {
         // Reset to empty if no pre-population data
         setIntent("")
+        setMainGoal("")
         setAudience("")
         setTimelineDate(undefined)
         setTimelineUrgency("none")
@@ -223,7 +229,8 @@ export function ClarifyingSurveyModal({
     if (!isStep1Valid) return
     onSubmit({
       intent,
-      audience,
+      mainGoal,
+      audience: "representative", // Default audience since it's removed from UI
       timelineDate,
       timelineUrgency: timelineUrgency === "none" ? undefined : timelineUrgency,
       tags: selectedTags,
@@ -232,7 +239,7 @@ export function ClarifyingSurveyModal({
     })
   }
 
-  const isStep1Valid = intent && audience
+  const isStep1Valid = intent && mainGoal.trim()
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -252,6 +259,17 @@ export function ClarifyingSurveyModal({
         {step === 1 && (
           <div className="space-y-6 py-4 pr-6">
             <div>
+              <Label htmlFor="main-goal">Main survey goal</Label>
+              <Input
+                id="main-goal"
+                value={mainGoal}
+                onChange={(e) => setMainGoal(e.target.value)}
+                placeholder="Ask about any civic issue or decision..."
+                className="mt-1 w-full"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="intent">Intent</Label>
               <Select value={intent} onValueChange={setIntent}>
                 <SelectTrigger id="intent" className={cn("mt-1 w-full", !intent && "text-muted-foreground")}>
@@ -261,22 +279,6 @@ export function ClarifyingSurveyModal({
                   {intentOptions.map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="audience">Audience</Label>
-              <Select value={audience} onValueChange={setAudience}>
-                <SelectTrigger id="audience" className={cn("mt-1 w-full", !audience && "text-muted-foreground")}>
-                  <SelectValue placeholder="Choose the right audience" />
-                </SelectTrigger>
-                <SelectContent>
-                  {audienceOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
