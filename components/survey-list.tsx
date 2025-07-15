@@ -37,10 +37,11 @@ interface SurveyListProps {
   onEditSurvey: (surveyId: number) => void
   onCreateFromScratch: () => void
   onGenerateWithAI: () => void
+  onViewSurvey: (survey: Survey) => void
 }
 
 // Define survey interface for type safety
-interface Survey {
+export interface Survey {
   id: number
   title: string
   status: string
@@ -51,7 +52,13 @@ interface Survey {
   createdBy: { initials: string; color: string }
 }
 
-export function SurveyList({ onCreateNew, onEditSurvey, onCreateFromScratch, onGenerateWithAI }: SurveyListProps) {
+export function SurveyList({
+  onCreateNew,
+  onEditSurvey,
+  onCreateFromScratch,
+  onGenerateWithAI,
+  onViewSurvey,
+}: SurveyListProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [cadenceFilter, setCadenceFilter] = useState("all")
@@ -463,7 +470,11 @@ export function SurveyList({ onCreateNew, onEditSurvey, onCreateFromScratch, onG
                 </tr>
               ) : filteredSurveys.length > 0 ? (
                 filteredSurveys.map((survey) => (
-                  <tr key={survey.id} className="border-b hover:bg-gray-50">
+                  <tr
+                    key={survey.id}
+                    className="border-b hover:bg-gray-50 cursor-pointer"
+                    onClick={() => onViewSurvey(survey)}
+                  >
                     <td className="p-4">
                       <div className="flex items-center">
                         <span className="text-sm">{survey.title}</span>
@@ -485,31 +496,55 @@ export function SurveyList({ onCreateNew, onEditSurvey, onCreateFromScratch, onG
                     </td>
                     <td className="p-4">
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" onClick={() => onEditSurvey(survey.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onEditSurvey(survey.id)
+                          }}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-52 p-1">
-                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md">
+                            <DropdownMenuItem
+                              className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <Copy className="w-4 h-4 mr-3 text-gray-600" />
                               Copy Cycle ID
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md">
+                            <DropdownMenuItem
+                              className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <Settings className="w-4 h-4 mr-3 text-gray-600" />
                               Cycle settings
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md">
+                            <DropdownMenuItem
+                              className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <Clock className="w-4 h-4 mr-3 text-gray-600" />
                               Extend cycle
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 rounded-md"
-                              onClick={() => togglePauseResume(survey.id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                togglePauseResume(survey.id)
+                              }}
                             >
                               {pausedSurveys.has(survey.id) ? (
                                 <>
@@ -524,7 +559,10 @@ export function SurveyList({ onCreateNew, onEditSurvey, onCreateFromScratch, onG
                               )}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="my-1 bg-gray-200" />
-                            <DropdownMenuItem className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-red-50 rounded-md text-red-600">
+                            <DropdownMenuItem
+                              className="flex items-center px-3 py-2.5 text-sm cursor-pointer hover:bg-red-50 rounded-md text-red-600"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <X className="w-4 h-4 mr-3 text-red-500" />
                               End cycle
                             </DropdownMenuItem>

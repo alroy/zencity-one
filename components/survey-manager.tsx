@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { SurveyList } from "@/components/survey-list"
+import { SurveyList, type Survey } from "@/components/survey-list"
 import { SurveyTemplateModal } from "@/components/survey-template-modal"
 import { SurveySettings } from "@/components/survey-settings"
 import { PageHeader } from "@/components/page-header"
@@ -13,6 +13,35 @@ import {
   type PrePopulationData,
 } from "@/components/clarifying-survey-modal"
 import { SurveyPreviewModal } from "@/components/survey-preview-modal"
+import { Badge } from "@/components/ui/badge"
+import { LayoutTemplate, Calendar, Share2 } from "lucide-react"
+
+// Helper functions to format survey data, consistent with survey-list
+const getStatusBadge = (status: string) => {
+  const statusConfig = {
+    draft: { label: "Draft", className: "bg-yellow-100 text-yellow-800" },
+    published: { label: "Published", className: "bg-blue-100 text-blue-800" },
+    distribution: { label: "Distribution", className: "bg-[#3BD1BB]/20 text-[#3BD1BB]" },
+    closed: { label: "Closed", className: "bg-[#FC7753]/20 text-[#FC7753]" },
+    canceled: { label: "Canceled", className: "bg-gray-100 text-gray-800" },
+  }
+
+  const config = statusConfig[status as keyof typeof statusConfig]
+  if (!config) return null
+  return <Badge className={config.className}>{config.label}</Badge>
+}
+
+const getDistributionMethodName = (method: string) => {
+  const methodNames: Record<string, string> = {
+    representative: "Representative",
+    fast: "Fast",
+    "connected-crm": "Connected CRM",
+    "internal-audience": "Internal Audience",
+    "self-distributed": "Self-distributed",
+    "third-party": "3rd-party",
+  }
+  return methodNames[method] || method
+}
 
 interface SurveyManagerProps {
   initialOptions?: {
@@ -25,7 +54,8 @@ interface SurveyManagerProps {
 }
 
 export function SurveyManager({ initialOptions }: SurveyManagerProps) {
-  const [view, setView] = useState<"list" | "template" | "settings" | "build">("list")
+  const [view, setView] = useState<"list" | "template" | "settings" | "build" | "survey-details">("list")
+  const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [templateFilter, setTemplateFilter] = useState<string[] | undefined>(undefined)
   const [templateNames, setTemplateNames] = useState<Record<string, string> | undefined>(undefined)
@@ -206,15 +236,45 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
   }
 
   const handleEditSurvey = (surveyId: number) => {
-    setView("settings")
+    // This could be enhanced to fetch survey data and navigate to settings
+    const surveyToEdit = new SurveyList({
+      onCreateNew: () => {},
+      onEditSurvey: () => {},
+      onCreateFromScratch: () => {},
+      onGenerateWithAI: () => {},
+      onViewSurvey: () => {},
+    }).props.surveys.find((s) => s.id === surveyId)
+
+    if (surveyToEdit) {
+      setSelectedSurvey(surveyToEdit)
+      setSelectedTemplate(surveyToEdit.template)
+      setSurveyTitle(surveyToEdit.title)
+      setInitialDistributionForSettings(surveyToEdit.distribution)
+      setIsPISTemplate(false)
+      setView("settings")
+    }
+  }
+
+  const handleViewSurvey = (survey: Survey) => {
+    setSelectedSurvey(survey)
+    setView("survey-details")
   }
 
   const handleBack = () => {
     setView("list")
+    setSelectedSurvey(null)
   }
 
   const handleSave = () => {
     setView("list")
+    setSelectedSurvey(null)
+  }
+
+  const handleBreadcrumbNavigate = (path: string) => {
+    if (path === "all-surveys") {
+      setView("list")
+      setSelectedSurvey(null)
+    }
   }
 
   const breadcrumbItems = [
@@ -239,6 +299,51 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
     )
   }
 
+  if (view === "survey-details" && selectedSurvey) {
+    const surveyBreadcrumbItems = [
+      { label: "Survey Manager", path: "survey-manager", isClickable: false },
+      { label: "All Surveys", path: "all-surveys", isClickable: true },
+      { label: selectedSurvey.title, isCurrent: true },
+    ]
+    return (
+      <div className="p-6 pt-0">
+        <PageHeader
+          title={selectedSurvey.title}
+          breadcrumbItems={surveyBreadcrumbItems}
+          onNavigate={handleBreadcrumbNavigate}
+        />
+        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 border-b pb-4 mb-6">
+          <div className="flex items-center gap-2">{getStatusBadge(selectedSurvey.status)}</div>
+          <div className="flex items-center gap-2">
+            <LayoutTemplate className="h-4 w-4 text-gray-500" />
+            <span>{selectedSurvey.template}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-gray-500" />
+            <span>{selectedSurvey.cadence}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Share2 className="h-4 w-4 text-gray-500" />
+            <span>{getDistributionMethodName(selectedSurvey.distribution)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-gray-500" />
+            <span>Created on {selectedSurvey.createdOn}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-6 h-6 rounded-full ${selectedSurvey.createdBy.color} text-white text-xs flex items-center justify-center`}
+            >
+              {selectedSurvey.createdBy.initials}
+            </div>
+            <span>by {selectedSurvey.createdBy.initials}</span>
+          </div>
+        </div>
+        {/* This is the dedicated inner page for the survey. More content can be added here later. */}
+      </div>
+    )
+  }
+
   return (
     <div className="p-6 pt-0">
       <PageHeader
@@ -253,6 +358,7 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
           onEditSurvey={handleEditSurvey}
           onCreateFromScratch={handleCreateFromScratch}
           onGenerateWithAI={handleGenerateWithAI}
+          onViewSurvey={handleViewSurvey}
         />
 
         <SurveyTemplateModal
