@@ -152,17 +152,17 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
         onEscapeKeyDown={handleClose}
         onPointerDownOutside={handleClose}
       >
-        <DialogHeader className="p-6 pb-4">
+        <DialogHeader className="p-6 pb-4 flex-shrink-0">
           <DialogTitle>Build Your Report</DialogTitle>
           <DialogDescription>Add, remove, and reorder widgets to customize your report.</DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-0 px-6 relative z-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-0 px-6 overflow-hidden">
           {/* Left Panel: Available Widgets */}
-          <Card className="flex flex-col">
-            <CardHeader>
+          <Card className="flex flex-col overflow-hidden">
+            <CardHeader className="flex-shrink-0">
               <CardTitle>Available Widgets</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow overflow-hidden">
+            <CardContent className="flex-1 min-h-0">
               <ScrollArea className="h-full">
                 <div className="pr-4">
                   <Accordion type="multiple" defaultValue={["dashboard", "advanced"]} className="w-full">
@@ -199,11 +199,11 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
           </Card>
 
           {/* Right Panel: Selected Widgets */}
-          <Card className="flex flex-col">
-            <CardHeader>
+          <Card className="flex flex-col overflow-hidden">
+            <CardHeader className="flex-shrink-0">
               <CardTitle>Your Report ({selectedWidgets.length})</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow overflow-hidden">
+            <CardContent className="flex-1 min-h-0">
               <ScrollArea className="h-full">
                 <div className="space-y-2 pr-2">
                   {selectedWidgets.length > 0 ? (
@@ -237,7 +237,7 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
             </CardContent>
           </Card>
         </div>
-        <DialogFooter className="p-6 bg-background border-t mt-4 relative z-10">
+        <DialogFooter className="p-6 bg-background border-t flex-shrink-0">
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
