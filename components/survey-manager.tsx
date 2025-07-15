@@ -15,6 +15,7 @@ import {
 import { SurveyPreviewModal } from "@/components/survey-preview-modal"
 import { Badge } from "@/components/ui/badge"
 import { LayoutTemplate, Calendar, Share2 } from "lucide-react"
+import { SurveyResultsPlaceholder } from "@/components/survey-results-placeholder"
 
 // Helper functions to format survey data, consistent with survey-list
 const getStatusBadge = (status: string) => {
@@ -335,7 +336,7 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
             <span>Created on {selectedSurvey.createdOn}</span>
           </div>
         </div>
-        {/* This is the dedicated inner page for the survey. More content can be added here later. */}
+        <SurveyResultsPlaceholder />
       </div>
     )
   }
