@@ -1,5 +1,7 @@
 "use client"
 
+import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,7 +12,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -472,8 +473,10 @@ export function SurveyList({
                 filteredSurveys.map((survey) => (
                   <tr
                     key={survey.id}
-                    className="border-b hover:bg-gray-50 cursor-pointer"
-                    onClick={() => onViewSurvey(survey)}
+                    className={`border-b hover:bg-gray-50 ${
+                      survey.status !== "draft" ? "cursor-pointer" : "cursor-default"
+                    }`}
+                    onClick={() => survey.status !== "draft" && onViewSurvey(survey)}
                   >
                     <td className="p-4">
                       <div className="flex items-center">

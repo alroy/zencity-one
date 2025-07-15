@@ -327,16 +327,12 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
             <span>{getDistributionMethodName(selectedSurvey.distribution)}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            <span>Created on {selectedSurvey.createdOn}</span>
-          </div>
-          <div className="flex items-center gap-2">
             <div
               className={`w-6 h-6 rounded-full ${selectedSurvey.createdBy.color} text-white text-xs flex items-center justify-center`}
             >
               {selectedSurvey.createdBy.initials}
             </div>
-            <span>by {selectedSurvey.createdBy.initials}</span>
+            <span>Created on {selectedSurvey.createdOn}</span>
           </div>
         </div>
         {/* This is the dedicated inner page for the survey. More content can be added here later. */}
