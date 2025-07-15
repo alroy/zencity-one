@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -11,32 +10,65 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { GripVertical } from "lucide-react"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { GripVertical, PlusCircle, XCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
-
-// Define widget types
-const dashboardWidgets = [
-  { id: "top-insights", name: "Top Insights" },
-  { id: "overall-results", name: "Overall Results" },
-  { id: "results-by-measure", name: "Results by Measure" },
-  { id: "priority-matrix", name: "Priority Matrix" },
-]
-
-const advancedWidgets = [
-  { id: "advanced-a", name: "Advanced Widget A" },
-  { id: "advanced-b", name: "Advanced Widget B" },
-  { id: "advanced-c", name: "Advanced Widget C" },
-  { id: "advanced-d", name: "Advanced Widget D" },
-]
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface ReportWidget {
   id: string
   name: string
+  description: string
 }
+
+const dashboardWidgets: ReportWidget[] = [
+  {
+    id: "top-insights",
+    name: "Top Insights",
+    description: "Key takeaways and summary.",
+  },
+  {
+    id: "overall-results",
+    name: "Overall Results",
+    description: "Aggregated results overview.",
+  },
+  {
+    id: "results-by-measure",
+    name: "Results by Measure",
+    description: "Breakdown by specific measures.",
+  },
+  {
+    id: "priority-matrix",
+    name: "Priority Matrix",
+    description: "Visualize importance vs. performance.",
+  },
+]
+
+const advancedWidgets: ReportWidget[] = [
+  {
+    id: "demographic-breakdown",
+    name: "Demographic Breakdown",
+    description: "Filter results by demographics.",
+  },
+  {
+    id: "trend-analysis",
+    name: "Trend Analysis",
+    description: "Compare results over time.",
+  },
+  {
+    id: "geographic-heat-map",
+    name: "Geographic Heat Map",
+    description: "Visualize data on a map.",
+  },
+  {
+    id: "sentiment-analysis",
+    name: "Sentiment Analysis",
+    description: "Analyze sentiment from open text.",
+  },
+]
 
 interface ReportBuilderModalProps {
   open: boolean
@@ -45,71 +77,27 @@ interface ReportBuilderModalProps {
 
 export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalProps) {
   const { toast } = useToast()
-  const [step, setStep] = useState(1)
-  const [selectedWidgets, setSelectedWidgets] = useState<string[]>([])
-  const [selectedAdvancedWidgets, setSelectedAdvancedWidgets] = useState<string[]>([])
-  const [widgetOrder, setWidgetOrder] = useState<ReportWidget[]>([])
+  const [selectedWidgets, setSelectedWidgets] = useState<ReportWidget[]>([])
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
 
   const handleClose = () => {
     onOpenChange(false)
     // Reset state after a short delay to allow for closing animation
     setTimeout(() => {
-      setStep(1)
       setSelectedWidgets([])
-      setSelectedAdvancedWidgets([])
-      setWidgetOrder([])
     }, 300)
   }
 
-  const handleNext = () => {
-    if (step === 1 && selectedWidgets.length === 0) {
-      toast({
-        title: "Selection Required",
-        description: "Please select at least one widget to continue.",
-        variant: "destructive",
-      })
-      return
-    }
-    setStep((s) => s + 1)
-  }
-
-  const handleBack = () => {
-    setStep((s) => s - 1)
-  }
-
-  const toggleWidget = (widgetId: string, isAdvanced = false) => {
-    const state = isAdvanced ? selectedAdvancedWidgets : selectedWidgets
-    const setState = isAdvanced ? setSelectedAdvancedWidgets : setSelectedWidgets
-    if (state.includes(widgetId)) {
-      setState(state.filter((id) => id !== widgetId))
-    } else {
-      setState([...state, widgetId])
+  const addWidget = (widget: ReportWidget) => {
+    if (!selectedWidgets.find((w) => w.id === widget.id)) {
+      setSelectedWidgets((prev) => [...prev, widget])
     }
   }
 
-  // Initialize widgetOrder when moving to step 3
-  useEffect(() => {
-    if (step === 3) {
-      const allSelectedIds = [...selectedWidgets, ...selectedAdvancedWidgets]
-      const currentOrderIds = widgetOrder.map((w) => w.id)
+  const removeWidget = (widgetId: string) => {
+    setSelectedWidgets((prev) => prev.filter((w) => w.id !== widgetId))
+  }
 
-      // Only update if the selection has changed to preserve user's ordering
-      if (JSON.stringify(allSelectedIds.sort()) !== JSON.stringify(currentOrderIds.sort())) {
-        const allWidgetsMap = [...dashboardWidgets, ...advancedWidgets].reduce(
-          (acc, w) => {
-            acc[w.id] = w.name
-            return acc
-          },
-          {} as Record<string, string>,
-        )
-
-        setWidgetOrder(allSelectedIds.map((id) => ({ id, name: allWidgetsMap[id] })))
-      }
-    }
-  }, [step, selectedWidgets, selectedAdvancedWidgets, widgetOrder])
-
-  // Drag and Drop handlers
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     setDraggedItem(id)
     e.dataTransfer.effectAllowed = "move"
@@ -124,176 +112,157 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
     e.preventDefault()
     if (!draggedItem) return
 
-    const draggedIndex = widgetOrder.findIndex((item) => item.id === draggedItem)
-    const targetIndex = widgetOrder.findIndex((item) => item.id === targetId)
+    const draggedIndex = selectedWidgets.findIndex((item) => item.id === draggedItem)
+    const targetIndex = selectedWidgets.findIndex((item) => item.id === targetId)
 
     if (draggedIndex === -1 || targetIndex === -1) return
 
-    const newOrder = [...widgetOrder]
+    const newOrder = [...selectedWidgets]
     const [removed] = newOrder.splice(draggedIndex, 1)
     newOrder.splice(targetIndex, 0, removed)
 
-    setWidgetOrder(newOrder)
+    setSelectedWidgets(newOrder)
     setDraggedItem(null)
   }
 
   const handleGenerateReport = () => {
-    const config = { widgets: widgetOrder.map((w) => w.id) }
-    console.log("Generating report with config:", config)
-    toast({
-      title: "Report Generated",
-      description: "Your report configuration has been submitted.",
-    })
+    if (selectedWidgets.length === 0) {
+      toast({
+        title: "No Widgets Selected",
+        description: "Please add at least one widget to generate a report.",
+        variant: "destructive",
+      })
+      return
+    }
+
     handleClose()
+
+    toast({
+      title: "Report Generation Started",
+      description: "Your report is being generated and will be available in the reports section.",
+    })
   }
 
-  const renderStepContent = () => {
-    switch (step) {
-      case 1:
-        return (
-          <>
-            <DialogHeader>
-              <DialogTitle>Step 1: Select Dashboard Widgets</DialogTitle>
-              <DialogDescription>
-                Choose the core widgets to include in your report. You must select at least one.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
-              {dashboardWidgets.map((widget) => (
-                <Card
-                  key={widget.id}
-                  onClick={() => toggleWidget(widget.id)}
-                  className={cn(
-                    "cursor-pointer transition-all",
-                    selectedWidgets.includes(widget.id) && "ring-2 ring-primary",
-                  )}
-                >
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <Checkbox checked={selectedWidgets.includes(widget.id)} readOnly />
-                    <span className="font-medium">{widget.name}</span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button onClick={handleNext} disabled={selectedWidgets.length === 0}>
-                Next
-              </Button>
-            </DialogFooter>
-          </>
-        )
-      case 2:
-        return (
-          <>
-            <DialogHeader>
-              <DialogTitle>Step 2: Select Advanced Widgets</DialogTitle>
-              <DialogDescription>Optionally, add any of these advanced widgets to your report.</DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
-              {advancedWidgets.map((widget) => (
-                <Card
-                  key={widget.id}
-                  onClick={() => toggleWidget(widget.id, true)}
-                  className={cn(
-                    "cursor-pointer transition-all",
-                    selectedAdvancedWidgets.includes(widget.id) && "ring-2 ring-primary",
-                  )}
-                >
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <Checkbox checked={selectedAdvancedWidgets.includes(widget.id)} readOnly />
-                    <span className="font-medium">{widget.name}</span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button variant="secondary" onClick={handleBack}>
-                Back
-              </Button>
-              <Button onClick={handleNext}>Next</Button>
-            </DialogFooter>
-          </>
-        )
-      case 3:
-        return (
-          <>
-            <DialogHeader>
-              <DialogTitle>Step 3: Reorder Widgets</DialogTitle>
-              <DialogDescription>Drag and drop the widgets to set their order in the final report.</DialogDescription>
-            </DialogHeader>
-            <div className="py-4 space-y-2">
-              {widgetOrder.map((widget) => (
-                <div
-                  key={widget.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, widget.id)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, widget.id)}
-                  className={cn(
-                    "flex items-center p-3 border rounded-md bg-gray-50 cursor-grab active:cursor-grabbing transition-opacity",
-                    draggedItem === widget.id && "opacity-50",
-                  )}
-                >
-                  <GripVertical className="h-5 w-5 mr-3 text-gray-400" />
-                  <span className="font-medium">{widget.name}</span>
-                </div>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button variant="secondary" onClick={handleBack}>
-                Back
-              </Button>
-              <Button onClick={handleNext}>Next</Button>
-            </DialogFooter>
-          </>
-        )
-      case 4:
-        return (
-          <>
-            <DialogHeader>
-              <DialogTitle>Step 4: Generate Report</DialogTitle>
-              <DialogDescription>Review your selections and their order, then generate the report.</DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <h4 className="font-semibold mb-2 text-gray-800">Selected Widgets (in order):</h4>
-              <ul className="list-decimal list-inside space-y-2 bg-gray-50 p-4 rounded-md border">
-                {widgetOrder.map((widget) => (
-                  <li key={widget.id} className="font-medium">
-                    {widget.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button variant="secondary" onClick={handleBack}>
-                Back
-              </Button>
-              <Button onClick={handleGenerateReport}>Generate Report</Button>
-            </DialogFooter>
-          </>
-        )
-      default:
-        return null
-    }
-  }
+  const isWidgetSelected = (widgetId: string) => !!selectedWidgets.find((w) => w.id === widgetId)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]" onEscapeKeyDown={handleClose} onPointerDownOutside={handleClose}>
-        {renderStepContent()}
+      <DialogContent
+        className="max-w-4xl h-[700px] flex flex-col p-0"
+        onEscapeKeyDown={handleClose}
+        onPointerDownOutside={handleClose}
+      >
+        <DialogHeader className="p-6 pb-4">
+          <DialogTitle>Build Your Report</DialogTitle>
+          <DialogDescription>Add, remove, and reorder widgets to customize your report.</DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-0 px-6">
+          {/* Left Panel: Available Widgets */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-lg font-semibold">Available Widgets</h3>
+            <ScrollArea className="flex-grow pr-4 -mr-4">
+              <Accordion type="multiple" defaultValue={["dashboard", "advanced"]} className="w-full">
+                <AccordionItem value="dashboard">
+                  <AccordionTrigger>Dashboard Widgets</AccordionTrigger>
+                  <AccordionContent className="space-y-2">
+                    {dashboardWidgets.map((widget) => (
+                      <WidgetCard
+                        key={widget.id}
+                        widget={widget}
+                        onAdd={addWidget}
+                        isSelected={isWidgetSelected(widget.id)}
+                      />
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="advanced">
+                  <AccordionTrigger>Advanced Widgets</AccordionTrigger>
+                  <AccordionContent className="space-y-2">
+                    {advancedWidgets.map((widget) => (
+                      <WidgetCard
+                        key={widget.id}
+                        widget={widget}
+                        onAdd={addWidget}
+                        isSelected={isWidgetSelected(widget.id)}
+                      />
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </ScrollArea>
+          </div>
+
+          {/* Right Panel: Selected Widgets */}
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle>Your Report ({selectedWidgets.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="space-y-2 pr-2">
+                  {selectedWidgets.length > 0 ? (
+                    selectedWidgets.map((widget) => (
+                      <div
+                        key={widget.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, widget.id)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, widget.id)}
+                        className={cn(
+                          "flex items-center p-3 border rounded-md bg-gray-50 cursor-grab active:cursor-grabbing transition-all",
+                          draggedItem === widget.id && "opacity-50 scale-105 shadow-lg",
+                        )}
+                      >
+                        <GripVertical className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0" />
+                        <span className="font-medium flex-grow">{widget.name}</span>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeWidget(widget.id)}>
+                          <XCircle className="h-5 w-5 text-gray-500 hover:text-destructive" />
+                          <span className="sr-only">Remove {widget.name}</span>
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-center text-sm text-gray-500 border-2 border-dashed rounded-lg p-4">
+                      <p>Add widgets from the left to build your report.</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+        <DialogFooter className="p-6 bg-background border-t mt-4 relative z-10">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleGenerateReport} disabled={selectedWidgets.length === 0}>
+            Generate Report
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function WidgetCard({
+  widget,
+  onAdd,
+  isSelected,
+}: {
+  widget: ReportWidget
+  onAdd: (widget: ReportWidget) => void
+  isSelected: boolean
+}) {
+  return (
+    <div className="p-3 border rounded-lg flex items-center gap-3 bg-white">
+      <div className="flex-grow">
+        <p className="font-semibold">{widget.name}</p>
+        <p className="text-sm text-gray-500">{widget.description}</p>
+      </div>
+      <Button variant="outline" size="sm" onClick={() => onAdd(widget)} disabled={isSelected} className="shrink-0">
+        <PlusCircle className="h-4 w-4 mr-2" />
+        Add
+      </Button>
+    </div>
   )
 }
