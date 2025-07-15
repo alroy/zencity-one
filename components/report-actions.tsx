@@ -19,14 +19,10 @@ interface ReportActionsProps {
 }
 
 /**
- * Split button:
+ * A button where only the chevron is clickable to reveal a dropdown menu.
  * ┌────────────────────┬────────┐
- * │ Generate report     │   ⌄    │
+ * │ Generate report    │   ⌄    │
  * └────────────────────┴────────┘
- *
- * • Left zone opens the “Build Your Report” modal only.
- * • Right zone (chevron) opens the dropdown menu only.
- * • aria-haspopup / aria-expanded live on the chevron button.
  */
 export function ReportActions({ surveyId, onBuildCustom }: ReportActionsProps) {
   const { toast } = useToast()
@@ -54,50 +50,41 @@ export function ReportActions({ surveyId, onBuildCustom }: ReportActionsProps) {
   return (
     <>
       <div className="flex items-center">
-        <div className="inline-flex rounded-md shadow-sm">
-          {/* LEFT ZONE – label (modal trigger) */}
-          <Button
-            size="sm"
-            className="rounded-r-none select-none"
-            onClick={() => {
-              setIsModalOpen(true)
-              onBuildCustom()
-            }}
-            // Explicitly ensure this zone never triggers the dropdown
-            style={{ pointerEvents: "auto", cursor: "pointer" }}
-            aria-label="Build a custom report"
-          >
-            Generate report
-          </Button>
+        <DropdownMenu>
+          <div className="inline-flex rounded-md shadow-sm">
+            {/* LEFT ZONE - unclickable label */}
+            <div
+              className="inline-flex items-center h-9 select-none rounded-l-md bg-primary px-3 text-sm font-medium text-primary-foreground"
+              aria-hidden="true"
+            >
+              Generate report
+            </div>
 
-          {/* RIGHT ZONE – chevron (menu trigger) */}
-          <DropdownMenu>
+            {/* RIGHT ZONE – chevron (menu trigger) */}
             <DropdownMenuTrigger asChild>
-              <Button
-                size="sm"
-                className="rounded-l-none px-2"
-                aria-haspopup="menu"
-                aria-expanded="false"
-                style={{ pointerEvents: "auto", cursor: "pointer" }}
-              >
+              <Button size="sm" className="rounded-l-none px-2" aria-label="More report options">
                 <ChevronDown className="h-4 w-4" />
-                <span className="sr-only">More report options</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => handleGenerateReport("executive_summary")}>
-                <FileText className="mr-2 h-4 w-4" /> Generate executive summary
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => handleGenerateReport("comprehensive")}>
-                <FileSignature className="mr-2 h-4 w-4" /> Generate comprehensive report
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => setIsModalOpen(true)}>
-                <Settings2 className="mr-2 h-4 w-4" /> Build a custom report
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+          </div>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => handleGenerateReport("executive_summary")}>
+              <FileText className="mr-2 h-4 w-4" /> Generate executive summary
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleGenerateReport("comprehensive")}>
+              <FileSignature className="mr-2 h-4 w-4" /> Generate comprehensive report
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => {
+                setIsModalOpen(true)
+                onBuildCustom()
+              }}
+            >
+              <Settings2 className="mr-2 h-4 w-4" /> Build a custom report
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Modal */}
