@@ -1,37 +1,15 @@
-"use client"
+import { PageHeader } from "@/components/page-header"
+import { SurveyManager } from "@/components/survey-manager"
 
-import { useState, useEffect } from "react"
-import { Monitor } from "@/components/monitor"
-import { ResearchAssistant } from "@/components/research-assistant"
-import { SurveyBuilder } from "@/components/survey-builder"
-import { ComingSoon } from "@/components/coming-soon"
-import ClientLayout from "./clientLayout"
+export default function Home() {
+  const breadcrumbs = [{ label: "Surveys", href: "/surveys" }]
 
-export default function ZencityPlatform() {
-  const [activeSection, setActiveSection] = useState("monitor")
-
-  // Get the active section from the URL or localStorage on initial load
-  useEffect(() => {
-    const section = window.location.pathname.split("/").pop() || "monitor"
-    if (["monitor", "research-assistant", "survey-builder"].includes(section)) {
-      setActiveSection(section)
-    }
-  }, [])
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case "monitor":
-        return <Monitor />
-      case "research-assistant":
-        return <ResearchAssistant />
-      case "survey-builder":
-        return <SurveyBuilder />
-      default:
-        // For any other section, show the coming soon component
-        return <ComingSoon section={activeSection} />
-    }
-  }
-
-  // The actual content is now rendered in the ClientLayout component
-  return <ClientLayout>{renderContent()}</ClientLayout>
+  return (
+    <div className="flex flex-col h-screen">
+      <PageHeader title="Community Survey" breadcrumbs={breadcrumbs} />
+      <main className="flex-1 p-6 overflow-auto">
+        <SurveyManager />
+      </main>
+    </div>
+  )
 }

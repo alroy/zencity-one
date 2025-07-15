@@ -13,7 +13,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { GripVertical, PlusCircle, XCircle } from "lucide-react"
+import { GripVertical, PlusCircle, XCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -73,14 +73,17 @@ const advancedWidgets: ReportWidget[] = [
 interface ReportBuilderModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  surveyId: string
 }
 
-export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalProps) {
+export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuilderModalProps) {
   const { toast } = useToast()
   const [selectedWidgets, setSelectedWidgets] = useState<ReportWidget[]>([])
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const handleClose = () => {
+    if (isGenerating) return
     onOpenChange(false)
     // Reset state after a short delay to allow for closing animation
     setTimeout(() => {
@@ -125,7 +128,7 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
     setDraggedItem(null)
   }
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
     if (selectedWidgets.length === 0) {
       toast({
         title: "No Widgets Selected",
@@ -135,22 +138,44 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
       return
     }
 
-    handleClose()
+    setIsGenerating(true)
+    try {
+      await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "custom",
+          surveyId,
+          widgets: selectedWidgets.map((w) => w.id),
+        }),
+      })
 
-    toast({
-      title: "Report Generation Started",
-      description: "Your report is being generated and will be available in the reports section.",
-    })
+      toast({
+        title: "Custom report generation started",
+        description: "Your report will be available in the reports section shortly.",
+        duration: 5000,
+      })
+      handleClose()
+    } catch (error) {
+      console.error("Failed to generate custom report:", error)
+      toast({
+        title: "Generation Failed",
+        description: "There was an error generating your report. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const isWidgetSelected = (widgetId: string) => !!selectedWidgets.find((w) => w.id === widgetId)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={isGenerating ? () => {} : onOpenChange}>
       <DialogContent
         className="max-w-4xl h-[700px] flex flex-col p-0"
-        onEscapeKeyDown={handleClose}
-        onPointerDownOutside={handleClose}
+        onEscapeKeyDown={isGenerating ? (e) => e.preventDefault() : handleClose}
+        onPointerDownOutside={isGenerating ? (e) => e.preventDefault() : handleClose}
       >
         <DialogHeader className="p-6 pb-4 flex-shrink-0">
           <DialogTitle>Build Your Report</DialogTitle>
@@ -238,11 +263,18 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
           </Card>
         </div>
         <DialogFooter className="p-6 bg-background border-t flex-shrink-0">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} disabled={isGenerating}>
             Cancel
           </Button>
-          <Button onClick={handleGenerateReport} disabled={selectedWidgets.length === 0}>
-            Generate Report
+          <Button onClick={handleGenerateReport} disabled={selectedWidgets.length === 0 || isGenerating}>
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Report"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

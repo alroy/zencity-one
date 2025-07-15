@@ -5,7 +5,6 @@ import { SurveyList, type Survey } from "@/components/survey-list"
 import { SurveyTemplateModal } from "@/components/survey-template-modal"
 import { SurveySettings } from "@/components/survey-settings"
 import PageHeader from "@/components/page-header"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   ClarifyingSurveyModal,
@@ -18,6 +17,7 @@ import { LayoutTemplate, Calendar, Share2 } from "lucide-react"
 import type { Question } from "@/components/questionnaire-builder"
 import type { GeneratedSurveyData } from "@/components/survey-preview-modal"
 import { ReportBuilderModal } from "@/components/report-builder-modal"
+import { ReportActions } from "@/components/report-actions"
 import { cn } from "@/lib/utils"
 
 /* ───────────────────────────────────────────────────────── helpers ── */
@@ -255,9 +255,7 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
             ]}
             onNavigate={handleBreadcrumb}
             actions={
-              <Button size="sm" onClick={() => setShowReportBuilderModal(true)}>
-                Generate Report
-              </Button>
+              <ReportActions surveyId={selectedSurvey.id} onBuildCustom={() => setShowReportBuilderModal(true)} />
             }
           />
 
@@ -289,7 +287,13 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
           <SurveyResultsPlaceholder />
         </div>
 
-        <ReportBuilderModal open={showReportBuilderModal} onOpenChange={setShowReportBuilderModal} />
+        {selectedSurvey && (
+          <ReportBuilderModal
+            open={showReportBuilderModal}
+            onOpenChange={setShowReportBuilderModal}
+            surveyId={selectedSurvey.id}
+          />
+        )}
       </>
     )
   }
