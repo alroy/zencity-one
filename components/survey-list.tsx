@@ -589,3 +589,5 @@ export function SurveyList({
     </div>
   )
 }
+
+export default SurveyList
