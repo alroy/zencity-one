@@ -156,41 +156,47 @@ export function ReportBuilderModal({ open, onOpenChange }: ReportBuilderModalPro
           <DialogTitle>Build Your Report</DialogTitle>
           <DialogDescription>Add, remove, and reorder widgets to customize your report.</DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-0 px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-0 px-6 relative z-0">
           {/* Left Panel: Available Widgets */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold">Available Widgets</h3>
-            <ScrollArea className="flex-grow pr-4 -mr-4">
-              <Accordion type="multiple" defaultValue={["dashboard", "advanced"]} className="w-full">
-                <AccordionItem value="dashboard">
-                  <AccordionTrigger>Dashboard Widgets</AccordionTrigger>
-                  <AccordionContent className="space-y-2">
-                    {dashboardWidgets.map((widget) => (
-                      <WidgetCard
-                        key={widget.id}
-                        widget={widget}
-                        onAdd={addWidget}
-                        isSelected={isWidgetSelected(widget.id)}
-                      />
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="advanced">
-                  <AccordionTrigger>Advanced Widgets</AccordionTrigger>
-                  <AccordionContent className="space-y-2">
-                    {advancedWidgets.map((widget) => (
-                      <WidgetCard
-                        key={widget.id}
-                        widget={widget}
-                        onAdd={addWidget}
-                        isSelected={isWidgetSelected(widget.id)}
-                      />
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </ScrollArea>
-          </div>
+          <Card className="flex flex-col">
+            <CardHeader>
+              <CardTitle>Available Widgets</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="pr-4">
+                  <Accordion type="multiple" defaultValue={["dashboard", "advanced"]} className="w-full">
+                    <AccordionItem value="dashboard">
+                      <AccordionTrigger>Dashboard Widgets</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                        {dashboardWidgets.map((widget) => (
+                          <WidgetCard
+                            key={widget.id}
+                            widget={widget}
+                            onAdd={addWidget}
+                            isSelected={isWidgetSelected(widget.id)}
+                          />
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="advanced">
+                      <AccordionTrigger>Advanced Widgets</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                        {advancedWidgets.map((widget) => (
+                          <WidgetCard
+                            key={widget.id}
+                            widget={widget}
+                            onAdd={addWidget}
+                            isSelected={isWidgetSelected(widget.id)}
+                          />
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
 
           {/* Right Panel: Selected Widgets */}
           <Card className="flex flex-col">
