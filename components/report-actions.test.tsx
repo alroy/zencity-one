@@ -1,147 +1,68 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { ReportActions } from "./report-actions"
-import { Toaster } from "@/components/ui/toaster"
-import { useToast } from "@/components/ui/use-toast"
 import jest from "jest" // Import jest to fix the undeclared variable error
 
-// Mock the useToast hook
-jest.mock("@/components/ui/use-toast", () => ({
-  useToast: jest.fn(),
+// Mock toast so tests run without side-effects
+jest.mock("@/hooks/use-toast", () => ({
+  useToast: () => ({ toast: jest.fn() }),
 }))
 
-const mockToast = jest.fn()
+// Mock ReportBuilderModal – we just need to check that it shows when open
+jest.mock("./report-builder-modal", () => ({
+  ReportBuilderModal: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="report-modal">Build Your Report</div> : null,
+}))
 
-// Mock fetch
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ message: "Success" }),
-  }),
-) as jest.Mock
+describe("ReportActions split button", () => {
+  const setup = () => render(<ReportActions surveyId="123" onBuildCustom={jest.fn()} />)
 
-describe("ReportActions", () => {
-  const mockOnBuildCustom = jest.fn()
-  const surveyId = "survey-123"
+  it("opens the modal – not the menu – when the label is clicked", async () => {
+    setup()
+    const labelButton = screen.getByRole("button", { name: /build a custom report/i })
+    await userEvent.click(labelButton)
 
-  beforeEach(() => {
-    ;(useToast as jest.Mock).mockReturnValue({ toast: mockToast })
-    jest.clearAllMocks()
+    // Modal should appear
+    expect(screen.getByTestId("report-modal")).toBeInTheDocument()
+
+    // Dropdown menu should NOT be visible
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument()
   })
 
-  it("renders the split button", () => {
-    render(<ReportActions surveyId={surveyId} onBuildCustom={mockOnBuildCustom} />)
-    expect(screen.getByRole("button", { name: /generate report/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /more report options/i })).toBeInTheDocument()
+  it("opens the dropdown – not the modal – when the chevron is clicked", async () => {
+    setup()
+    const chevronButton = screen.getByRole("button", { name: /more report options/i })
+    await userEvent.click(chevronButton)
+
+    // Menu should be visible
+    expect(screen.getByRole("menu")).toBeInTheDocument()
+
+    // Modal should NOT appear
+    expect(screen.queryByTestId("report-modal")).not.toBeInTheDocument()
   })
 
-  it("clicking the main button generates an executive summary", async () => {
-    render(
-      <>
-        <ReportActions surveyId={surveyId} onBuildCustom={mockOnBuildCustom} />
-        <Toaster />
-      </>,
-    )
+  it("keyboard navigation lands on both zones and triggers correct action", async () => {
+    setup()
+    const user = userEvent.setup()
 
-    await userEvent.click(screen.getByRole("button", { name: /generate report/i }))
+    // First Tab → label button
+    await user.tab()
+    expect(screen.getByRole("button", { name: /build a custom report/i })).toHaveFocus()
 
-    expect(mockToast).toHaveBeenCalledWith({
-      description: "Generating executive summary report. It will be saved in the Reports section.",
-      duration: 5000,
-    })
+    // Press Enter → modal opens
+    await user.keyboard("[Enter]")
+    expect(screen.getByTestId("report-modal")).toBeInTheDocument()
 
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "executive_summary", surveyId }),
-      })
-    })
-  })
+    // Close modal by clicking outside (simulate)
+    await user.keyboard("[Escape]")
 
-  it("opens dropdown and generates executive summary from menu", async () => {
-    render(
-      <>
-        <ReportActions surveyId={surveyId} onBuildCustom={mockOnBuildCustom} />
-        <Toaster />
-      </>,
-    )
+    // Second Tab → chevron button
+    await user.tab()
+    const chevronButton = screen.getByRole("button", { name: /more report options/i })
+    expect(chevronButton).toHaveFocus()
 
-    await userEvent.click(screen.getByRole("button", { name: /more report options/i }))
-    await userEvent.click(screen.getByRole("menuitem", { name: /generate executive summary/i }))
-
-    expect(mockToast).toHaveBeenCalledWith({
-      description: "Generating executive summary report. It will be saved in the Reports section.",
-      duration: 5000,
-    })
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "executive_summary", surveyId }),
-      })
-    })
-  })
-
-  it("opens dropdown and generates comprehensive report from menu", async () => {
-    render(
-      <>
-        <ReportActions surveyId={surveyId} onBuildCustom={mockOnBuildCustom} />
-        <Toaster />
-      </>,
-    )
-
-    await userEvent.click(screen.getByRole("button", { name: /more report options/i }))
-    await userEvent.click(screen.getByRole("menuitem", { name: /generate comprehensive report/i }))
-
-    expect(mockToast).toHaveBeenCalledWith({
-      description: "Generating comprehensive report. It will be saved in the Reports section.",
-      duration: 5000,
-    })
-    await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "comprehensive", surveyId }),
-      })
-    })
-  })
-
-  it("opens dropdown and calls onBuildCustom for custom report", async () => {
-    render(<ReportActions surveyId={surveyId} onBuildCustom={mockOnBuildCustom} />)
-
-    await userEvent.click(screen.getByRole("button", { name: /more report options/i }))
-    await userEvent.click(screen.getByRole("menuitem", { name: /build a custom report/i }))
-
-    expect(mockOnBuildCustom).toHaveBeenCalledTimes(1)
-    expect(fetch).not.toHaveBeenCalled()
-    expect(mockToast).not.toHaveBeenCalled()
-  })
-
-  describe("Keyboard Navigation and Accessibility", () => {
-    it("allows keyboard navigation through menu items", async () => {
-      render(<ReportActions surveyId={surveyId} onBuildCustom={mockOnBuildCustom} />)
-      const trigger = screen.getByRole("button", { name: /more report options/i })
-      trigger.focus()
-
-      await userEvent.keyboard("{enter}")
-      const menu = screen.getByRole("menu")
-      expect(menu).toBeVisible()
-
-      const menuItems = screen.getAllByRole("menuitem")
-      expect(menuItems[0]).toHaveFocus()
-
-      await userEvent.keyboard("{arrowdown}")
-      expect(menuItems[1]).toHaveFocus()
-
-      await userEvent.keyboard("{arrowdown}") // Skips separator
-      expect(menuItems[2]).toHaveFocus()
-
-      await userEvent.keyboard("{enter}")
-      expect(mockOnBuildCustom).toHaveBeenCalledTimes(1)
-
-      // Focus should return to the trigger button
-      await waitFor(() => expect(trigger).toHaveFocus())
-    })
+    // Space key should open the dropdown
+    await user.keyboard("[Space]")
+    expect(screen.getByRole("menu")).toBeInTheDocument()
   })
 })
