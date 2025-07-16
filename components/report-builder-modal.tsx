@@ -13,7 +13,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { GripVertical, PlusCircle, XCircle } from "lucide-react"
+import { GripVertical, PlusCircle, XCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -82,10 +82,13 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
   const [selectedWidgets, setSelectedWidgets] = useState<ReportWidget[]>([])
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
   const [outputFormat, setOutputFormat] = useState<"pdf" | "slides">("pdf")
+  const [isSaving, setIsSaving] = useState(false)
 
   const handleOpenChange = (isOpen: boolean) => {
+    if (isSaving) return // Prevent closing while saving
     onOpenChange(isOpen)
     if (!isOpen) {
+      // Reset state on close
       setTimeout(() => {
         setSelectedWidgets([])
         setDraggedItem(null)
@@ -131,8 +134,8 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
     setDraggedItem(null)
   }
 
-  const handleSaveReport = () => {
-    if (!surveyId) return
+  const handleSaveReport = async () => {
+    if (!surveyId || isSaving) return
     if (selectedWidgets.length === 0) {
       toast({
         title: "No Widgets Selected",
@@ -142,33 +145,48 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
       return
     }
 
-    handleOpenChange(false)
+    setIsSaving(true)
 
-    toast({
-      title: "Report saved",
-      description: `Your custom ${
-        outputFormat === "pdf" ? "report" : "slide deck"
-      } is being generated and will be available in the reports section shortly.`,
-      duration: 5000,
-    })
+    const reportConfig = {
+      type: "custom",
+      surveyId,
+      widgets: selectedWidgets.map((w) => w.id),
+      format: outputFormat,
+    }
 
-    fetch("/api/reports", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "custom",
-        surveyId,
-        widgets: selectedWidgets.map((w) => w.id),
-        format: outputFormat,
-      }),
-    }).catch((error) => {
+    try {
+      const response = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reportConfig),
+      })
+
+      if (!response.ok) {
+        throw new Error("Save failed")
+      }
+
+      // Close modal only after successful save
+      onOpenChange(false)
+
+      setTimeout(() => {
+        toast({
+          title: "Report saved",
+          description: `Your custom ${
+            outputFormat === "pdf" ? "report" : "slide deck"
+          } is being generated and will be available in the reports section shortly.`,
+          duration: 5000,
+        })
+      }, 150)
+    } catch (error) {
       console.error("Failed to save custom report:", error)
       toast({
         title: "Save Failed",
         description: "Could not save the report configuration. Please check your connection and try again.",
         variant: "destructive",
       })
-    })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const isWidgetSelected = (widgetId: string) => !!selectedWidgets.find((w) => w.id === widgetId)
@@ -279,6 +297,7 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
                 if (value) setOutputFormat(value)
               }}
               aria-label="Report output format"
+              disabled={isSaving}
             >
               <ToggleGroupItem value="pdf" aria-label="PDF">
                 PDF
@@ -289,11 +308,12 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
             </ToggleGroup>
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => handleOpenChange(false)}>
+            <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isSaving}>
               Cancel
             </Button>
-            <Button onClick={handleSaveReport} disabled={selectedWidgets.length === 0}>
-              Save Report
+            <Button onClick={handleSaveReport} disabled={selectedWidgets.length === 0 || isSaving}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSaving ? "Saving..." : "Save Report"}
             </Button>
           </div>
         </DialogFooter>
