@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ReportBuilderModal } from "@/components/report-builder-modal"
 import { PostSaveModal } from "@/components/post-save-modal"
 import { useToast } from "@/hooks/use-toast"
@@ -16,15 +17,16 @@ export function ReportActions({ surveyId, surveyTitle }: ReportActionsProps) {
   const [isPostSaveModalOpen, setIsPostSaveModalOpen] = useState(false)
   const [activeReportId, setActiveReportId] = useState<string | null>(null)
 
-  const handleGenerateStandardReport = () => {
+  const handleGenerateStandardReport = (reportType: "Executive Summary" | "Comprehensive") => {
     if (!surveyId) return
     toast({
       title: "Generating Report...",
-      description: `Your standard report for "${surveyTitle}" is being generated.`,
+      description: `Your ${reportType.toLowerCase()} report for "${surveyTitle}" is being generated.`,
       duration: 2000,
     })
     // Simulate API call and get a report ID
-    const mockReportId = `std-report-${surveyId}`
+    const reportTypePrefix = reportType === "Executive Summary" ? "exec-summary" : "comprehensive"
+    const mockReportId = `${reportTypePrefix}-report-${surveyId}`
     setActiveReportId(mockReportId)
 
     setTimeout(() => {
@@ -53,9 +55,19 @@ export function ReportActions({ surveyId, surveyTitle }: ReportActionsProps) {
         <p className="text-sm text-gray-500">Generate standard or custom reports for your survey.</p>
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={handleGenerateStandardReport}>
-          Generate Standard Report
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">Generate Standard Report</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => handleGenerateStandardReport("Executive Summary")}>
+              Executive Summary Report
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleGenerateStandardReport("Comprehensive")}>
+              Comprehensive Report
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button onClick={() => setIsReportBuilderOpen(true)}>Build Custom Report</Button>
       </div>
 
