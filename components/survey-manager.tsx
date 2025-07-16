@@ -85,6 +85,8 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
 
   /* ----- new state ----- */
   const [showReportBuilderModal, setShowReportBuilderModal] = useState(false)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null)
 
   /* ----- effects ----- */
   useEffect(() => {
@@ -138,6 +140,11 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
     setClarifyingQuery("")
     setPrePopulationData(undefined)
     setShowClarifyingModal(true)
+  }
+
+  const handleBuildReportClick = (surveyId: string) => {
+    setSelectedSurveyId(surveyId)
+    setIsReportModalOpen(true)
   }
 
   /* Template selection */

@@ -13,10 +13,11 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { GripVertical, PlusCircle, XCircle, Loader2 } from "lucide-react"
+import { GripVertical, PlusCircle, XCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 interface ReportWidget {
   id: string
@@ -73,22 +74,24 @@ const advancedWidgets: ReportWidget[] = [
 interface ReportBuilderModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  surveyId: string
+  surveyId: string | null
 }
 
 export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuilderModalProps) {
   const { toast } = useToast()
   const [selectedWidgets, setSelectedWidgets] = useState<ReportWidget[]>([])
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [outputFormat, setOutputFormat] = useState<"pdf" | "slides">("pdf")
 
-  const handleClose = () => {
-    if (isGenerating) return
-    onOpenChange(false)
-    // Reset state after a short delay to allow for closing animation
-    setTimeout(() => {
-      setSelectedWidgets([])
-    }, 300)
+  const handleOpenChange = (isOpen: boolean) => {
+    onOpenChange(isOpen)
+    if (!isOpen) {
+      setTimeout(() => {
+        setSelectedWidgets([])
+        setDraggedItem(null)
+        setOutputFormat("pdf")
+      }, 300)
+    }
   }
 
   const addWidget = (widget: ReportWidget) => {
@@ -128,61 +131,56 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
     setDraggedItem(null)
   }
 
-  const handleGenerateReport = async () => {
+  const handleSaveReport = () => {
+    if (!surveyId) return
     if (selectedWidgets.length === 0) {
       toast({
         title: "No Widgets Selected",
-        description: "Please add at least one widget to generate a report.",
+        description: "Please add at least one widget to save a report.",
         variant: "destructive",
       })
       return
     }
 
-    setIsGenerating(true)
-    try {
-      await fetch("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "custom",
-          surveyId,
-          widgets: selectedWidgets.map((w) => w.id),
-        }),
-      })
+    handleOpenChange(false)
 
+    toast({
+      title: "Report saved",
+      description: `Your custom ${
+        outputFormat === "pdf" ? "report" : "slide deck"
+      } is being generated and will be available in the reports section shortly.`,
+      duration: 5000,
+    })
+
+    fetch("/api/reports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "custom",
+        surveyId,
+        widgets: selectedWidgets.map((w) => w.id),
+        format: outputFormat,
+      }),
+    }).catch((error) => {
+      console.error("Failed to save custom report:", error)
       toast({
-        title: "Custom report generation started",
-        description: "Your report will be available in the reports section shortly.",
-        duration: 5000,
-      })
-      handleClose()
-    } catch (error) {
-      console.error("Failed to generate custom report:", error)
-      toast({
-        title: "Generation Failed",
-        description: "There was an error generating your report. Please try again.",
+        title: "Save Failed",
+        description: "Could not save the report configuration. Please check your connection and try again.",
         variant: "destructive",
       })
-    } finally {
-      setIsGenerating(false)
-    }
+    })
   }
 
   const isWidgetSelected = (widgetId: string) => !!selectedWidgets.find((w) => w.id === widgetId)
 
   return (
-    <Dialog open={open} onOpenChange={isGenerating ? () => {} : onOpenChange}>
-      <DialogContent
-        className="max-w-4xl h-[700px] flex flex-col p-0"
-        onEscapeKeyDown={isGenerating ? (e) => e.preventDefault() : handleClose}
-        onPointerDownOutside={isGenerating ? (e) => e.preventDefault() : handleClose}
-      >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-4xl h-[700px] flex flex-col p-0">
         <DialogHeader className="p-6 pb-4 flex-shrink-0">
           <DialogTitle>Build Your Report</DialogTitle>
           <DialogDescription>Add, remove, and reorder widgets to customize your report.</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-0 px-6 overflow-hidden">
-          {/* Left Panel: Available Widgets */}
           <Card className="flex flex-col overflow-hidden">
             <CardHeader className="flex-shrink-0">
               <CardTitle>Available Widgets</CardTitle>
@@ -223,16 +221,17 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
             </CardContent>
           </Card>
 
-          {/* Right Panel: Selected Widgets */}
           <Card className="flex flex-col overflow-hidden">
             <CardHeader className="flex-shrink-0">
-              <CardTitle>Your Report ({selectedWidgets.length})</CardTitle>
+              <CardTitle>
+                Your {outputFormat === "pdf" ? "Report" : "Slides"} ({selectedWidgets.length})
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 min-h-0">
               <ScrollArea className="h-full">
                 <div className="space-y-2 pr-2">
                   {selectedWidgets.length > 0 ? (
-                    selectedWidgets.map((widget) => (
+                    selectedWidgets.map((widget, index) => (
                       <div
                         key={widget.id}
                         draggable
@@ -245,7 +244,14 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
                         )}
                       >
                         <GripVertical className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0" />
-                        <span className="font-medium flex-grow">{widget.name}</span>
+                        <div className="flex-grow flex items-center">
+                          {outputFormat === "slides" && (
+                            <span className="text-sm font-normal text-gray-500 mr-2 w-14 shrink-0">
+                              Slide {index + 1}:
+                            </span>
+                          )}
+                          <span className="font-medium">{widget.name}</span>
+                        </div>
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeWidget(widget.id)}>
                           <XCircle className="h-5 w-5 text-gray-500 hover:text-destructive" />
                           <span className="sr-only">Remove {widget.name}</span>
@@ -262,20 +268,34 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuild
             </CardContent>
           </Card>
         </div>
-        <DialogFooter className="p-6 bg-background border-t flex-shrink-0">
-          <Button variant="outline" onClick={handleClose} disabled={isGenerating}>
-            Cancel
-          </Button>
-          <Button onClick={handleGenerateReport} disabled={selectedWidgets.length === 0 || isGenerating}>
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              "Generate Report"
-            )}
-          </Button>
+        <DialogFooter className="p-6 bg-background border-t flex-shrink-0 flex-col-reverse sm:flex-row sm:justify-between gap-4">
+          <div className="flex items-center gap-2 justify-center sm:justify-start">
+            <span className="text-sm font-medium text-gray-700">Output Format:</span>
+            <ToggleGroup
+              type="single"
+              defaultValue="pdf"
+              value={outputFormat}
+              onValueChange={(value: "pdf" | "slides") => {
+                if (value) setOutputFormat(value)
+              }}
+              aria-label="Report output format"
+            >
+              <ToggleGroupItem value="pdf" aria-label="PDF">
+                PDF
+              </ToggleGroupItem>
+              <ToggleGroupItem value="slides" aria-label="Slides">
+                Slides
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveReport} disabled={selectedWidgets.length === 0}>
+              Save Report
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
