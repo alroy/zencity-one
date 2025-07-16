@@ -14,36 +14,36 @@ export function ReportActions({ surveyId, surveyTitle }: ReportActionsProps) {
   const { toast } = useToast()
   const [isReportBuilderOpen, setIsReportBuilderOpen] = useState(false)
   const [isPostSaveModalOpen, setIsPostSaveModalOpen] = useState(false)
-  const [activeReportId, setActiveReportId] = useState<string | null>(null)
+  const [lastClosedAt, setLastClosedAt] = useState(0)
 
   const handleGenerateStandardReport = () => {
     if (!surveyId) return
     toast({
       title: "Generating Report...",
       description: `Your standard report for "${surveyTitle}" is being generated.`,
-      duration: 2000,
     })
-    // Simulate API call and get a report ID
-    const mockReportId = `std-report-${surveyId}`
-    setActiveReportId(mockReportId)
-
+    // Simulate API call
     setTimeout(() => {
       setIsPostSaveModalOpen(true)
     }, 2000)
   }
 
-  const handleCustomReportSaveSuccess = (reportId: string) => {
-    setActiveReportId(reportId)
-    toast({
-      title: "Report configuration saved",
-      description: "Your custom report is being generated.",
-      duration: 3000,
-    })
+  const handleReportBuilderChange = (open: boolean) => {
+    // Guard to prevent the modal from reopening immediately after closing.
+    // This can happen due to race conditions or state updates in parent components.
+    if (open && Date.now() - lastClosedAt < 500) {
+      return
+    }
 
-    // Display the "Report Saved" modal after the toast has been dismissed.
-    setTimeout(() => {
-      setIsPostSaveModalOpen(true)
-    }, 3500) // Slightly longer than toast duration
+    if (!open) {
+      setLastClosedAt(Date.now())
+    }
+    setIsReportBuilderOpen(open)
+  }
+
+  const openReportBuilder = () => {
+    // This function ensures the guard is respected when opening manually
+    handleReportBuilderChange(true)
   }
 
   return (
@@ -56,17 +56,18 @@ export function ReportActions({ surveyId, surveyTitle }: ReportActionsProps) {
         <Button variant="outline" onClick={handleGenerateStandardReport}>
           Generate Standard Report
         </Button>
-        <Button onClick={() => setIsReportBuilderOpen(true)}>Build Custom Report</Button>
+        <Button onClick={openReportBuilder}>Build Custom Report</Button>
       </div>
 
-      <ReportBuilderModal
-        open={isReportBuilderOpen}
-        onOpenChange={setIsReportBuilderOpen}
-        surveyId={surveyId}
-        onSaveSuccess={handleCustomReportSaveSuccess}
-      />
+      <ReportBuilderModal open={isReportBuilderOpen} onOpenChange={handleReportBuilderChange} surveyId={surveyId} />
 
-      <PostSaveModal open={isPostSaveModalOpen} onOpenChange={setIsPostSaveModalOpen} reportId={activeReportId} />
+      <PostSaveModal
+        open={isPostSaveModalOpen}
+        onOpenChange={setIsPostSaveModalOpen}
+        title="Standard Report Generated"
+        description={`Your standard report for "${surveyTitle}" is ready.`}
+        surveyId={surveyId}
+      />
     </div>
   )
 }

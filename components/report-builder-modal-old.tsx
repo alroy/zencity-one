@@ -75,10 +75,9 @@ interface ReportBuilderModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   surveyId: string | null
-  onSaveSuccess: (reportId: string) => void
 }
 
-export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess }: ReportBuilderModalProps) {
+export function ReportBuilderModal({ open, onOpenChange, surveyId }: ReportBuilderModalProps) {
   const { toast } = useToast()
   const [selectedWidgets, setSelectedWidgets] = useState<ReportWidget[]>([])
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
@@ -166,12 +165,18 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
         throw new Error("Save failed")
       }
 
-      const result = await response.json()
-      const reportId = result.id
-
-      // Close this modal and trigger the parent's success handler
+      // Close modal only after successful save
       onOpenChange(false)
-      onSaveSuccess(reportId)
+
+      setTimeout(() => {
+        toast({
+          title: "Report saved",
+          description: `Your custom ${
+            outputFormat === "pdf" ? "report" : "slide deck"
+          } is being generated and will be available in the reports section shortly.`,
+          duration: 5000,
+        })
+      }, 150)
     } catch (error) {
       console.error("Failed to save custom report:", error)
       toast({
