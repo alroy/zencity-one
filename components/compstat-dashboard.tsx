@@ -19,9 +19,15 @@ import {
   Activity,
   Target,
   Heart,
+  Phone,
+  UserCheck,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Info,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
 
 interface CompStatDashboardProps {
   onSectionChange?: (section: string) => void
@@ -33,7 +39,7 @@ const mockData = {
   lastUpdated: new Date(),
   kpis: {
     crimeRate: { current: 372, previous: 423, change: -12 },
-    clearanceRate: { current: 68, change: 3 },
+    clearanceRate: { current: 68, previous: 3 },
     responseTime: { current: 6.2, change: -0.3 },
     trustScore: { current: 72, change: 3 },
   },
@@ -43,6 +49,22 @@ const mockData = {
     citations: { current: 847, previous: 892 },
     callsForService: 3241,
     officerHours: 12450,
+  },
+  operationalTrends: {
+    partICrimes: [
+      { month: "Aug", value: 445 },
+      { month: "Sep", value: 423 },
+      { month: "Oct", value: 398 },
+      { month: "Nov", value: 385 },
+      { month: "Dec", value: 372 },
+    ],
+    arrests: [
+      { month: "Aug", value: 165 },
+      { month: "Sep", value: 187 },
+      { month: "Oct", value: 194 },
+      { month: "Nov", value: 198 },
+      { month: "Dec", value: 202 },
+    ],
   },
   communityMetrics: {
     trust: { value: 72, change: 3, trend: "up" },
@@ -80,6 +102,8 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
   const [selectedDivision, setSelectedDivision] = useState("Southwest")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [expandedMetrics, setExpandedMetrics] = useState<string[]>([])
+  const [hoveredMetric, setHoveredMetric] = useState<string | null>(null)
 
   // Update time every minute
   useEffect(() => {
@@ -126,6 +150,24 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
         {config.icon} {config.label}
       </Badge>
     )
+  }
+
+  const toggleMetricExpansion = (metricKey: string) => {
+    setExpandedMetrics((prev) =>
+      prev.includes(metricKey) ? prev.filter((key) => key !== metricKey) : [...prev, metricKey],
+    )
+  }
+
+  const getMetricIcon = (metricType: string) => {
+    const icons = {
+      partICrimes: Shield,
+      arrests: UserCheck,
+      citations: FileText,
+      callsForService: Phone,
+      officerHours: Clock,
+    }
+    const IconComponent = icons[metricType as keyof typeof icons] || Activity
+    return <IconComponent className="w-5 h-5" />
   }
 
   const demographicData = Object.entries(mockData.demographics).map(([key, value]) => ({
@@ -247,46 +289,290 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
 
           {/* Dual Metrics Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Operational Metrics */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="w-5 h-5 mr-2 text-[#3BD1BB]" />
-                  OPERATIONAL METRICS
+            <Card className="bg-gradient-to-br from-card to-muted/20 border-2 hover:border-accent/50 transition-all duration-300 shadow-lg hover:shadow-xl metric-hover-effect">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="p-2 rounded-lg bg-accent/10 mr-3">
+                      <Activity className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground">OPERATIONAL METRICS</h3>
+                      <p className="text-sm text-muted-foreground">Real-time performance indicators</p>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="animate-pulse-subtle bg-accent/10 text-accent border-accent/20">
+                    Live
+                  </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Part I Crimes</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">{mockData.operationalMetrics.partICrimes.previous} →</span>
-                    <span className="font-semibold">{mockData.operationalMetrics.partICrimes.current}</span>
-                    <span className="text-[#FC7753] text-sm">↓12%</span>
+              <CardContent className="space-y-4">
+                {/* Part I Crimes */}
+                <div
+                  className={`p-4 rounded-lg border transition-all duration-300 cursor-pointer metric-card ${
+                    hoveredMetric === "partICrimes"
+                      ? "border-accent bg-accent/5 shadow-md transform scale-[1.02]"
+                      : "border-border bg-card hover:bg-muted/10"
+                  }`}
+                  onMouseEnter={() => setHoveredMetric("partICrimes")}
+                  onMouseLeave={() => setHoveredMetric(null)}
+                  onClick={() => toggleMetricExpansion("partICrimes")}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      toggleMetricExpansion("partICrimes")
+                    }
+                  }}
+                  aria-expanded={expandedMetrics.includes("partICrimes")}
+                  aria-label="Part I Crimes metric details"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-full bg-destructive/10 transition-colors duration-300">
+                        {getMetricIcon("partICrimes")}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-foreground">Part I Crimes</span>
+                        <div className="text-xs text-muted-foreground">Serious offenses</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="text-right">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-muted-foreground">
+                            {mockData.operationalMetrics.partICrimes.previous} →
+                          </span>
+                          <span className="text-xl font-bold text-foreground animate-count-up">
+                            {mockData.operationalMetrics.partICrimes.current}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-end space-x-1">
+                          <TrendingDown className="w-4 h-4 text-chart-2" />
+                          <span className="text-sm font-semibold text-chart-2">12%</span>
+                        </div>
+                      </div>
+                      {expandedMetrics.includes("partICrimes") ? (
+                        <ChevronUp className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedMetrics.includes("partICrimes") && (
+                    <div className="mt-4 pt-4 border-t border-border animate-slide-in">
+                      <div className="h-20">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={mockData.operationalTrends.partICrimes}>
+                            <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[2, 2, 0, 0]} />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "hsl(var(--popover))",
+                                border: "1px solid hsl(var(--border))",
+                                borderRadius: "6px",
+                                color: "hsl(var(--popover-foreground))",
+                              }}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="mt-2 text-xs text-muted-foreground">5-month trend showing consistent decline</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Arrests Made */}
+                <div
+                  className={`p-4 rounded-lg border transition-all duration-300 cursor-pointer metric-card ${
+                    hoveredMetric === "arrests"
+                      ? "border-accent bg-accent/5 shadow-md transform scale-[1.02]"
+                      : "border-border bg-card hover:bg-muted/10"
+                  }`}
+                  onMouseEnter={() => setHoveredMetric("arrests")}
+                  onMouseLeave={() => setHoveredMetric(null)}
+                  onClick={() => toggleMetricExpansion("arrests")}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      toggleMetricExpansion("arrests")
+                    }
+                  }}
+                  aria-expanded={expandedMetrics.includes("arrests")}
+                  aria-label="Arrests made metric details"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-full bg-chart-2/10 transition-colors duration-300">
+                        {getMetricIcon("arrests")}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-foreground">Arrests Made</span>
+                        <div className="text-xs text-muted-foreground">Total apprehensions</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="text-right">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-muted-foreground">
+                            {mockData.operationalMetrics.arrests.previous} →
+                          </span>
+                          <span className="text-xl font-bold text-foreground animate-count-up">
+                            {mockData.operationalMetrics.arrests.current}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-end space-x-1">
+                          <TrendingUp className="w-4 h-4 text-chart-2" />
+                          <span className="text-sm font-semibold text-chart-2">8%</span>
+                        </div>
+                      </div>
+                      {expandedMetrics.includes("arrests") ? (
+                        <ChevronUp className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200" />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedMetrics.includes("arrests") && (
+                    <div className="mt-4 pt-4 border-t border-border animate-slide-in">
+                      <div className="h-20">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={mockData.operationalTrends.arrests}>
+                            <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[2, 2, 0, 0]} />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "hsl(var(--popover))",
+                                border: "1px solid hsl(var(--border))",
+                                borderRadius: "6px",
+                                color: "hsl(var(--popover-foreground))",
+                              }}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="mt-2 text-xs text-muted-foreground">Steady improvement in arrest rates</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Citations Issued */}
+                <div
+                  className={`p-4 rounded-lg border transition-all duration-300 cursor-pointer metric-card ${
+                    hoveredMetric === "citations"
+                      ? "border-accent bg-accent/5 shadow-md transform scale-[1.02]"
+                      : "border-border bg-card hover:bg-muted/10"
+                  }`}
+                  onMouseEnter={() => setHoveredMetric("citations")}
+                  onMouseLeave={() => setHoveredMetric(null)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Citations issued metric"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-full bg-chart-4/10 transition-colors duration-300">
+                        {getMetricIcon("citations")}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-foreground">Citations Issued</span>
+                        <div className="text-xs text-muted-foreground">Traffic & violations</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-muted-foreground">
+                          {mockData.operationalMetrics.citations.previous} →
+                        </span>
+                        <span className="text-xl font-bold text-foreground animate-count-up">
+                          {mockData.operationalMetrics.citations.current}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-end space-x-1">
+                        <TrendingDown className="w-4 h-4 text-chart-5" />
+                        <span className="text-sm font-semibold text-chart-5">5%</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Arrests Made</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">{mockData.operationalMetrics.arrests.previous} →</span>
-                    <span className="font-semibold">{mockData.operationalMetrics.arrests.current}</span>
-                    <span className="text-[#3BD1BB] text-sm">↑8%</span>
+
+                {/* Calls for Service */}
+                <div
+                  className={`p-4 rounded-lg border transition-all duration-300 metric-card ${
+                    hoveredMetric === "callsForService"
+                      ? "border-accent bg-accent/5 shadow-md transform scale-[1.02]"
+                      : "border-border bg-card hover:bg-muted/10"
+                  }`}
+                  onMouseEnter={() => setHoveredMetric("callsForService")}
+                  onMouseLeave={() => setHoveredMetric(null)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Calls for service metric"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-full bg-accent/10 transition-colors duration-300">
+                        {getMetricIcon("callsForService")}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-foreground">Calls for Service</span>
+                        <div className="text-xs text-muted-foreground">Total dispatched calls</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-accent animate-count-up">
+                        {mockData.operationalMetrics.callsForService.toLocaleString()}
+                      </span>
+                      <div className="text-xs text-muted-foreground">This month</div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Citations Issued</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">{mockData.operationalMetrics.citations.previous} →</span>
-                    <span className="font-semibold">{mockData.operationalMetrics.citations.current}</span>
-                    <span className="text-[#FC7753] text-sm">↓5%</span>
+
+                {/* Officer Hours */}
+                <div
+                  className={`p-4 rounded-lg border transition-all duration-300 metric-card ${
+                    hoveredMetric === "officerHours"
+                      ? "border-accent bg-accent/5 shadow-md transform scale-[1.02]"
+                      : "border-border bg-card hover:bg-muted/10"
+                  }`}
+                  onMouseEnter={() => setHoveredMetric("officerHours")}
+                  onMouseLeave={() => setHoveredMetric(null)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Officer hours metric"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-full bg-chart-3/10 transition-colors duration-300">
+                        {getMetricIcon("officerHours")}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-foreground">Officer Hours</span>
+                        <div className="text-xs text-muted-foreground">Total duty hours</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-chart-3 animate-count-up">
+                        {mockData.operationalMetrics.officerHours.toLocaleString()}
+                      </span>
+                      <div className="text-xs text-muted-foreground">This month</div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Calls for Service</span>
-                  <span className="font-semibold">{mockData.operationalMetrics.callsForService.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Officer Hours</span>
-                  <span className="font-semibold">{mockData.operationalMetrics.officerHours.toLocaleString()}</span>
+
+                <div className="mt-6 p-4 bg-accent/5 rounded-lg border border-accent/20">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Info className="w-4 h-4 text-accent" />
+                    <span className="text-sm font-semibold text-accent">Key Insights</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <div>• Crime reduction of 12% indicates effective patrol strategies</div>
+                    <div>• Arrest rate improvement suggests enhanced investigative work</div>
+                    <div>• High call volume requires continued resource allocation</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
