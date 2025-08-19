@@ -346,7 +346,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium">{team.name}</h3>
+                  <h3 className="font-semibold">{team.name}</h3>
                   {selectedTeam === team.id && <CheckCircle className="h-4 w-4 text-[#3BD1BB]" />}
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
@@ -366,7 +366,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Surveys</p>
-                <p className="text-2xl font-bold">{currentTeamData.activeSurveys}</p>
+                <p className="text-3xl font-bold">{currentTeamData.activeSurveys}</p>
               </div>
               <BarChart3 className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -378,7 +378,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Responses</p>
-                <p className="text-2xl font-bold">{currentTeamData.totalResponses}</p>
+                <p className="text-3xl font-bold">{currentTeamData.totalResponses}</p>
               </div>
               <Users className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -390,7 +390,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Sources Monitored</p>
-                <p className="text-2xl font-bold">{currentTeamData.sourcesMonitored}</p>
+                <p className="text-3xl font-bold">{currentTeamData.sourcesMonitored}</p>
               </div>
               <MessageCircle className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -402,7 +402,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Trending Topics</p>
-                <p className="text-2xl font-bold">{currentTeamData.trendingTopics}</p>
+                <p className="text-3xl font-bold">{currentTeamData.trendingTopics}</p>
               </div>
               <TrendingUp className="w-8 h-8 text-[#3BD1BB]" />
             </div>
@@ -416,7 +416,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
           {/* Header */}
           <div className="flex items-center space-x-2">
             <Users className="h-5 w-5 text-[#3BD1BB]" />
-            <h2 className="text-xl font-semibold text-gray-900">Community Engagement at a Glance</h2>
+            <h2 className="text-lg font-bold text-gray-800">Community Engagement at a Glance</h2>
           </div>
 
           <p className="text-sm text-gray-600">
@@ -440,7 +440,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Positive Sentiment</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed">
                   {selectedTeam === "cityManagement"
                     ? "City Management team has received positive feedback on downtown revitalization efforts. Residents appreciate the improved walkability and new business opportunities, though concerns about parking remain."
                     : selectedTeam === "parksRecreation"
@@ -467,7 +467,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Areas for Improvement</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed">
                   {selectedTeam === "cityManagement"
                     ? "Some residents have expressed concerns about parking availability downtown and the impact of construction on local businesses during the revitalization process."
                     : selectedTeam === "parksRecreation"
@@ -512,7 +512,9 @@ export function Monitor({ onSectionChange }: MonitorProps) {
       {/* Running Surveys */}
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Running Surveys {selectedTeam !== "all" && `- ${teamsData[selectedTeam].name}`}</CardTitle>
+          <CardTitle className="text-lg font-bold">
+            Running Surveys {selectedTeam !== "all" && `- ${teamsData[selectedTeam].name}`}
+          </CardTitle>
           <Button variant="outline" size="sm" onClick={() => onSectionChange && onSectionChange("survey-builder")}>
             <Eye className="w-4 h-4 mr-2" />
             Show All Surveys
@@ -530,7 +532,9 @@ export function Monitor({ onSectionChange }: MonitorProps) {
       {/* Trending Conversations */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Trending Conversations {selectedTeam !== "all" && `- ${teamsData[selectedTeam].name}`}</CardTitle>
+          <CardTitle className="text-lg font-bold">
+            Trending Conversations {selectedTeam !== "all" && `- ${teamsData[selectedTeam].name}`}
+          </CardTitle>
           <p className="text-sm text-gray-600">Sentiment analysis from social media channels</p>
         </CardHeader>
         <CardContent className="space-y-4">

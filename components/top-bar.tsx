@@ -84,10 +84,10 @@ export function TopBar({ customerName = "Willowbrook County" }: TopBarProps) {
             />
           </div>
           <div className="flex flex-col">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-500">
               Time in Willowbrook County: {currentTime} | Weather: {weather}
             </div>
-            <div className="text-lg font-medium text-gray-800">
+            <div className="text-xl font-semibold text-gray-800">
               {greeting} {customerName}
             </div>
           </div>

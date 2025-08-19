@@ -1,21 +1,23 @@
 "use client"
 
-import { useState, type DragEvent } from "react"
+import type React from "react"
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
-import { GripVertical, Loader2, PlusCircle, XCircle } from "lucide-react"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { GripVertical, PlusCircle, XCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 interface ReportWidget {
   id: string
@@ -23,25 +25,51 @@ interface ReportWidget {
   description: string
 }
 
-/* --- ORIGINAL WIDGET ARRAYS (order preserved) --------------------------- */
 const dashboardWidgets: ReportWidget[] = [
-  { id: "top-insights", name: "Top Insights", description: "Key takeaways and summary." },
-  { id: "overall-results", name: "Overall Results", description: "Aggregated results overview." },
-  { id: "results-by-measure", name: "Results by Measure", description: "Breakdown by specific measures." },
-  { id: "priority-matrix", name: "Priority Matrix", description: "Visualize importance vs. performance." },
+  {
+    id: "top-insights",
+    name: "Top Insights",
+    description: "Key takeaways and summary.",
+  },
+  {
+    id: "overall-results",
+    name: "Overall Results",
+    description: "Aggregated results overview.",
+  },
+  {
+    id: "results-by-measure",
+    name: "Results by Measure",
+    description: "Breakdown by specific measures.",
+  },
+  {
+    id: "priority-matrix",
+    name: "Priority Matrix",
+    description: "Visualize importance vs. performance.",
+  },
 ]
 
 const advancedWidgets: ReportWidget[] = [
-  { id: "demographic-breakdown", name: "Demographic Breakdown", description: "Filter results by demographics." },
-  { id: "trend-analysis", name: "Trend Analysis", description: "Compare results over time." },
-  { id: "geographic-heat-map", name: "Geographic Heat Map", description: "Visualize data on a map." },
-  { id: "sentiment-analysis", name: "Sentiment Analysis", description: "Analyze sentiment from open text." },
+  {
+    id: "demographic-breakdown",
+    name: "Demographic Breakdown",
+    description: "Filter results by demographics.",
+  },
+  {
+    id: "trend-analysis",
+    name: "Trend Analysis",
+    description: "Compare results over time.",
+  },
+  {
+    id: "geographic-heat-map",
+    name: "Geographic Heat Map",
+    description: "Visualize data on a map.",
+  },
+  {
+    id: "sentiment-analysis",
+    name: "Sentiment Analysis",
+    description: "Analyze sentiment from open text.",
+  },
 ]
-
-/* Unified list in original order (Dashboard first, Advanced second) */
-const allWidgets: ReportWidget[] = [...dashboardWidgets, ...advancedWidgets]
-
-/* ------------------------------------------------------------------------ */
 
 interface ReportBuilderModalProps {
   open: boolean
@@ -52,17 +80,16 @@ interface ReportBuilderModalProps {
 
 export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess }: ReportBuilderModalProps) {
   const { toast } = useToast()
-
   const [selectedWidgets, setSelectedWidgets] = useState<ReportWidget[]>([])
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
   const [outputFormat, setOutputFormat] = useState<"pdf" | "slides">("pdf")
   const [isSaving, setIsSaving] = useState(false)
 
-  /* ---------- Dialog open / close -------------------------------------- */
   const handleOpenChange = (isOpen: boolean) => {
-    if (isSaving) return
+    if (isSaving) return // Prevent closing while saving
     onOpenChange(isOpen)
     if (!isOpen) {
+      // Reset state on close
       setTimeout(() => {
         setSelectedWidgets([])
         setDraggedItem(null)
@@ -71,9 +98,8 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
     }
   }
 
-  /* ---------- Widget operations ---------------------------------------- */
   const addWidget = (widget: ReportWidget) => {
-    if (!selectedWidgets.some((w) => w.id === widget.id)) {
+    if (!selectedWidgets.find((w) => w.id === widget.id)) {
       setSelectedWidgets((prev) => [...prev, widget])
     }
   }
@@ -82,32 +108,33 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
     setSelectedWidgets((prev) => prev.filter((w) => w.id !== widgetId))
   }
 
-  const isWidgetSelected = (widgetId: string) => selectedWidgets.some((w) => w.id === widgetId)
-
-  /* ---------- Drag & drop ---------------------------------------------- */
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, id: string) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     setDraggedItem(id)
     e.dataTransfer.effectAllowed = "move"
   }
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
   }
-  const handleDrop = (e: DragEvent<HTMLDivElement>, targetId: string) => {
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetId: string) => {
     e.preventDefault()
     if (!draggedItem) return
-    const draggedIndex = selectedWidgets.findIndex((w) => w.id === draggedItem)
-    const targetIndex = selectedWidgets.findIndex((w) => w.id === targetId)
+
+    const draggedIndex = selectedWidgets.findIndex((item) => item.id === draggedItem)
+    const targetIndex = selectedWidgets.findIndex((item) => item.id === targetId)
+
     if (draggedIndex === -1 || targetIndex === -1) return
 
     const newOrder = [...selectedWidgets]
     const [removed] = newOrder.splice(draggedIndex, 1)
     newOrder.splice(targetIndex, 0, removed)
+
     setSelectedWidgets(newOrder)
     setDraggedItem(null)
   }
 
-  /* ---------- Save ------------------------------------------------------ */
   const handleSaveReport = async () => {
     if (!surveyId || isSaving) return
     if (selectedWidgets.length === 0) {
@@ -120,6 +147,7 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
     }
 
     setIsSaving(true)
+
     const reportConfig = {
       type: "custom",
       surveyId,
@@ -128,20 +156,27 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
     }
 
     try {
-      const res = await fetch("/api/reports", {
+      const response = await fetch("/api/reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reportConfig),
       })
-      if (!res.ok) throw new Error("Save failed")
-      const { id: reportId } = await res.json()
+
+      if (!response.ok) {
+        throw new Error("Save failed")
+      }
+
+      const result = await response.json()
+      const reportId = result.id
+
+      // Close this modal and trigger the parent's success handler
       onOpenChange(false)
       onSaveSuccess(reportId)
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      console.error("Failed to save custom report:", error)
       toast({
         title: "Save Failed",
-        description: "Unable to save the report configuration.",
+        description: "Could not save the report configuration. Please check your connection and try again.",
         variant: "destructive",
       })
     } finally {
@@ -149,40 +184,58 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
     }
   }
 
-  /* =============================== JSX ================================== */
+  const isWidgetSelected = (widgetId: string) => !!selectedWidgets.find((w) => w.id === widgetId)
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl h-[700px] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-4">
+        <DialogHeader className="p-6 pb-4 flex-shrink-0">
           <DialogTitle>Build Your Report</DialogTitle>
-          <DialogDescription>Select and reorder widgets for your custom report.</DialogDescription>
+          <DialogDescription>Add, remove, and reorder widgets to customize your report.</DialogDescription>
         </DialogHeader>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-0 px-6 overflow-hidden">
-          {/* ---------- LEFT – All Available Widgets ---------------------- */}
           <Card className="flex flex-col overflow-hidden">
-            <CardHeader>
+            <CardHeader className="flex-shrink-0">
               <CardTitle>Available Widgets</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 min-h-0">
               <ScrollArea className="h-full">
-                <div className="space-y-2 pr-4">
-                  {allWidgets.map((widget) => (
-                    <WidgetCard
-                      key={widget.id}
-                      widget={widget}
-                      onAdd={addWidget}
-                      isSelected={isWidgetSelected(widget.id)}
-                    />
-                  ))}
+                <div className="pr-4">
+                  <Accordion type="multiple" defaultValue={["dashboard", "advanced"]} className="w-full">
+                    <AccordionItem value="dashboard">
+                      <AccordionTrigger>Dashboard Widgets</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                        {dashboardWidgets.map((widget) => (
+                          <WidgetCard
+                            key={widget.id}
+                            widget={widget}
+                            onAdd={addWidget}
+                            isSelected={isWidgetSelected(widget.id)}
+                          />
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="advanced">
+                      <AccordionTrigger>Advanced Widgets</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                        {advancedWidgets.map((widget) => (
+                          <WidgetCard
+                            key={widget.id}
+                            widget={widget}
+                            onAdd={addWidget}
+                            isSelected={isWidgetSelected(widget.id)}
+                          />
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 </div>
               </ScrollArea>
             </CardContent>
           </Card>
 
-          {/* ---------- RIGHT – Selected Widgets / Preview ---------------- */}
           <Card className="flex flex-col overflow-hidden">
-            <CardHeader>
+            <CardHeader className="flex-shrink-0">
               <CardTitle>
                 Your {outputFormat === "pdf" ? "Report" : "Slides"} ({selectedWidgets.length})
               </CardTitle>
@@ -190,8 +243,8 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
             <CardContent className="flex-1 min-h-0">
               <ScrollArea className="h-full">
                 <div className="space-y-2 pr-2">
-                  {selectedWidgets.length ? (
-                    selectedWidgets.map((widget, idx) => (
+                  {selectedWidgets.length > 0 ? (
+                    selectedWidgets.map((widget, index) => (
                       <div
                         key={widget.id}
                         draggable
@@ -203,10 +256,12 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
                           draggedItem === widget.id && "opacity-50 scale-105 shadow-lg",
                         )}
                       >
-                        <GripVertical className="h-5 w-5 mr-3 text-gray-400" />
+                        <GripVertical className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0" />
                         <div className="flex-grow flex items-center">
                           {outputFormat === "slides" && (
-                            <span className="text-sm text-gray-500 mr-2 w-14 shrink-0">Slide {idx + 1}:</span>
+                            <span className="text-sm font-normal text-gray-500 mr-2 w-14 shrink-0">
+                              Slide {index + 1}:
+                            </span>
                           )}
                           <span className="font-medium">{widget.name}</span>
                         </div>
@@ -217,8 +272,8 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
                       </div>
                     ))
                   ) : (
-                    <div className="h-full flex items-center justify-center text-sm text-gray-500 border-2 border-dashed rounded-lg p-4 text-center">
-                      Add widgets from the left to build your report.
+                    <div className="h-full flex items-center justify-center text-center text-sm text-gray-500 border-2 border-dashed rounded-lg p-4">
+                      <p>Add widgets from the left to build your report.</p>
                     </div>
                   )}
                 </div>
@@ -226,26 +281,32 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
             </CardContent>
           </Card>
         </div>
-
-        {/* ---------- Footer -------------------------------------------- */}
-        <DialogFooter className="p-6 bg-background border-t flex-col-reverse sm:flex-row sm:justify-between gap-4">
+        <DialogFooter className="p-6 bg-background border-t flex-shrink-0 flex-col-reverse sm:flex-row sm:justify-between gap-4">
           <div className="flex items-center gap-2 justify-center sm:justify-start">
             <span className="text-sm font-medium text-gray-700">Output Format:</span>
             <ToggleGroup
               type="single"
+              defaultValue="pdf"
               value={outputFormat}
-              onValueChange={(v: "pdf" | "slides") => v && setOutputFormat(v)}
+              onValueChange={(value: "pdf" | "slides") => {
+                if (value) setOutputFormat(value)
+              }}
+              aria-label="Report output format"
               disabled={isSaving}
             >
-              <ToggleGroupItem value="pdf">PDF</ToggleGroupItem>
-              <ToggleGroupItem value="slides">Slides</ToggleGroupItem>
+              <ToggleGroupItem value="pdf" aria-label="PDF">
+                PDF
+              </ToggleGroupItem>
+              <ToggleGroupItem value="slides" aria-label="Slides">
+                Slides
+              </ToggleGroupItem>
             </ToggleGroup>
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isSaving}>
               Cancel
             </Button>
-            <Button onClick={handleSaveReport} disabled={!selectedWidgets.length || isSaving}>
+            <Button onClick={handleSaveReport} disabled={selectedWidgets.length === 0 || isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSaving ? "Saving..." : "Save Report"}
             </Button>
@@ -256,7 +317,6 @@ export function ReportBuilderModal({ open, onOpenChange, surveyId, onSaveSuccess
   )
 }
 
-/* ============================= Sub-components =========================== */
 function WidgetCard({
   widget,
   onAdd,

@@ -32,25 +32,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-// Import the useUser hook at the top of the file
 import { useUser } from "@/contexts/user-context"
 
 interface SidebarProps {
   activeSection: string
-  onSectionChange: (section: string) => void
+  onSectionChange?: (section: string) => void
 }
 
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   const [expandedSections, setExpandedSections] = useState(["city-explorer", "engagement-manager"])
   const { toast } = useToast()
-
-  // Inside the Sidebar component, add this line after the useState declarations
   const { avatar, userInfo } = useUser()
 
-  // Ensure the parent sections of active items are expanded
   useEffect(() => {
-    if (activeSection === "monitor" || activeSection === "research-assistant") {
+    if (
+      activeSection === "monitor" ||
+      activeSection === "research-assistant" ||
+      activeSection === "compstat-dashboard"
+    ) {
       setExpandedSections((prev) => (prev.includes("city-explorer") ? prev : [...prev, "city-explorer"]))
     } else if (activeSection === "survey-builder") {
       setExpandedSections((prev) => (prev.includes("survey-manager") ? prev : [...prev, "survey-manager"]))
@@ -70,6 +69,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   const handleSectionClick = (sectionId: string) => {
     const functionalSections = [
       "monitor",
+      "compstat-dashboard",
       "research-assistant",
       "survey-builder",
       "internal-platforms",
@@ -81,10 +81,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     ]
 
     if (functionalSections.includes(sectionId)) {
-      console.log(`Navigating to section: ${sectionId}`)
-      onSectionChange(sectionId)
+      onSectionChange?.(sectionId)
     } else {
-      // Show toast notification instead of navigating
       toast({
         title: "Feature Coming Soon",
         description: "This section is currently under development and will be available in a future update.",
@@ -100,6 +98,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       icon: Monitor,
       children: [
         { id: "monitor", title: "Monitor", icon: Monitor, badge: "3" },
+        { id: "compstat-dashboard", title: "CompStat Dashboard", icon: BarChart3 },
         { id: "research-assistant", title: "Research Assistant", icon: MessageSquare },
         { id: "workflows", title: "Workflows", icon: Workflow },
       ],
@@ -137,14 +136,12 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      {/* Header with Zencity Logo - Adjusted padding for alignment with salutation */}
       <div className="pt-6 px-4 pb-4">
         <div className="flex items-center">
           <Image src="/images/zencity-logo.png" alt="Zencity" width={120} height={30} className="h-auto" />
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((section) => (
           <div key={section.id}>
@@ -189,7 +186,6 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
           </div>
         ))}
 
-        {/* Admin Section */}
         <div className="pt-4 border-t border-gray-200">
           <Button
             variant="ghost"
@@ -202,7 +198,6 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         </div>
       </nav>
 
-      {/* User Section with Dropdown */}
       <div className="p-4 border-t border-gray-200">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -1,11 +1,12 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { UserProvider } from "@/contexts/user-context"
 import { Sidebar } from "@/components/sidebar"
-import { Toaster } from "@/components/ui/toaster"
 import { TopBar } from "@/components/top-bar"
+import { FloatingToolkit } from "@/components/floating-toolkit"
+import { Toaster } from "@/components/ui/toaster"
 import { Monitor } from "@/components/monitor"
 import { ResearchAssistant } from "@/components/research-assistant"
 import { SurveyManager } from "@/components/survey-manager"
@@ -13,28 +14,27 @@ import { ComingSoon } from "@/components/coming-soon"
 import { InternalPlatforms } from "@/components/integrations/internal-platforms"
 import { ResidentFeedbackPlatforms } from "@/components/integrations/resident-feedback"
 import { IntegrationHealth } from "@/components/integrations/integration-health"
-import { FloatingToolkit } from "@/components/floating-toolkit"
 import { ProfileInformation } from "@/components/profile/profile-information"
 import { NotificationPreferences } from "@/components/profile/notification-preferences"
 import { SecuritySettings } from "@/components/profile/security-settings"
-import { UserProvider } from "@/contexts/user-context"
+import { CompStatDashboard } from "@/components/compstat-dashboard"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [activeSection, setActiveSection] = useState("monitor")
   const [sectionOptions, setSectionOptions] = useState<any>(null)
-  const customerName = "Willowbrook County" // This would typically come from a context or API
+  const customerName = "Willowbrook County"
 
   const handleSectionChange = (section: string, options?: any) => {
-    console.log(`Setting active section to: ${section}`, options)
     setActiveSection(section)
     setSectionOptions(options || null)
   }
 
   const renderContent = () => {
-    console.log(`Rendering content for section: ${activeSection}`)
     switch (activeSection) {
       case "monitor":
         return <Monitor onSectionChange={handleSectionChange} />
+      case "compstat-dashboard":
+        return <CompStatDashboard onSectionChange={handleSectionChange} />
       case "research-assistant":
         return <ResearchAssistant onSectionChange={handleSectionChange} />
       case "survey-builder":
@@ -52,28 +52,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       case "security-settings":
         return <SecuritySettings />
       default:
-        // For any other section, show the coming soon component
+        // The original logic showed a "Coming Soon" component for unhandled sections.
+        // If you want to render the page content from Next.js routing instead,
+        // you can replace this with: return children;
         return <ComingSoon section={activeSection} />
     }
   }
 
   return (
-    <html lang="en">
-      <body>
-        <UserProvider>
-          <div className="flex h-screen bg-gray-50">
-            <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <TopBar customerName={customerName} />
-              <div className="flex-1 flex justify-center overflow-hidden">
-                <main className="w-[80%] overflow-y-auto">{renderContent()}</main>
-              </div>
-              <FloatingToolkit onSectionChange={handleSectionChange} />
-            </div>
-            <Toaster />
-          </div>
-        </UserProvider>
-      </body>
-    </html>
+    <UserProvider>
+      <div className="flex h-screen bg-gray-50 font-sans">
+        <Sidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <TopBar customerName={customerName} />
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">{renderContent()}</main>
+        </div>
+        <FloatingToolkit onSectionChange={handleSectionChange} />
+      </div>
+      <Toaster />
+    </UserProvider>
   )
 }

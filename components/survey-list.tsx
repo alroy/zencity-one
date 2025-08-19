@@ -450,13 +450,21 @@ export function SurveyList({
           <table className="w-full min-w-[800px]">
             <thead className="border-b bg-gray-50">
               <tr>
-                <th className="text-left p-4 font-medium text-gray-700">Survey title</th>
-                <th className="text-left p-4 font-medium text-gray-700">Status</th>
-                <th className="text-left p-4 font-medium text-gray-700 hidden md:table-cell">Template</th>
-                <th className="text-left p-4 font-medium text-gray-700">Cadence</th>
-                <th className="text-left p-4 font-medium text-gray-700">Distribution</th>
-                <th className="text-left p-4 font-medium text-gray-700 hidden lg:table-cell">Created</th>
-                <th className="text-left p-4 font-medium text-gray-700">Actions</th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Survey title
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  Template
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cadence</th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Distribution
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                  Created
+                </th>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
