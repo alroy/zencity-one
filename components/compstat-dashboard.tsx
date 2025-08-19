@@ -667,7 +667,7 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
             </div>
 
             {/* Dual Metrics Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-4">
               <Card
                 className={`bg-gradient-to-br from-card to-muted/20 border-2 hover:border-accent/50 transition-all duration-300 shadow-lg hover:shadow-xl metric-hover-effect ${isLoading ? "animate-pulse" : ""}`}
               >
@@ -1113,7 +1113,7 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
             </div>
 
             {/* Division Comparison Table */}
-            <Card className={`transition-all duration-300 ${isLoading ? "animate-pulse" : ""}`}>
+            <Card className={`transition-all duration-300 my-4 ${isLoading ? "animate-pulse" : ""}`}>
               <CardHeader>
                 <CardTitle>DIVISION COMPARISON</CardTitle>
               </CardHeader>
