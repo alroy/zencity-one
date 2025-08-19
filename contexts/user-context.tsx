@@ -16,7 +16,7 @@ interface UserContextType {
 const defaultUserInfo = {
   firstName: "John",
   lastName: "Smith",
-  jobTitle: "City Manager",
+  jobTitle: "Captain, Southwest Division",
 }
 
 const UserContext = createContext<UserContextType>({

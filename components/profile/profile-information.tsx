@@ -22,7 +22,7 @@ export function ProfileInformation() {
     lastName: userInfo.lastName,
     email: "john.smith@willowbrookcounty.gov",
     jobTitle: userInfo.jobTitle,
-    department: "City Management",
+    department: "Police Department",
     phone: "(303) 555-1234)",
     timezone: "America/Denver",
   })
