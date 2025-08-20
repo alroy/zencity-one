@@ -90,8 +90,8 @@ const mockDataByDivision = {
       { month: "Dec", overall: 74, hispanic: 63, black: 71, white: 80, asian: 75 },
     ],
   },
-  Southwest: {
-    currentDivision: "Southwest",
+  Patrol: {
+    currentDivision: "Patrol",
     lastUpdated: new Date(),
     kpis: {
       crimeRate: { current: 372, previous: 423, change: -12 },
@@ -145,8 +145,8 @@ const mockDataByDivision = {
       { month: "Dec", overall: 72, hispanic: 61, black: 69, white: 78, asian: 73 },
     ],
   },
-  Northeast: {
-    currentDivision: "Northeast",
+  Investigations: {
+    currentDivision: "Investigations",
     lastUpdated: new Date(),
     kpis: {
       crimeRate: { current: 298, previous: 351, change: -15 },
@@ -200,8 +200,8 @@ const mockDataByDivision = {
       { month: "Dec", overall: 78, hispanic: 72, black: 76, white: 82, asian: 79 },
     ],
   },
-  Central: {
-    currentDivision: "Central",
+  Traffic: {
+    currentDivision: "Traffic",
     lastUpdated: new Date(),
     kpis: {
       crimeRate: { current: 445, previous: 484, change: -8 },
@@ -255,8 +255,8 @@ const mockDataByDivision = {
       { month: "Dec", overall: 76, hispanic: 68, black: 74, white: 81, asian: 77 },
     ],
   },
-  Valley: {
-    currentDivision: "Valley",
+  "Special Operations": {
+    currentDivision: "Special Operations",
     lastUpdated: new Date(),
     kpis: {
       crimeRate: { current: 356, previous: 396, change: -10 },
@@ -310,8 +310,8 @@ const mockDataByDivision = {
       { month: "Dec", overall: 74, hispanic: 67, black: 72, white: 79, asian: 75 },
     ],
   },
-  Olympic: {
-    currentDivision: "Olympic",
+  "Community Services": {
+    currentDivision: "Community Services",
     lastUpdated: new Date(),
     kpis: {
       crimeRate: { current: 412, previous: 434, change: -5 },
@@ -365,8 +365,8 @@ const mockDataByDivision = {
       { month: "Dec", overall: 69, hispanic: 58, black: 66, white: 75, asian: 70 },
     ],
   },
-  Southeast: {
-    currentDivision: "Southeast",
+  Administrative: {
+    currentDivision: "Administrative",
     lastUpdated: new Date(),
     kpis: {
       crimeRate: { current: 467, previous: 482, change: -3 },
@@ -420,19 +420,131 @@ const mockDataByDivision = {
       { month: "Dec", overall: 67, hispanic: 55, black: 64, white: 73, asian: 68 },
     ],
   },
+  "Professional Standards": {
+    currentDivision: "Professional Standards",
+    lastUpdated: new Date(),
+    kpis: {
+      crimeRate: { current: 298, previous: 351, change: -15 },
+      clearanceRate: { current: 76, change: 5 },
+      responseTime: { current: 5.8, change: -0.4 },
+      trustScore: { current: 78, change: 4 },
+    },
+    operationalMetrics: {
+      partICrimes: { current: 298, previous: 351 },
+      arrests: { current: 189, previous: 176 },
+      citations: { current: 723, previous: 768 },
+      callsForService: 2987,
+      officerHours: 11200,
+    },
+    operationalTrends: {
+      partICrimes: [
+        { month: "Aug", value: 378 },
+        { month: "Sep", value: 351 },
+        { month: "Oct", value: 332 },
+        { month: "Nov", value: 315 },
+        { month: "Dec", value: 298 },
+      ],
+      arrests: [
+        { month: "Aug", value: 152 },
+        { month: "Sep", value: 176 },
+        { month: "Oct", value: 181 },
+        { month: "Nov", value: 185 },
+        { month: "Dec", value: 189 },
+      ],
+    },
+    communityMetrics: {
+      trust: { value: 78, change: 4, trend: "up" },
+      fairness: { value: 76, change: 3, trend: "up" },
+      voice: { value: 71, change: 2, trend: "up" },
+      respect: { value: 80, change: 6, trend: "up" },
+      safety: { value: 75, change: 2, trend: "up" },
+    },
+    demographics: {
+      hispanic: { trust: 72, gap: -6 },
+      black: { trust: 76, gap: -2 },
+      white: { trust: 82, gap: 4 },
+      asian: { trust: 79, gap: 1 },
+      other: { trust: 77, gap: -1 },
+    },
+    trustTrend: [
+      { month: "Jul", overall: 70, hispanic: 64, black: 72, white: 76, asian: 74 },
+      { month: "Aug", overall: 72, hispanic: 66, black: 74, white: 78, asian: 76 },
+      { month: "Sep", overall: 74, hispanic: 68, black: 75, white: 79, asian: 77 },
+      { month: "Oct", overall: 75, hispanic: 70, black: 75, white: 80, asian: 78 },
+      { month: "Nov", overall: 76, hispanic: 71, black: 75, white: 81, asian: 78 },
+      { month: "Dec", overall: 78, hispanic: 72, black: 76, white: 82, asian: 79 },
+    ],
+  },
+  Detention: {
+    currentDivision: "Detention",
+    lastUpdated: new Date(),
+    kpis: {
+      crimeRate: { current: 356, previous: 396, change: -10 },
+      clearanceRate: { current: 72, change: 3 },
+      responseTime: { current: 5.9, change: -0.3 },
+      trustScore: { current: 74, change: 2 },
+    },
+    operationalMetrics: {
+      partICrimes: { current: 356, previous: 396 },
+      arrests: { current: 194, previous: 181 },
+      citations: { current: 798, previous: 834 },
+      callsForService: 3089,
+      officerHours: 11950,
+    },
+    operationalTrends: {
+      partICrimes: [
+        { month: "Aug", value: 421 },
+        { month: "Sep", value: 396 },
+        { month: "Oct", value: 378 },
+        { month: "Nov", value: 367 },
+        { month: "Dec", value: 356 },
+      ],
+      arrests: [
+        { month: "Aug", value: 158 },
+        { month: "Sep", value: 181 },
+        { month: "Oct", value: 187 },
+        { month: "Nov", value: 191 },
+        { month: "Dec", value: 194 },
+      ],
+    },
+    communityMetrics: {
+      trust: { value: 74, change: 2, trend: "up" },
+      fairness: { value: 71, change: 1, trend: "up" },
+      voice: { value: 66, change: 0, trend: "stable" },
+      respect: { value: 76, change: 3, trend: "up" },
+      safety: { value: 72, change: 1, trend: "up" },
+    },
+    demographics: {
+      hispanic: { trust: 67, gap: -7 },
+      black: { trust: 72, gap: -2 },
+      white: { trust: 79, gap: 5 },
+      asian: { trust: 75, gap: 1 },
+      other: { trust: 73, gap: -1 },
+    },
+    trustTrend: [
+      { month: "Jul", overall: 68, hispanic: 60, black: 68, white: 74, asian: 71 },
+      { month: "Aug", overall: 70, hispanic: 62, black: 70, white: 76, asian: 73 },
+      { month: "Sep", overall: 71, hispanic: 64, black: 71, white: 77, asian: 74 },
+      { month: "Oct", overall: 72, hispanic: 65, black: 71, white: 78, asian: 74 },
+      { month: "Nov", overall: 73, hispanic: 66, black: 71, white: 78, asian: 74 },
+      { month: "Dec", overall: 74, hispanic: 67, black: 72, white: 79, asian: 75 },
+    ],
+  },
 }
 
 const divisions = [
-  { name: "Northeast", crime: -15, trust: 78, fairness: 76, response: 5.8, status: "leading" },
-  { name: "Central", crime: -8, trust: 76, fairness: 74, response: 6.1, status: "strong" },
-  { name: "Southwest", crime: -12, trust: 72, fairness: 68, response: 6.2, status: "current" },
-  { name: "Valley", crime: -10, trust: 74, fairness: 71, response: 5.9, status: "strong" },
-  { name: "Olympic", crime: -5, trust: 69, fairness: 65, response: 6.5, status: "watch" },
-  { name: "Southeast", crime: -3, trust: 67, fairness: 63, response: 6.8, status: "priority" },
+  { name: "Investigations", crime: -15, trust: 78, fairness: 76, response: 5.8, status: "leading" },
+  { name: "Traffic", crime: -8, trust: 76, fairness: 74, response: 6.1, status: "strong" },
+  { name: "Patrol", crime: -12, trust: 72, fairness: 68, response: 6.2, status: "current" },
+  { name: "Special Operations", crime: -10, trust: 74, fairness: 71, response: 5.9, status: "strong" },
+  { name: "Community Services", crime: -5, trust: 69, fairness: 65, response: 6.5, status: "watch" },
+  { name: "Administrative", crime: -3, trust: 67, fairness: 63, response: 6.8, status: "priority" },
+  { name: "Professional Standards", crime: -15, trust: 78, fairness: 76, response: 5.8, status: "leading" },
+  { name: "Detention", crime: -10, trust: 74, fairness: 71, response: 5.9, status: "strong" },
 ]
 
 export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
-  const [selectedDivision, setSelectedDivision] = useState("Southwest")
+  const [selectedDivision, setSelectedDivision] = useState("Patrol")
   const [isLoading, setIsLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -441,7 +553,7 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
   const [dataUpdating, setDataUpdating] = useState(false)
 
   const currentData =
-    mockDataByDivision[selectedDivision as keyof typeof mockDataByDivision] || mockDataByDivision.Southwest
+    mockDataByDivision[selectedDivision as keyof typeof mockDataByDivision] || mockDataByDivision.Patrol
 
   // Update time every minute
   useEffect(() => {
@@ -558,12 +670,14 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All Divisions">All Divisions</SelectItem>
-              <SelectItem value="Northeast">Northeast</SelectItem>
-              <SelectItem value="Central">Central</SelectItem>
-              <SelectItem value="Southwest">Southwest</SelectItem>
-              <SelectItem value="Valley">Valley</SelectItem>
-              <SelectItem value="Olympic">Olympic</SelectItem>
-              <SelectItem value="Southeast">Southeast</SelectItem>
+              <SelectItem value="Patrol">Patrol</SelectItem>
+              <SelectItem value="Investigations">Investigations</SelectItem>
+              <SelectItem value="Traffic">Traffic</SelectItem>
+              <SelectItem value="Special Operations">Special Operations</SelectItem>
+              <SelectItem value="Community Services">Community Services</SelectItem>
+              <SelectItem value="Administrative">Administrative</SelectItem>
+              <SelectItem value="Professional Standards">Professional Standards</SelectItem>
+              <SelectItem value="Detention">Detention</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" size="sm" disabled={isLoading}>
