@@ -682,7 +682,7 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
           </Select>
           <Button variant="outline" size="sm" disabled={isLoading}>
             <Download className="w-4 h-4 mr-2" />
-            Export PDF
+            Download CompStart Report
           </Button>
         </div>
       </div>
@@ -1284,7 +1284,7 @@ export function CompStatDashboard({ onSectionChange }: CompStatDashboardProps) {
                 <div>
                   <h4 className="text-sm font-semibold text-[#3BD1BB] mb-2">✅ WINS TO HIGHLIGHT</h4>
                   <ul className="text-xs space-y-1 text-gray-600">
-                    <li>• Trust up 3% after foot patrols</li>
+                    <li>Trust up 3% after foot patrols</li>
                     <li>• Crime down 12% month-over-month</li>
                     <li>• Best respect scores in 18 months</li>
                   </ul>
