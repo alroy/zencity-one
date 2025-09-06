@@ -43,6 +43,19 @@ export function SurveyPreviewModal({ open, onClose, surveyData, onOpenBuilder }:
     return audienceMap[methodValue] || "Unknown Method"
   }
 
+  const getDisplayDistributionMethod = (): string => {
+    const { surveyType, selectedProject } = surveyData.clarifyingFormData
+
+    if (surveyType === "diy" && selectedProject) {
+      return `DIY distribution via project ${selectedProject}`
+    }
+
+    return getDistributionMethodLabel(surveyData.distributionMethod)
+  }
+
+  const displayTitle = surveyData.clarifyingFormData.mainGoal || surveyData.title
+  const displayIntent = surveyData.clarifyingFormData.intent
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
@@ -54,16 +67,16 @@ export function SurveyPreviewModal({ open, onClose, surveyData, onOpenBuilder }:
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold text-gray-800">Title</h3>
-              <p className="text-sm text-gray-600">{surveyData.title}</p>
+              <p className="text-sm text-gray-600">{displayTitle}</p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-800">Goal</h3>
-              <p className="text-sm text-gray-600">{surveyData.goal}</p>
+              <h3 className="font-semibold text-gray-800">Intent</h3>
+              <p className="text-sm text-gray-600">{displayIntent}</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">Distribution Method</h3>
               <Badge variant="outline" className="mt-1">
-                {getDistributionMethodLabel(surveyData.distributionMethod)}
+                {getDisplayDistributionMethod()}
               </Badge>
             </div>
           </div>
