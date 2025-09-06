@@ -303,7 +303,7 @@ export function ClarifyingSurveyModal({
                     <RadioGroupItem value="diy" id="diy" className="mt-1" />
                     <div className="flex-1">
                       <Label htmlFor="diy" className="font-medium cursor-pointer">
-                        DIY Project Survey
+                        DIY Project
                       </Label>
                       <p className="text-sm text-gray-600 mt-1">
                         Create a survey for an existing project that you'll manage and distribute yourself.
