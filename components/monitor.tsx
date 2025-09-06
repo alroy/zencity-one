@@ -317,7 +317,7 @@ export function Monitor({ onSectionChange }: MonitorProps) {
     const sentimentConfig = {
       positive: { className: "bg-[#3BD1BB] text-white" },
       negative: { className: "bg-[#FC7753] text-white" },
-      mixed: { className: "bg-gray-200 text-gray-800" },
+      mixed: { className: "bg-gray-600 text-white" },
     }
 
     const config = sentimentConfig[sentiment as keyof typeof sentimentConfig]
