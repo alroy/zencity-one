@@ -209,11 +209,11 @@ export function SurveyList({
   // Get status badge with appropriate styling
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      draft: { label: "Draft", className: "bg-yellow-100 text-yellow-800" },
-      published: { label: "Published", className: "bg-blue-100 text-blue-800" },
-      distribution: { label: "Distribution", className: "bg-[#3BD1BB]/20 text-[#3BD1BB]" },
-      closed: { label: "Closed", className: "bg-[#FC7753]/20 text-[#FC7753]" },
-      canceled: { label: "Canceled", className: "bg-gray-100 text-gray-800" },
+      draft: { label: "Draft", className: "bg-yellow-200 text-yellow-900" },
+      published: { label: "Published", className: "bg-blue-200 text-blue-900" },
+      distribution: { label: "Distribution", className: "bg-[#3BD1BB] text-white" },
+      closed: { label: "Closed", className: "bg-[#FC7753] text-white" },
+      canceled: { label: "Canceled", className: "bg-gray-200 text-gray-900" },
     }
 
     const config = statusConfig[status as keyof typeof statusConfig]

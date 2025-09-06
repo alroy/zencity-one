@@ -22,6 +22,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export interface ClarifyingFormData {
   intent: string
@@ -29,12 +30,14 @@ export interface ClarifyingFormData {
   audience: string
   timelineDate?: Date
   timelineUrgency?: string
+  surveyPublishingDate?: Date // Added new field for DIY surveys
   tags: string[]
   originalQuery: string
   uploadedFiles?: File[]
+  surveyType: "zencity" | "diy"
+  selectedProject?: string
 }
 
-// Add new interface for pre-population
 export interface PrePopulationData {
   suggestedIntent?: string
   suggestedMainGoal?: string
@@ -42,6 +45,7 @@ export interface PrePopulationData {
   suggestedTags?: string[]
   suggestedTimelineUrgency?: string
   suggestedTimelineDate?: Date
+  suggestedSurveyPublishingDate?: Date // Added pre-population for new field
 }
 
 interface ClarifyingSurveyModalProps {
@@ -49,7 +53,7 @@ interface ClarifyingSurveyModalProps {
   onClose: () => void
   onSubmit: (formData: ClarifyingFormData) => void
   initialQuery: string
-  prePopulationData?: PrePopulationData // Add this line
+  prePopulationData?: PrePopulationData
 }
 
 const intentOptions = [
@@ -85,6 +89,16 @@ const tagsTaxonomy = [
 
 const timelineUrgencyOptions = ["ASAP", "Within 1 week", "Within 2 weeks", "Within 1 month"]
 
+const availableProjects = [
+  "Lincoln Park Initiative",
+  "Transportation 2030",
+  "Downtown Revitalization",
+  "Climate Action Plan",
+  "Housing Strategy Update",
+  "Parks Master Plan",
+  "Economic Development Strategy",
+]
+
 export function ClarifyingSurveyModal({
   open,
   onClose,
@@ -92,43 +106,46 @@ export function ClarifyingSurveyModal({
   initialQuery,
   prePopulationData,
 }: ClarifyingSurveyModalProps) {
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(0)
   const [intent, setIntent] = useState<string>("")
   const [mainGoal, setMainGoal] = useState<string>("")
   const [audience, setAudience] = useState<string>("")
   const [timelineDate, setTimelineDate] = useState<Date | undefined>()
   const [timelineUrgency, setTimelineUrgency] = useState<string>("none")
+  const [surveyPublishingDate, setSurveyPublishingDate] = useState<Date | undefined>() // Added state for new field
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
-  // Add these new state variables for file upload
+  const [surveyType, setSurveyType] = useState<"zencity" | "diy">("zencity")
+  const [selectedProject, setSelectedProject] = useState<string>("")
+
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [uploadError, setUploadError] = useState<string>("")
   const [isUploading, setIsUploading] = useState(false)
 
   useEffect(() => {
     if (open) {
-      // Reset all state when modal opens
-      setStep(1)
+      setStep(0)
+      setSurveyType("zencity")
+      setSelectedProject("")
 
-      // Pre-populate fields if data is provided
       if (prePopulationData) {
         setIntent(prePopulationData.suggestedIntent || "")
         setMainGoal(prePopulationData.suggestedMainGoal || "")
         setAudience(prePopulationData.suggestedAudience || "")
         setTimelineDate(prePopulationData.suggestedTimelineDate)
         setTimelineUrgency(prePopulationData.suggestedTimelineUrgency || "none")
+        setSurveyPublishingDate(prePopulationData.suggestedSurveyPublishingDate) // Added pre-population handling
         setSelectedTags(prePopulationData.suggestedTags || [])
       } else {
-        // Reset to empty if no pre-population data
         setIntent("")
         setMainGoal("")
         setAudience("")
         setTimelineDate(undefined)
         setTimelineUrgency("none")
+        setSurveyPublishingDate(undefined) // Reset new field
         setSelectedTags([])
       }
 
-      // Reset file upload state
       setUploadedFiles([])
       setUploadError("")
       setIsUploading(false)
@@ -144,7 +161,7 @@ export function ClarifyingSurveyModal({
 
     try {
       const validFiles: File[] = []
-      const maxSize = 10 * 1024 * 1024 // 10MB
+      const maxSize = 10 * 1024 * 1024
       const allowedTypes = [
         "application/pdf",
         "application/msword",
@@ -152,14 +169,12 @@ export function ClarifyingSurveyModal({
       ]
 
       for (const file of Array.from(files)) {
-        // Check file type
         if (!allowedTypes.includes(file.type)) {
           setUploadError(`"${file.name}" is not a supported file type. Please upload PDF or Word documents only.`)
           setIsUploading(false)
           return
         }
 
-        // Check file size
         if (file.size > maxSize) {
           setUploadError(`"${file.name}" exceeds the 10MB size limit. Please choose a smaller file.`)
           setIsUploading(false)
@@ -169,13 +184,11 @@ export function ClarifyingSurveyModal({
         validFiles.push(file)
       }
 
-      // Simulate upload delay for better UX
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       setUploadedFiles((prev) => [...prev, ...validFiles])
       setIsUploading(false)
 
-      // Clear the input so the same file can be uploaded again if needed
       event.target.value = ""
     } catch (error) {
       setUploadError("An error occurred while uploading the file. Please try again.")
@@ -210,7 +223,9 @@ export function ClarifyingSurveyModal({
   }
 
   const handleNext = () => {
-    if (step === 1 && isStep1Valid) {
+    if (step === 0 && isStep0Valid) {
+      setStep(1)
+    } else if (step === 1 && isStep1Valid) {
       setStep(2)
     } else if (step === 2) {
       setStep(3)
@@ -218,7 +233,9 @@ export function ClarifyingSurveyModal({
   }
 
   const handleBack = () => {
-    if (step === 2) {
+    if (step === 1) {
+      setStep(0)
+    } else if (step === 2) {
       setStep(1)
     } else if (step === 3) {
       setStep(2)
@@ -230,32 +247,96 @@ export function ClarifyingSurveyModal({
     onSubmit({
       intent,
       mainGoal,
-      audience: "representative", // Default audience since it's removed from UI
+      audience: "representative",
       timelineDate,
       timelineUrgency: timelineUrgency === "none" ? undefined : timelineUrgency,
+      surveyPublishingDate, // Include new field in submission
       tags: selectedTags,
       originalQuery: initialQuery,
-      uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined, // Add this line
+      uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+      surveyType,
+      selectedProject: surveyType === "diy" ? selectedProject : undefined,
     })
   }
 
+  const isStep0Valid = surveyType === "zencity" || (surveyType === "diy" && selectedProject)
   const isStep1Valid = intent && mainGoal.trim()
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Create Quick Survey: Step {step} of 3</DialogTitle>
+          <DialogTitle>Create Quick Survey: Step {step + 1} of 4</DialogTitle>
           <DialogDescription>
-            {step === 1
-              ? "First, tell us about the survey's purpose and audience."
-              : step === 2
-                ? "Now, add some optional tags to help categorize your survey."
-                : "Finally, you can upload additional context documents to help inform your survey (optional)."}
+            {step === 0
+              ? "First, let us know if this survey will be managed by Zencity or if it's a DIY project."
+              : step === 1
+                ? "Now, tell us about the survey's purpose and audience."
+                : step === 2
+                  ? "Add some optional tags to help categorize your survey."
+                  : "Finally, you can upload additional context documents to help inform your survey (optional)."}
           </DialogDescription>
         </DialogHeader>
 
-        {/* Step 1: Intent, Audience, Timeline */}
+        {step === 0 && (
+          <div className="space-y-6 py-4 pr-6">
+            <div>
+              <Label className="text-base font-medium">Survey Management</Label>
+              <p className="text-sm text-gray-600 mt-1 mb-4">Choose how this survey will be managed and distributed.</p>
+
+              <RadioGroup value={surveyType} onValueChange={(value: "zencity" | "diy") => setSurveyType(value)}>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                    <RadioGroupItem value="zencity" id="zencity" className="mt-1" />
+                    <div className="flex-1">
+                      <Label htmlFor="zencity" className="font-medium cursor-pointer">
+                        Zencity Managed Survey
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Zencity will handle the survey distribution, data collection, and analysis using our
+                        representative sampling methods.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                    <RadioGroupItem value="diy" id="diy" className="mt-1" />
+                    <div className="flex-1">
+                      <Label htmlFor="diy" className="font-medium cursor-pointer">
+                        DIY Project Survey
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Create a survey for an existing project that you'll manage and distribute yourself.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {surveyType === "diy" && (
+              <div>
+                <Label htmlFor="project-select">Select Project</Label>
+                <Select value={selectedProject} onValueChange={setSelectedProject}>
+                  <SelectTrigger
+                    id="project-select"
+                    className={cn("mt-1 w-full", !selectedProject && "text-muted-foreground")}
+                  >
+                    <SelectValue placeholder="Choose a project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableProjects.map((project) => (
+                      <SelectItem key={project} value={project}>
+                        {project}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        )}
+
         {step === 1 && (
           <div className="space-y-6 py-4 pr-6">
             <div>
@@ -285,56 +366,86 @@ export function ClarifyingSurveyModal({
               </Select>
             </div>
 
-            <div>
-              <Label>Timeline</Label>
-              <p className="text-sm text-gray-600 mb-2">When do you need the survey results?</p>
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="timeline-date" className="text-sm">
-                    Target Date
-                  </Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal mt-1",
-                          !timelineDate && "text-muted-foreground",
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {timelineDate ? format(timelineDate, "PPP") : <span>Select target date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={timelineDate} onSelect={setTimelineDate} initialFocus />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+            {surveyType === "zencity" ? (
+              // Original timeline section for Zencity Managed Surveys
+              <div>
+                <Label>Timeline</Label>
+                <p className="text-sm text-gray-600 mb-2">When do you need the survey results?</p>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="timeline-date" className="text-sm">
+                      Target Date
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal mt-1",
+                            !timelineDate && "text-muted-foreground",
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {timelineDate ? format(timelineDate, "PPP") : <span>Select target date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar mode="single" selected={timelineDate} onSelect={setTimelineDate} initialFocus />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
-                <div>
-                  <Label htmlFor="timeline-urgency" className="text-sm">
-                    Urgency Level
-                  </Label>
-                  <Select value={timelineUrgency} onValueChange={setTimelineUrgency}>
-                    <SelectTrigger className="mt-1 w-full">
-                      <SelectValue placeholder="Select urgency level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No specific deadline</SelectItem>
-                      <SelectItem value="ASAP">ASAP</SelectItem>
-                      <SelectItem value="Within 1 week">Within 1 week</SelectItem>
-                      <SelectItem value="Within 2 weeks">Within 2 weeks</SelectItem>
-                      <SelectItem value="Within 1 month">Within 1 month</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <Label htmlFor="timeline-urgency" className="text-sm">
+                      Urgency Level
+                    </Label>
+                    <Select value={timelineUrgency} onValueChange={setTimelineUrgency}>
+                      <SelectTrigger className="mt-1 w-full">
+                        <SelectValue placeholder="Select urgency level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No specific deadline</SelectItem>
+                        <SelectItem value="ASAP">ASAP</SelectItem>
+                        <SelectItem value="Within 1 week">Within 1 week</SelectItem>
+                        <SelectItem value="Within 2 weeks">Within 2 weeks</SelectItem>
+                        <SelectItem value="Within 1 month">Within 1 month</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              // New Survey Publishing Date section for DIY Project Surveys
+              <div>
+                <Label htmlFor="survey-publishing-date">Survey Publishing Date</Label>
+                <p className="text-sm text-gray-600 mb-2">When do you plan to publish this survey?</p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal mt-1",
+                        !surveyPublishingDate && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {surveyPublishingDate ? format(surveyPublishingDate, "PPP") : <span>Select publishing date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={surveyPublishingDate}
+                      onSelect={setSurveyPublishingDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Step 2: Tags */}
         {step === 2 && (
           <div className="py-4 pr-6 flex-grow flex flex-col">
             <Label>Tags (Optional)</Label>
@@ -359,7 +470,6 @@ export function ClarifyingSurveyModal({
           </div>
         )}
 
-        {/* Step 3: File Upload */}
         {step === 3 && (
           <div className="py-4 pr-6 flex-grow flex flex-col space-y-4">
             <div>
@@ -370,7 +480,6 @@ export function ClarifyingSurveyModal({
               </p>
             </div>
 
-            {/* Upload Area */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
               <input
                 type="file"
@@ -394,7 +503,6 @@ export function ClarifyingSurveyModal({
               </label>
             </div>
 
-            {/* Upload Progress */}
             {isUploading && (
               <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#3BD1BB]"></div>
@@ -402,7 +510,6 @@ export function ClarifyingSurveyModal({
               </div>
             )}
 
-            {/* Error Message */}
             {uploadError && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
                 <div className="flex items-start">
@@ -415,7 +522,6 @@ export function ClarifyingSurveyModal({
               </div>
             )}
 
-            {/* Uploaded Files List */}
             {uploadedFiles.length > 0 && (
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-700">Uploaded Files ({uploadedFiles.length})</Label>
@@ -450,7 +556,6 @@ export function ClarifyingSurveyModal({
               </div>
             )}
 
-            {/* File Guidelines */}
             <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
               <div className="flex items-start">
                 <div className="text-blue-400 mr-2">💡</div>
@@ -468,10 +573,24 @@ export function ClarifyingSurveyModal({
         )}
 
         <DialogFooter>
-          {step === 1 && (
+          {step === 0 && (
             <>
               <Button variant="outline" onClick={onClose}>
                 Cancel
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={!isStep0Valid}
+                className="bg-[#3BD1BB] hover:bg-[#2ab19e] text-white"
+              >
+                Next
+              </Button>
+            </>
+          )}
+          {step === 1 && (
+            <>
+              <Button variant="outline" onClick={handleBack}>
+                Back
               </Button>
               <Button
                 onClick={handleNext}

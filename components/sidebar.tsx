@@ -168,14 +168,18 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
                     key={item.id}
                     variant={activeSection === item.id ? "secondary" : "ghost"}
                     className={`w-full justify-start p-2 h-auto ${
-                      activeSection === item.id ? "bg-[#3BD1BB]/10 text-[#3BD1BB] hover:bg-[#3BD1BB]/20" : ""
+                      activeSection === item.id ? "bg-[#3BD1BB]/10 text-gray-900 hover:bg-[#3BD1BB]/20" : ""
                     }`}
                     onClick={() => handleSectionClick(item.id)}
                   >
-                    <item.icon className={`w-4 h-4 mr-2 ${activeSection === item.id ? "text-[#3BD1BB]" : ""}`} />
+                    <item.icon className={`w-4 h-4 mr-2 ${activeSection === item.id ? "text-gray-900" : ""}`} />
                     <span className="text-sm">{item.title}</span>
                     {item.badge && (
-                      <Badge className={`ml-auto ${activeSection === item.id ? "bg-[#3BD1BB]/20 text-[#3BD1BB]" : ""}`}>
+                      <Badge
+                        className={`ml-auto ${
+                          activeSection === item.id ? "bg-gray-900 text-white" : "bg-gray-600 text-white"
+                        }`}
+                      >
                         {item.badge}
                       </Badge>
                     )}
