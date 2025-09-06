@@ -266,7 +266,7 @@ export function ClarifyingSurveyModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Create Quick Survey: Step {step + 1} of 4</DialogTitle>
+          <DialogTitle>Smart Survey Composer: Step {step + 1} of 4</DialogTitle>
           <DialogDescription>
             {step === 0
               ? "First, let us know if this survey will be managed by Zencity or if it's a DIY project."

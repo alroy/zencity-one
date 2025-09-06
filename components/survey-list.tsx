@@ -286,7 +286,7 @@ export function SurveyList({
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onGenerateWithAI}>
               <Bot className="mr-2 h-4 w-4" />
-              <span>Generate using Survey AI</span>
+              <span>Smart Survey Composer</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
