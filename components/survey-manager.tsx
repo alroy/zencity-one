@@ -167,10 +167,12 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
 
   /* AI clarifying modal submit */
   const handleClarifyingModalSubmit = (data: ClarifyingFormData) => {
+    const distributionMethod = data.surveyType === "diy" ? "self-distributed" : data.audience
+
     const surveyData: GeneratedSurveyData = {
       title: data.mainGoal, // Use the main survey goal as the title
       goal: `Generated goal for ${data.intent}`,
-      distributionMethod: data.audience,
+      distributionMethod: distributionMethod,
       questions: [
         // Introduction section
         {

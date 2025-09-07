@@ -47,10 +47,30 @@ export function SurveyPreviewModal({ open, onClose, surveyData, onOpenBuilder }:
     const { surveyType, selectedProject } = surveyData.clarifyingFormData
 
     if (surveyType === "diy" && selectedProject) {
-      return `DIY distribution via project ${selectedProject}`
+      return "Self-distributed"
     }
 
     return getDistributionMethodLabel(surveyData.distributionMethod)
+  }
+
+  const getActualDistributionMethod = (): string => {
+    const { surveyType } = surveyData.clarifyingFormData
+
+    if (surveyType === "diy") {
+      return "self-distributed"
+    }
+
+    return surveyData.distributionMethod
+  }
+
+  const getEndDate = (): Date | undefined => {
+    const { surveyType, surveyEndDate } = surveyData.clarifyingFormData
+
+    if (surveyType === "diy" && surveyEndDate) {
+      return surveyEndDate
+    }
+
+    return undefined
   }
 
   const displayTitle = surveyData.clarifyingFormData.mainGoal || surveyData.title
@@ -79,6 +99,12 @@ export function SurveyPreviewModal({ open, onClose, surveyData, onOpenBuilder }:
                 {getDisplayDistributionMethod()}
               </Badge>
             </div>
+            {surveyData.clarifyingFormData.surveyType === "diy" && getEndDate() && (
+              <div>
+                <h3 className="font-semibold text-gray-800">Survey End Date</h3>
+                <p className="text-sm text-gray-600">{getEndDate()?.toLocaleDateString()}</p>
+              </div>
+            )}
           </div>
         </ScrollArea>
         <DialogFooter>

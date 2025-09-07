@@ -87,14 +87,16 @@ export function DistributionPreviewModal({
             </Badge>
           </div>
 
-          {startDate && (
+          {(startDate || endDate) && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-500">Schedule</h3>
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4 text-gray-500" />
                 <span>
-                  Starts: {startDate ? format(startDate, "MMMM d, yyyy") : "Not set"}
-                  {endDate && ` • Ends: ${format(endDate, "MMMM d, yyyy")}`}
+                  {startDate && `Starts: ${format(startDate, "MMMM d, yyyy")}`}
+                  {startDate && endDate && " • "}
+                  {endDate && `Ends: ${format(endDate, "MMMM d, yyyy")}`}
+                  {!startDate && endDate && `Ends: ${format(endDate, "MMMM d, yyyy")}`}
                 </span>
               </div>
             </div>
