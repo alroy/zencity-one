@@ -31,6 +31,7 @@ export interface ClarifyingFormData {
   timelineDate?: Date
   timelineUrgency?: string
   surveyPublishingDate?: Date // Added new field for DIY surveys
+  surveyEndDate?: Date // Added survey end date for DIY projects
   tags: string[]
   originalQuery: string
   uploadedFiles?: File[]
@@ -46,6 +47,7 @@ export interface PrePopulationData {
   suggestedTimelineUrgency?: string
   suggestedTimelineDate?: Date
   suggestedSurveyPublishingDate?: Date // Added pre-population for new field
+  suggestedSurveyEndDate?: Date // Added pre-population for survey end date
 }
 
 interface ClarifyingSurveyModalProps {
@@ -113,6 +115,7 @@ export function ClarifyingSurveyModal({
   const [timelineDate, setTimelineDate] = useState<Date | undefined>()
   const [timelineUrgency, setTimelineUrgency] = useState<string>("none")
   const [surveyPublishingDate, setSurveyPublishingDate] = useState<Date | undefined>() // Added state for new field
+  const [surveyEndDate, setSurveyEndDate] = useState<Date | undefined>() // Added state for survey end date
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const [surveyType, setSurveyType] = useState<"zencity" | "diy">("zencity")
@@ -135,6 +138,7 @@ export function ClarifyingSurveyModal({
         setTimelineDate(prePopulationData.suggestedTimelineDate)
         setTimelineUrgency(prePopulationData.suggestedTimelineUrgency || "none")
         setSurveyPublishingDate(prePopulationData.suggestedSurveyPublishingDate) // Added pre-population handling
+        setSurveyEndDate(prePopulationData.suggestedSurveyEndDate) // Added pre-population for survey end date
         setSelectedTags(prePopulationData.suggestedTags || [])
       } else {
         setIntent("")
@@ -143,6 +147,7 @@ export function ClarifyingSurveyModal({
         setTimelineDate(undefined)
         setTimelineUrgency("none")
         setSurveyPublishingDate(undefined) // Reset new field
+        setSurveyEndDate(undefined) // Reset survey end date field
         setSelectedTags([])
       }
 
@@ -251,6 +256,7 @@ export function ClarifyingSurveyModal({
       timelineDate,
       timelineUrgency: timelineUrgency === "none" ? undefined : timelineUrgency,
       surveyPublishingDate, // Include new field in submission
+      surveyEndDate, // Include survey end date in submission
       tags: selectedTags,
       originalQuery: initialQuery,
       uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
@@ -416,31 +422,59 @@ export function ClarifyingSurveyModal({
               </div>
             ) : (
               // New Survey Publishing Date section for DIY Project Surveys
-              <div>
-                <Label htmlFor="survey-publishing-date">Survey Publishing Date</Label>
-                <p className="text-sm text-gray-600 mb-2">When do you plan to publish this survey?</p>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal mt-1",
-                        !surveyPublishingDate && "text-muted-foreground",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {surveyPublishingDate ? format(surveyPublishingDate, "PPP") : <span>Select publishing date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={surveyPublishingDate}
-                      onSelect={setSurveyPublishingDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="survey-publishing-date">Survey Publishing Date</Label>
+                  <p className="text-sm text-gray-600 mb-2">When do you plan to publish this survey?</p>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal mt-1",
+                          !surveyPublishingDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {surveyPublishingDate ? (
+                          format(surveyPublishingDate, "PPP")
+                        ) : (
+                          <span>Select publishing date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={surveyPublishingDate}
+                        onSelect={setSurveyPublishingDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div>
+                  <Label htmlFor="survey-end-date">Survey End-Date</Label>
+                  <p className="text-sm text-gray-600 mb-2">When do you plan to close this survey?</p>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal mt-1",
+                          !surveyEndDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {surveyEndDate ? format(surveyEndDate, "PPP") : <span>Select end date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" selected={surveyEndDate} onSelect={setSurveyEndDate} initialFocus />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             )}
           </div>
