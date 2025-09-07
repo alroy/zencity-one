@@ -167,28 +167,93 @@ export function SurveyManager({ initialOptions }: SurveyManagerProps) {
 
   /* AI clarifying modal submit */
   const handleClarifyingModalSubmit = (data: ClarifyingFormData) => {
-    // -- Simplified fake generation logic (replace w/ real API later)
     const surveyData: GeneratedSurveyData = {
-      title: `${data.intent.split(" ")[0]} Survey`,
+      title: data.mainGoal, // Use the main survey goal as the title
       goal: `Generated goal for ${data.intent}`,
       distributionMethod: data.audience,
       questions: [
+        // Introduction section
+        {
+          id: "intro",
+          type: "completion",
+          title: "Welcome to Our Survey",
+          completionText: `Thank you for participating in this survey about "${data.mainGoal}". Your input is valuable to us and will help inform important decisions. This survey should take approximately 5-7 minutes to complete. All responses are confidential and will be used solely for research purposes.`,
+          label: "I",
+          labelType: "char",
+        },
+        // Question 1 - Context/Background
         {
           id: "q1",
-          type: "rating",
-          text: `Rate how you feel about ${data.originalQuery}`,
+          type: "multiple-choice",
+          text: `How familiar are you with the topic of ${data.mainGoal.toLowerCase()}?`,
           options: [
-            { value: "1", label: "Poor" },
-            { value: "5", label: "Excellent" },
+            { value: "very-familiar", label: "Very familiar - I have extensive knowledge" },
+            { value: "somewhat-familiar", label: "Somewhat familiar - I have basic knowledge" },
+            { value: "limited-knowledge", label: "Limited knowledge - I know a little" },
+            { value: "not-familiar", label: "Not familiar - This is new to me" },
           ],
           label: "1",
           labelType: "number",
         },
+        // Question 2 - Current situation assessment
+        {
+          id: "q2",
+          type: "rating",
+          text: `How would you rate the current situation regarding ${data.mainGoal.toLowerCase()}?`,
+          options: [
+            { value: "1", label: "1 - Very poor" },
+            { value: "2", label: "2 - Poor" },
+            { value: "3", label: "3 - Fair" },
+            { value: "4", label: "4 - Good" },
+            { value: "5", label: "5 - Excellent" },
+          ],
+          label: "2",
+          labelType: "number",
+        },
+        // Question 3 - Priority/Importance
+        {
+          id: "q3",
+          type: "rating",
+          text: `How important is it to address ${data.mainGoal.toLowerCase()} in our community?`,
+          options: [
+            { value: "1", label: "1 - Not important at all" },
+            { value: "2", label: "2 - Slightly important" },
+            { value: "3", label: "3 - Moderately important" },
+            { value: "4", label: "4 - Very important" },
+            { value: "5", label: "5 - Extremely important" },
+          ],
+          label: "3",
+          labelType: "number",
+        },
+        // Question 4 - Specific preferences/solutions
+        {
+          id: "q4",
+          type: "multiple-choice",
+          text: `What approach would you most prefer for addressing ${data.mainGoal.toLowerCase()}?`,
+          options: [
+            { value: "immediate-action", label: "Immediate action with available resources" },
+            { value: "comprehensive-planning", label: "Comprehensive planning and phased implementation" },
+            { value: "community-involvement", label: "Community-led initiatives with government support" },
+            { value: "research-first", label: "More research and analysis before taking action" },
+            { value: "other", label: "Other approach (please specify in comments)" },
+          ],
+          label: "4",
+          labelType: "number",
+        },
+        // Question 5 - Open-ended feedback
+        {
+          id: "q5",
+          type: "open-ended",
+          text: `Please share any additional thoughts, concerns, or suggestions you have regarding ${data.mainGoal.toLowerCase()}:`,
+          label: "5",
+          labelType: "number",
+        },
+        // Completion page
         {
           id: "completion",
           type: "completion",
-          title: "Done!",
-          completionText: "Thanks!",
+          title: "Thank you for your participation!",
+          completionText: `Your responses have been recorded and will contribute to our understanding of ${data.mainGoal.toLowerCase()}. We appreciate the time you've taken to share your thoughts with us. Your input helps us make more informed decisions that better serve our community's needs.`,
           label: "C",
           labelType: "char",
         },

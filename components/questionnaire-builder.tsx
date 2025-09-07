@@ -9,7 +9,7 @@ import { ContentSidebar } from "@/components/content-sidebar"
 // Export Question type for use in other components
 export interface Question {
   id: string
-  type: "rating" | "completion" | "multiple-choice" | "open-ended" // Added new types
+  type: "rating" | "completion" | "multiple-choice" | "open-ended" | "introduction" // Added introduction type
   text?: string
   options?: { value: string; label: string }[]
   title?: string
@@ -75,15 +75,19 @@ export function QuestionnaireBuilder({ initialQuestions: initialQuestionsProp }:
               variant="secondary"
               className="absolute -top-3 left-4 px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-700 border-purple-200"
             >
-              {question.labelType === "char" && question.label !== "C" ? question.label : ""}
+              {question.label === "I" && <span className="font-normal text-purple-600">Introduction</span>}
               {question.labelType === "number" ? question.label : ""}
-              {question.label === "C" ? "C" : ""}
-              {question.label === "C" && (
-                <span className="ml-1.5 font-normal text-purple-600">Completion End Page</span>
-              )}
+              {question.label === "C" && <span className="font-normal text-purple-600">Completion End Page</span>}
+              {question.labelType === "char" && question.label !== "C" && question.label !== "I" ? question.label : ""}
             </Badge>
             <Card className="pt-6">
               <CardContent>
+                {(question.type === "completion" || question.type === "introduction") && (
+                  <>
+                    <h3 className="text-xl font-semibold mb-2">{question.title}</h3>
+                    <p className="text-gray-600">{question.completionText}</p>
+                  </>
+                )}
                 {question.type === "rating" && (
                   <>
                     <p className="font-medium mb-4">{question.text}</p>
@@ -99,7 +103,7 @@ export function QuestionnaireBuilder({ initialQuestions: initialQuestionsProp }:
                     </RadioGroup>
                   </>
                 )}
-                {question.type === "multiple-choice" && ( // Render multiple choice
+                {question.type === "multiple-choice" && (
                   <>
                     <p className="font-medium mb-4">{question.text}</p>
                     <RadioGroup>
@@ -114,7 +118,7 @@ export function QuestionnaireBuilder({ initialQuestions: initialQuestionsProp }:
                     </RadioGroup>
                   </>
                 )}
-                {question.type === "open-ended" && ( // Render open-ended
+                {question.type === "open-ended" && (
                   <>
                     <p className="font-medium mb-4">{question.text}</p>
                     <textarea
@@ -122,12 +126,6 @@ export function QuestionnaireBuilder({ initialQuestions: initialQuestionsProp }:
                       rows={3}
                       placeholder="Type your answer here..."
                     />
-                  </>
-                )}
-                {question.type === "completion" && (
-                  <>
-                    <h3 className="text-xl font-semibold mb-2">{question.title}</h3>
-                    <p className="text-gray-600">{question.completionText}</p>
                   </>
                 )}
               </CardContent>
